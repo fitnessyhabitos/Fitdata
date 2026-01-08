@@ -1359,7 +1359,7 @@
             <div id="shared-list"></div>
         </div>
     </div>
-        <script>
+           <script>
         // 🔥 CONFIGURACIÓN FIREBASE - REEMPLAZA CON TU CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
@@ -1446,13 +1446,14 @@
         ];
 
         const adminEmails = ['toni@fitdata.com', 'kati@fitdata.com', 'paul@fitdata.com'];
+        const ACCESS_CODE = 'fityhab'; // Código de acceso para nuevos usuarios
 
         let currentLanguage = 'es';
         let currentUser = null;
         let currentUserData = null;
         let currentRoutine = null;
         let currentWorkout = null;
-        let restTime = 180;
+        let restTime = 60;
         let timerInterval = null;
         let currentMuscleFilter = 'Todos';
         let selectedExercises = new Set();
@@ -1543,7 +1544,7 @@
                     workouts: [],
                     sharedRoutines: [],
                     sharedCycles: [],
-                    restTime: 180,
+                    restTime: 60,
                     body: {},
                     weightHistory: [],
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1567,7 +1568,7 @@
             try {
                 await auth.signInWithEmailAndPassword(email, password);
             } catch (error) {
-                document.getElementById('login-error').textContent = 'Email o contraseña incorrectos';
+                document.getElementById('login-error').textContent = '❌ Email o contraseña incorrectos';
             }
         }
 
@@ -2445,4 +2446,5 @@
     </script>
 </body>
 </html>
+
 
