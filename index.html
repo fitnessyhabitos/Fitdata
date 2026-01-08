@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#0a0a0a">
     <title>Fit Data by Toni - Entrenamiento Inteligente</title>
-
-    <!-- Firebase SDK -->
+    
+    <!-- 🔥 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
+    
     <style>
         * {
             margin: 0;
@@ -23,207 +23,301 @@
         :root {
             --bg-primary: #0a0a0a;
             --bg-secondary: #1a1a1a;
-            --bg-tertiary: #2a2a2a;
             --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --accent: #00ff88;
-            --accent-dark: #00cc6a;
+            --text-secondary: #b0b0b0;
+            --accent: #ff4444;
+            --accent-dark: #cc0000;
+            --success: #22dd88;
+            --warning: #ffaa00;
             --gold: #ffd700;
-            --red: #ff4444;
-            --border: #333;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            background: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: env(safe-area-inset-bottom);
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background-color: var(--bg-secondary);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid var(--accent);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-right span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        button:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        button.secondary:hover {
+            background-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        button.success {
+            background-color: var(--success);
+            color: #000;
+        }
+
+        button.success:hover {
+            background-color: #1acc77;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .container-sm {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
         .screen {
             display: none;
-            min-height: 100vh;
-            padding: 1rem;
-            padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         }
 
         .screen.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        .navbar {
-            background: var(--bg-secondary);
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .navbar.hidden {
-            display: none;
+        .loading {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
         }
 
-        .navbar-left {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
         }
 
-        button {
-            background: var(--accent);
-            color: var(--bg-primary);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s ease;
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
         }
 
-        button:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
+        .auth-form {
+            background-color: var(--bg-secondary);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin: 3rem auto;
         }
 
-        button.secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+        .auth-form h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
         }
 
-        button.secondary:hover {
-            background: var(--bg-secondary);
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="number"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-family: inherit;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.1);
+        .auth-form p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid var(--text-secondary);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.2);
+        }
+
+        .auth-toggle {
+            margin-top: 1.5rem;
             color: var(--text-secondary);
             font-size: 0.9rem;
-            font-weight: 500;
+        }
+
+        .auth-toggle button {
+            background: none;
+            color: var(--accent);
+            padding: 0;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 0.3rem;
         }
 
         .error {
-            color: var(--red);
+            color: #ff6b6b;
             font-size: 0.85rem;
-            margin-top: 0.25rem;
+            margin-top: 0.3rem;
         }
 
-        .auth-container {
-            max-width: 400px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: var(--bg-secondary);
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        .dashboard-header {
+            margin-bottom: 2rem;
         }
 
-        .auth-container h1 {
-            margin-bottom: 1.5rem;
-            text-align: center;
-            font-size: 1.75rem;
+        .dashboard-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
         }
 
-        .stats-grid {
+        .dashboard-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: var(--bg-secondary);
+            background-color: var(--bg-secondary);
             padding: 1.5rem;
-            border-radius: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
             text-align: center;
-            border: 1px solid var(--border);
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
         }
 
         .stat-card h3 {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 2rem;
+            color: var(--accent);
             margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
+        .stat-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            margin: 2rem 0 1rem 0;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .routines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .routine-card {
-            background: var(--bg-secondary);
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--text-secondary);
+            border-radius: 8px;
             padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border);
-            transition: transform 0.2s;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
         .routine-card:hover {
-            transform: translateY(-2px);
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(255, 68, 68, 0.2);
+            transform: translateY(-4px);
         }
 
         .routine-card h3 {
+            color: var(--accent);
             margin-bottom: 0.5rem;
-            font-size: 1.25rem;
+        }
+
+        .routine-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
         }
 
         .routine-tags {
             display: flex;
-            flex-wrap: wrap;
             gap: 0.5rem;
-            margin: 0.75rem 0;
+            flex-wrap: wrap;
+            margin: 1rem 0;
         }
 
         .tag {
-            background: var(--bg-tertiary);
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+            background-color: var(--bg-primary);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid var(--accent);
         }
 
         .routine-actions {
@@ -235,7 +329,296 @@
 
         .routine-actions button {
             flex: 1;
-            min-width: 100px;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            min-width: 80px;
+        }
+
+        .exercise-block {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--text-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .exercise-info h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .exercise-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .exercise-image {
+            width: 150px;
+            height: 150px;
+            background-color: var(--bg-secondary);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+
+        .series-container {
+            margin-top: 1.5rem;
+        }
+
+        .series-container h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .series-row {
+            display: grid;
+            grid-template-columns: 60px 80px 80px 50px auto;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            align-items: center;
+            padding: 0.8rem;
+            background-color: var(--bg-secondary);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .series-row.completed {
+            border-color: var(--success);
+            background-color: rgba(34, 221, 136, 0.1);
+        }
+
+        .series-row.gold {
+            border-color: var(--gold);
+            background-color: rgba(255, 215, 0, 0.1);
+        }
+
+        .series-row.red {
+            border-color: #ff6b6b;
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+
+        .series-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .series-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .series-input-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .series-input input {
+            width: 70px;
+            padding: 0.7rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--text-secondary);
+            color: var(--text-primary);
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .series-input input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .checkbox-series {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-series input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .timer-display {
+            background-color: var(--bg-secondary);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem auto;
+            display: none;
+            max-width: 400px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer-display.active {
+            display: block;
+        }
+
+        .timer-display h2 {
+            color: var(--accent);
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .timer-display p {
+            color: var(--text-secondary);
+        }
+
+        .muscle-map {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .muscle-map h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .muscle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .muscle-badge {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--text-secondary);
+            padding: 0.8rem;
+            border-radius: 6px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .muscle-badge.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .summary-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-modal.active {
+            display: flex;
+        }
+
+        .summary-content {
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid var(--accent);
+        }
+
+        .summary-content h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .summary-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem;
+            background-color: var(--bg-primary);
+            border-radius: 6px;
+            margin-bottom: 0.8rem;
+        }
+
+        .summary-stat label {
+            color: var(--text-secondary);
+        }
+
+        .summary-stat .value {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .workout-difficulty {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .difficulty-btn {
+            padding: 1rem;
+            border: 2px solid var(--text-secondary);
+            background-color: transparent;
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .difficulty-btn.light {
+            border-color: var(--success);
+        }
+
+        .difficulty-btn.light:hover, .difficulty-btn.light.selected {
+            background-color: var(--success);
+            color: #000;
+        }
+
+        .difficulty-btn.medium {
+            border-color: var(--warning);
+        }
+
+        .difficulty-btn.medium:hover, .difficulty-btn.medium.selected {
+            background-color: var(--warning);
+            color: #000;
+        }
+
+        .difficulty-btn.heavy {
+            border-color: var(--accent);
+        }
+
+        .difficulty-btn.heavy:hover, .difficulty-btn.heavy.selected {
+            background-color: var(--accent);
+            color: #000;
         }
 
         .modal {
@@ -245,45 +628,116 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-
-        .modal.active {
-            display: flex;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
             align-items: center;
             justify-content: center;
         }
 
+        .modal.active {
+            display: flex;
+        }
+
         .modal-content {
-            background: var(--bg-secondary);
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
             padding: 2rem;
-            border-radius: 1rem;
             max-width: 600px;
-            width: 100%;
+            width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            border: 1px solid var(--border);
+            border: 2px solid var(--accent);
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--accent);
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-dark);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid var(--text-secondary);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.2);
+        }
+
+        .muscle-group-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .muscle-group-tab {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid var(--text-secondary);
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .muscle-group-tab.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .muscle-group-tab:hover {
+            border-color: var(--accent);
+        }
+
+        .exercise-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .exercise-item {
-            background: var(--bg-tertiary);
+            background-color: var(--bg-primary);
+            border: 1px solid var(--text-secondary);
             padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 1rem;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s;
         }
 
         .exercise-item:hover {
-            background: var(--bg-secondary);
             border-color: var(--accent);
+            background-color: rgba(255, 68, 68, 0.1);
+        }
+
+        .exercise-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--success);
         }
 
         .exercise-item-text {
@@ -292,562 +746,620 @@
 
         .exercise-item-name {
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            color: var(--text-primary);
         }
 
         .exercise-item-muscle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
         }
 
-        .muscle-group-tabs {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-card {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .profile-card h3 {
+            color: var(--accent);
             margin-bottom: 1rem;
         }
 
-        .muscle-group-tab {
-            padding: 0.5rem 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 0.5rem;
-            cursor: pointer;
+        .profile-card p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
             font-size: 0.9rem;
-            border: 1px solid transparent;
-            transition: all 0.2s;
         }
 
-        .muscle-group-tab:hover {
-            background: var(--bg-secondary);
+        .admin-table th {
+            background-color: var(--bg-secondary);
+            color: var(--accent);
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--accent);
         }
 
-        .muscle-group-tab.active {
-            background: var(--accent);
-            color: var(--bg-primary);
-            border-color: var(--accent);
+        .admin-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--text-secondary);
+            color: var(--text-primary);
         }
 
-        .exercise-block {
-            background: var(--bg-secondary);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid var(--border);
+        .admin-table tr:hover {
+            background-color: rgba(255, 68, 68, 0.05);
         }
 
-        .exercise-header {
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--bg-primary);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success);
+            transition: width 0.3s ease;
+        }
+
+        .pending-users-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .pending-user-item {
+            background-color: var(--bg-primary);
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            border: 1px solid var(--text-secondary);
         }
 
-        .exercise-info h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.25rem;
+        .pending-user-item button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
         }
 
-        .exercise-info p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+        .volume-by-muscle {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
         }
 
-        .exercise-image {
-            font-size: 3rem;
-            filter: grayscale(20%);
-        }
-
-        .series-container {
-            margin-top: 1rem;
-        }
-
-        .series-container h4 {
-            margin-bottom: 0.75rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        .series-row {
-            display: grid;
-            grid-template-columns: 40px 1fr 1fr 40px 40px;
-            gap: 0.5rem;
-            align-items: center;
-            padding: 0.75rem;
-            background: var(--bg-tertiary);
-            border-radius: 0.5rem;
+        .volume-muscle-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem;
+            background-color: var(--bg-primary);
             margin-bottom: 0.5rem;
-            border: 1px solid transparent;
-            transition: all 0.2s;
+            border-radius: 4px;
         }
 
-        .series-row.completed {
-            background: rgba(0, 255, 136, 0.1);
-            border-color: var(--accent);
+        .volume-muscle-item strong {
+            color: var(--accent);
         }
 
-        .series-row.gold {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: var(--gold);
-        }
-
-        .series-row.red {
-            background: rgba(255, 68, 68, 0.1);
-            border-color: var(--red);
-        }
-
-        .series-label {
-            font-weight: 700;
-            text-align: center;
-        }
-
-        .series-input-group {
+        .radio-group {
             display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
+            gap: 1.5rem;
+            margin: 0.5rem 0;
         }
 
-        .series-input-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        .series-input input {
-            padding: 0.5rem;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 0.25rem;
-            color: var(--text-primary);
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .checkbox-series {
+        .radio-group label {
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .checkbox-series input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            gap: 0.5rem;
             cursor: pointer;
         }
 
-        .timer-display {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: var(--bg-secondary);
-            padding: 3rem;
-            border-radius: 2rem;
-            font-size: 4rem;
-            font-weight: 700;
-            z-index: 2000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            border: 2px solid var(--accent);
-            transition: transform 0.3s ease;
+        .radio-group input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
         }
 
-        .timer-display.active {
-            transform: translate(-50%, -50%) scale(1);
+        .weight-history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
         }
 
-        .hidden {
-            display: none !important;
-        }
-
-        #loading-screen {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            font-size: 2rem;
-        }
-
-        #loading-screen.active {
-            display: flex;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            margin: 2rem 0 1rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .muscle-badge {
-            padding: 0.5rem 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-right: 0.5rem;
+        .weight-history-item {
+            background-color: var(--bg-primary);
+            padding: 0.8rem;
             margin-bottom: 0.5rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .muscle-badge.active {
-            background: var(--accent);
-            color: var(--bg-primary);
+        .weight-history-item span {
+            color: var(--text-secondary);
+        }
+
+        .weight-history-item strong {
+            color: var(--accent);
+            font-size: 1.1rem;
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
             .navbar {
+                padding: 1rem;
                 flex-direction: column;
-                gap: 0.5rem;
+                gap: 1rem;
             }
 
-            .navbar-left {
-                flex-direction: column;
+            .nav-right {
                 width: 100%;
+                justify-content: space-around;
             }
 
-            .navbar-left button {
-                width: 100%;
-            }
-
-            .series-row {
-                grid-template-columns: 30px 1fr 1fr 30px 30px;
-                gap: 0.25rem;
-                padding: 0.5rem;
-            }
-
-            .stats-grid {
+            .routines-grid {
                 grid-template-columns: 1fr;
             }
 
-            .routine-actions {
-                flex-direction: column;
+            .series-row {
+                grid-template-columns: 60px 70px 70px 40px auto;
+                font-size: 0.8rem;
             }
 
-            .routine-actions button {
-                width: 100%;
+            .exercise-image {
+                width: 120px;
+                height: 120px;
             }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .timer-display {
+                max-width: 90%;
+            }
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-
-    <!-- Loading Screen -->
     <div id="loading-screen" class="screen active">
-        <div>⏳ Cargando...</div>
+        <div class="loading">Cargando Fit Data by Toni</div>
     </div>
 
-    <!-- Navbar -->
-    <nav id="main-navbar" class="navbar hidden">
-        <div class="navbar-left">
+    <nav class="navbar hidden" id="main-navbar">
+        <div class="navbar-brand">Fit Data by Toni</div>
+        <div class="nav-right" id="navbar-content">
             <span id="navbar-user"></span>
-        </div>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button id="profile-btn" onclick="goToProfile()" class="secondary hidden">👤 Perfil</button>
-            <button id="admin-btn" onclick="goToAdmin()" class="secondary hidden">⚙️ Admin</button>
-            <button id="back-to-user-btn" onclick="goToUserPanel()" class="secondary hidden">👤 Panel Usuario</button>
-            <button id="logout-btn" onclick="logout()" class="secondary hidden">🚪 Salir</button>
+            <button onclick="goToProfile()" id="profile-btn" class="secondary hidden">👤 Perfil</button>
+            <button onclick="goToAdmin()" id="admin-btn" class="secondary hidden">🔐 Admin</button>
+            <button onclick="goToUserPanel()" id="back-to-user-btn" class="secondary hidden">👤 Usuario</button>
+            <button onclick="logout()" id="logout-btn" class="hidden">Salir</button>
         </div>
     </nav>
 
-    <!-- Login Screen -->
     <div id="login-screen" class="screen">
-        <div class="auth-container">
-            <h1>🔥 Fit Data by Toni</h1>
-            <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="login-email">Email</label>
-                    <input type="email" id="login-email" placeholder="tu@email.com" required>
-                    <div class="error" id="login-error"></div>
+        <div class="container-sm">
+            <div class="auth-form">
+                <h1>Fit Data by Toni</h1>
+                <p>Entrena más inteligente, crece más fuerte</p>
+                
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="tu@email.com" required>
+                        <div class="error" id="login-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" placeholder="Tu contraseña" required>
+                    </div>
+                    <button type="submit">Iniciar Sesión</button>
+                </form>
+
+                <div class="auth-toggle">
+                    <span>¿No tienes cuenta?</span>
+                    <button onclick="switchToRegister()">Regístrate</button>
                 </div>
-                <div class="form-group">
-                    <label for="login-password">Contraseña</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <button type="submit" style="width: 100%; margin-bottom: 1rem;">Iniciar Sesión</button>
-            </form>
-            <button onclick="switchToRegister()" class="secondary" style="width: 100%;">Crear Cuenta</button>
+            </div>
         </div>
     </div>
 
-    <!-- Register Screen -->
     <div id="register-screen" class="screen">
-        <div class="auth-container">
-            <h1>📝 Crear Cuenta</h1>
-            <form onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label for="register-username">Nombre de usuario</label>
-                    <input type="text" id="register-username" placeholder="Tu nombre" required>
-                    <div class="error" id="register-error"></div>
+        <div class="container-sm">
+            <div class="auth-form">
+                <h1>Crea tu Cuenta</h1>
+                <p>Únete a Fit Data by Toni</p>
+                
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-username">Nombre de usuario</label>
+                        <input type="text" id="register-username" placeholder="Elige tu nombre de usuario" required>
+                        <div class="error" id="register-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" placeholder="tu@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm">Confirmar Contraseña</label>
+                        <input type="password" id="register-confirm" placeholder="Repite tu contraseña" required>
+                        <div class="error" id="register-confirm-error"></div>
+                    </div>
+                    <button type="submit">Crear Cuenta</button>
+                </form>
+
+                <div class="auth-toggle">
+                    <span>¿Ya tienes cuenta?</span>
+                    <button onclick="switchToLogin()">Inicia Sesión</button>
                 </div>
-                <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" placeholder="tu@email.com" required>
+
+                <div class="auth-toggle" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--text-secondary); color: var(--text-secondary); font-size: 0.8rem;">
+                    <p>⏳ Tu cuenta necesitará ser aprobada por un administrador</p>
                 </div>
-                <div class="form-group">
-                    <label for="register-access-code">Código de acceso</label>
-                    <input type="text" id="register-access-code" placeholder="Código de tu entrenador" required>
-                    <small style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-top: 0.3rem;">💡 Solicita el código a tu entrenador</small>
-                    <div class="error" id="register-code-error"></div>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">Contraseña (mínimo 6 caracteres)</label>
-                    <input type="password" id="register-password" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-confirm">Confirmar contraseña</label>
-                    <input type="password" id="register-confirm" required>
-                    <div class="error" id="register-confirm-error"></div>
-                </div>
-                <button type="submit" style="width: 100%; margin-bottom: 1rem;">Crear Cuenta</button>
-            </form>
-            <button onclick="switchToLogin()" class="secondary" style="width: 100%;">Ya tengo cuenta</button>
+            </div>
         </div>
     </div>
 
-    <!-- Dashboard Screen -->
     <div id="dashboard-screen" class="screen">
-        <h1>📊 Dashboard</h1>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Rutinas</h3>
-                <div class="value" id="stat-routines">0</div>
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Mi Entrenamiento</h1>
+                <p style="color: var(--text-secondary);">Gestiona tus rutinas y controla tu progreso</p>
             </div>
-            <div class="stat-card">
-                <h3>Entrenamientos</h3>
-                <div class="value" id="stat-workouts">0</div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3 id="stat-routines">0</h3>
+                    <p>Rutinas</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-workouts">0</h3>
+                    <p>Entrenamientos</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-volume">0</h3>
+                    <p>kg Volumen</p>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3>Volumen Total (kg)</h3>
-                <div class="value" id="stat-volume">0</div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <button onclick="showCreateRoutineModal()">+ Nueva Rutina</button>
+                <button onclick="showSharedRoutines()" class="secondary">Ver Compartidas</button>
             </div>
-        </div>
 
-        <h2 class="section-title">💪 Mis Rutinas</h2>
-        <button onclick="showCreateRoutineModal()" style="margin-bottom: 1rem;">+ Nueva Rutina</button>
-        <div id="routines-container"></div>
+            <h2 class="section-title">Mis Rutinas</h2>
+            <div id="routines-container" class="routines-grid"></div>
 
-        <h2 class="section-title">✨ Rutinas Compartidas</h2>
-        <div id="shared-routines-container"></div>
+            <h2 class="section-title">Compartidas Conmigo</h2>
+            <div id="shared-routines-container" class="routines-grid"></div>
 
-        <div id="cycles-section" class="hidden">
-            <h2 class="section-title">🔄 Ciclos de Entrenamiento</h2>
-            <div id="cycles-container"></div>
+            <div id="cycles-section" class="hidden">
+                <h2 class="section-title">Ciclos de Entrenamiento</h2>
+                <div id="cycles-container" class="routines-grid"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Workout Screen -->
     <div id="workout-screen" class="screen">
-        <button onclick="goToDashboard()" class="secondary" style="margin-bottom: 1rem;">← Volver</button>
-        <h1 id="workout-title"></h1>
-        <div id="muscle-grid" style="margin-bottom: 1.5rem;"></div>
-        <div id="exercises-container"></div>
-        <button onclick="finishWorkout()" style="width: 100%; margin-top: 2rem;">✅ Finalizar Entrenamiento</button>
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1 id="workout-title" style="margin: 0;"></h1>
+                <button onclick="backToDashboard()" class="secondary">← Volver</button>
+            </div>
 
-        <div id="timer-display" class="timer-display">
-            <div id="timer-text">3:00</div>
-            <button onclick="skipRestTime()" class="secondary" style="margin-top: 1rem;">Saltar</button>
+            <div class="timer-display" id="timer-display">
+                <h2 id="timer-text">3:00</h2>
+                <p>Descansa antes del siguiente ejercicio</p>
+                <button onclick="skipRestTime()" class="secondary">Omitir Descanso</button>
+            </div>
+
+            <div class="muscle-map">
+                <h4>Músculos Trabajados Hoy</h4>
+                <div id="muscle-grid" class="muscle-grid"></div>
+            </div>
+
+            <div id="exercises-container"></div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+                <button onclick="finishWorkout()" class="success">✓ Finalizar Entrenamiento</button>
+                <button onclick="backToDashboard()" class="secondary">Cancelar</button>
+            </div>
         </div>
     </div>
-
-    <!-- Profile Screen -->
     <div id="profile-screen" class="screen">
-        <button onclick="goToDashboard()" class="secondary" style="margin-bottom: 1rem;">← Volver</button>
-        <h1>👤 Perfil</h1>
-
-        <div class="auth-container">
-            <h2 id="profile-username"></h2>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0;">
-                <div style="text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="profile-routines">0</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Rutinas</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="profile-workouts">0</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Entrenamientos</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="profile-volume">0</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Volumen (kg)</div>
-                </div>
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1>Mi Perfil</h1>
+                <button onclick="backToDashboard()" class="secondary">← Volver</button>
             </div>
 
-            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">⚙️ Configuración</h3>
-            <div class="form-group">
-                <label for="rest-time">Tiempo de descanso (segundos)</label>
-                <input type="number" id="rest-time" value="60" onchange="updateRestTime(this.value)">
-            </div>
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <h3>📊 Estadísticas</h3>
+                    <p><strong>Usuario:</strong> <span id="profile-username"></span></p>
+                    <p><strong>Rutinas:</strong> <span id="profile-routines">0</span></p>
+                    <p><strong>Entrenamientos:</strong> <span id="profile-workouts">0</span></p>
+                    <p><strong>Volumen Total:</strong> <span id="profile-volume">0</span> kg</p>
+                </div>
 
-            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">📏 Datos Corporales</h3>
-            <div class="form-group">
-                <label for="user-weight">Peso (kg)</label>
-                <input type="number" id="user-weight" step="0.1">
-            </div>
-            <div class="form-group">
-                <label for="user-height">Altura (cm)</label>
-                <input type="number" id="user-height">
-            </div>
-            <div class="form-group" id="kcal-group" style="display: none;">
-                <label for="user-kcal">Calorías objetivo</label>
-                <input type="number" id="user-kcal">
-            </div>
-            <div class="form-group" id="water-group" style="display: none;">
-                <label for="user-water">Agua diaria (L)</label>
-                <input type="number" id="user-water" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Estado nutricional</label>
-                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
-                        <input type="radio" name="nutrition-status" value="deficit"> Déficit
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
-                        <input type="radio" name="nutrition-status" value="mantenimiento"> Mantenimiento
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
-                        <input type="radio" name="nutrition-status" value="superavit"> Superávit
-                    </label>
+                <div class="profile-card">
+                    <h3>⏱️ Descanso</h3>
+                    <label for="rest-time">Tiempo de descanso (segundos):</label>
+                    <input type="number" id="rest-time" min="30" max="600" value="60" style="width: 100%; padding: 0.5rem; margin: 1rem 0; background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--text-secondary); border-radius: 6px;">
+                    <button onclick="saveRestTime()" class="success" style="width: 100%; margin-top: 1rem;">Guardar</button>
                 </div>
             </div>
-            <button onclick="saveProfileData()" style="width: 100%; margin-top: 1rem;">💾 Guardar Cambios</button>
 
-            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">📈 Historial de Peso</h3>
-            <div id="weight-history"></div>
+            <h2 class="section-title">📊 Datos Físicos</h2>
+            <div class="profile-card" style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="user-weight">Peso Actual (kg)</label>
+                    <input type="number" id="user-weight" step="0.1" min="30" max="300" placeholder="ej: 75.5">
+                </div>
+                <div class="form-group">
+                    <label for="user-height">Altura (cm)</label>
+                    <input type="number" id="user-height" min="100" max="250" placeholder="ej: 175">
+                </div>
+                <div class="form-group">
+                    <label>Estado Nutricional</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="nutrition-status" value="volumen">
+                            <span>💪 Volumen</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="nutrition-status" value="deficit">
+                            <span>🔥 Déficit</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="nutrition-status" value="mantenimiento">
+                            <span>⚖️ Mantenimiento</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" id="kcal-group" style="display: none;">
+                    <label for="user-kcal">Calorías Objetivo (kcal/día)</label>
+                    <input type="number" id="user-kcal" min="1000" max="6000" placeholder="ej: 2500">
+                </div>
+                <div class="form-group" id="water-group" style="display: none;">
+                    <label for="user-water">Agua Objetivo (litros/día)</label>
+                    <input type="number" id="user-water" step="0.1" min="1" max="10" placeholder="ej: 3.5">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button onclick="saveBodyData()" class="success" style="flex: 1;">💾 Guardar Datos</button>
+                    <button onclick="registerWeeklyWeight()" class="secondary" style="flex: 1;">📊 Registrar Peso Semanal</button>
+                </div>
+            </div>
 
-            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">💪 Volumen por Músculo</h3>
-            <div id="volume-by-muscle"></div>
+            <h2 class="section-title">📈 Historial de Peso</h2>
+            <div id="weight-history-container" class="weight-history-list"></div>
 
-            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">📅 Últimos Entrenamientos</h3>
-            <div id="workout-history"></div>
+            <h2 class="section-title">Volumen por Grupo Muscular</h2>
+            <div class="volume-by-muscle" id="volume-by-muscle"></div>
+
+            <h2 class="section-title">Historial de Entrenamientos</h2>
+            <div id="workout-history" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;"></div>
         </div>
     </div>
 
-    <!-- Admin Screen -->
     <div id="admin-screen" class="screen">
-        <button onclick="goToDashboard()" class="secondary" style="margin-bottom: 1rem;">← Volver al Dashboard</button>
-        <h1>⚙️ Panel de Administración</h1>
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1>🔐 Panel Admin</h1>
+                <button onclick="backToDashboard()" class="secondary">← Volver</button>
+            </div>
 
-        <h2 class="section-title">👥 Gestión de Usuarios</h2>
-        <div id="admin-users"></div>
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <h3>Total de Usuarios</h3>
+                    <p style="font-size: 2rem; color: var(--accent);" id="admin-total-users">0</p>
+                </div>
+                <div class="profile-card">
+                    <h3>Total de Entrenamientos</h3>
+                    <p style="font-size: 2rem; color: var(--accent);" id="admin-total-workouts">0</p>
+                </div>
+                <div class="profile-card">
+                    <h3>Total de Rutinas</h3>
+                    <p style="font-size: 2rem; color: var(--accent);" id="admin-total-routines">0</p>
+                </div>
+            </div>
 
-        <h2 class="section-title">🔄 Gestión de Ciclos</h2>
-        <button onclick="showCreateCycleModal()" style="margin-bottom: 1rem;">+ Crear Ciclo</button>
-        <div id="admin-cycles"></div>
+            <h2 class="section-title">Usuarios Pendientes de Aprobación</h2>
+            <div class="pending-users-list" id="pending-users-list"></div>
 
-        <h2 class="section-title">🍎 Configuración Nutrición</h2>
-        <div class="auth-container">
-            <div class="form-group">
-                <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
-                    <input type="checkbox" id="enable-nutrition" onchange="toggleNutritionTracking(this.checked)">
-                    Habilitar seguimiento de nutrición
+            <h2 class="section-title">Usuarios Aprobados y Progresos</h2>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rutinas</th>
+                        <th>Entrenamientos</th>
+                        <th>Volumen Total</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-users-table"></tbody>
+            </table>
+
+            <h2 class="section-title">Crear Ciclos de Entrenamiento</h2>
+            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="cycle-name">Nombre del Ciclo</label>
+                    <input type="text" id="cycle-name" placeholder="ej: Split 3 días">
+                </div>
+                <div class="form-group">
+                    <label for="cycle-description">Descripción</label>
+                    <input type="text" id="cycle-description" placeholder="ej: Piernas, Espalda, Hombros">
+                </div>
+                <div class="form-group">
+                    <label>Selecciona Rutinas para el Ciclo</label>
+                    <div id="cycle-routines-list" style="max-height: 300px; overflow-y: auto;"></div>
+                </div>
+                <button onclick="createCycle()" style="width: 100%; margin-top: 1rem;">Crear Ciclo</button>
+            </div>
+
+            <h2 class="section-title">Asignar Ciclos o Rutinas a Usuarios</h2>
+            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="assign-user-select">Selecciona usuario:</label>
+                    <select id="assign-user-select" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
+                        <option value="">-- Selecciona un usuario --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="assign-type-select">Tipo de asignación:</label>
+                    <select id="assign-type-select" onchange="toggleAssignmentType()" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
+                        <option value="routine">Rutina Individual</option>
+                        <option value="cycle">Ciclo Completo</option>
+                    </select>
+                </div>
+                <div class="form-group" id="assign-routine-group">
+                    <label for="assign-routine-select">Selecciona rutina:</label>
+                    <select id="assign-routine-select" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
+                        <option value="">-- Selecciona una rutina --</option>
+                    </select>
+                </div>
+                <div class="form-group hidden" id="assign-cycle-group">
+                    <label for="assign-cycle-select">Selecciona ciclo:</label>
+                    <select id="assign-cycle-select" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
+                        <option value="">-- Selecciona un ciclo --</option>
+                    </select>
+                </div>
+                <button onclick="assignToUser()" style="width: 100%; margin-top: 1rem;">Asignar</button>
+            </div>
+
+            <h2 class="section-title">Configuración de Seguimiento Nutricional</h2>
+            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+                    <input type="checkbox" id="enable-nutrition-tracking" onchange="toggleNutritionTracking()" style="width: 20px; height: 20px;">
+                    <span>Habilitar seguimiento de calorías y agua para todos los usuarios</span>
                 </label>
             </div>
         </div>
     </div>
 
-    <!-- Create Routine Modal -->
-    <div id="routine-modal" class="modal">
-        <div class="modal-content">
-            <h2>➕ Nueva Rutina</h2>
-            <form onsubmit="handleCreateRoutine(event)">
-                <div class="form-group">
-                    <label for="routine-name">Nombre de la rutina</label>
-                    <input type="text" id="routine-name" placeholder="Ej: Día de Pierna" required>
-                </div>
-                <div class="form-group">
-                    <label for="routine-description">Descripción (opcional)</label>
-                    <textarea id="routine-description" rows="2" placeholder="Descripción..."></textarea>
-                </div>
-
-                <h3 style="margin: 1.5rem 0 1rem 0;">Seleccionar ejercicios</h3>
-
-                <input type="text" id="exercise-search" placeholder="🔍 Buscar ejercicio..." 
-                       style="margin-bottom: 1rem;" oninput="renderExerciseList()">
-
-                <div class="muscle-group-tabs">
-                    <div class="muscle-group-tab active" onclick="filterByMuscle('Todos')">Todos</div>
-                    <div class="muscle-group-tab" onclick="filterByMuscle('Piernas')">Piernas</div>
-                    <div class="muscle-group-tab" onclick="filterByMuscle('Espalda')">Espalda</div>
-                    <div class="muscle-group-tab" onclick="filterByMuscle('Pecho')">Pecho</div>
-                    <div class="muscle-group-tab" onclick="filterByMuscle('Hombros')">Hombros</div>
-                    <div class="muscle-group-tab" onclick="filterByMuscle('Biceps')">Bíceps</div>
-                    <div class="muscle-group-tab" onclick="filterByMuscle('Triceps')">Tríceps</div>
-                    <div class="muscle-group-tab" onclick="filterByMuscle('Abs')">Abs</div>
-                </div>
-
-                <div id="exercises-list" style="max-height: 300px; overflow-y: auto; margin-bottom: 1rem;"></div>
-
-                <div style="display: flex; gap: 0.5rem;">
-                    <button type="submit" style="flex: 1;">✅ Crear Rutina</button>
-                    <button type="button" onclick="closeRoutineModal()" class="secondary" style="flex: 1;">❌ Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Summary Modal -->
-    <div id="summary-modal" class="modal">
-        <div class="modal-content">
-            <h2>🎉 Entrenamiento Completado</h2>
+    <div id="summary-modal" class="summary-modal">
+        <div class="summary-content">
+            <h2>Entrenamiento Completado ✓</h2>
             <div id="summary-body"></div>
 
-            <h3 style="margin-top: 1.5rem;">¿Cómo fue el entrenamiento?</h3>
-            <div style="display: flex; gap: 0.5rem; margin: 1rem 0;">
-                <button class="difficulty-btn secondary" onclick="setWorkoutDifficulty('fácil')" style="flex: 1;">😊 Fácil</button>
-                <button class="difficulty-btn secondary" onclick="setWorkoutDifficulty('normal')" style="flex: 1;">💪 Normal</button>
-                <button class="difficulty-btn secondary" onclick="setWorkoutDifficulty('difícil')" style="flex: 1;">🔥 Difícil</button>
-            </div>
-
-            <h3 style="margin-top: 1.5rem;">📊 Estadísticas Totales</h3>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0;">
-                <div style="text-align: center; padding: 1rem; background: var(--bg-tertiary); border-radius: 0.5rem;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="lifetime-workouts">0</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Total entrenamientos</div>
+            <h3 style="color: var(--accent); margin-top: 2rem; margin-bottom: 1rem;">📊 Resumen desde el inicio</h3>
+            <div id="summary-lifetime" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 2rem;">
+                <div class="summary-stat">
+                    <label>Total Entrenamientos:</label>
+                    <div class="value" id="lifetime-workouts">0</div>
                 </div>
-                <div style="text-align: center; padding: 1rem; background: var(--bg-tertiary); border-radius: 0.5rem;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="lifetime-volume">0 kg</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Volumen total</div>
+                <div class="summary-stat">
+                    <label>Volumen Total:</label>
+                    <div class="value" id="lifetime-volume">0 kg</div>
                 </div>
-                <div style="text-align: center; padding: 1rem; background: var(--bg-tertiary); border-radius: 0.5rem;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="lifetime-sets">0</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Total series</div>
+                <div class="summary-stat">
+                    <label>Series Completadas:</label>
+                    <div class="value" id="lifetime-sets">0</div>
                 </div>
-                <div style="text-align: center; padding: 1rem; background: var(--bg-tertiary); border-radius: 0.5rem;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="lifetime-avg">0 kg</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Promedio volumen</div>
+                <div class="summary-stat">
+                    <label>Promedio por Entrenamiento:</label>
+                    <div class="value" id="lifetime-avg">0 kg</div>
                 </div>
             </div>
 
-            <button onclick="closeSummary()" style="width: 100%; margin-top: 1rem;">🏠 Volver al Dashboard</button>
+            <div style="margin-top: 2rem;">
+                <label style="display: block; margin-bottom: 1rem; color: var(--accent); font-weight: 600;">¿Cómo fue el entrenamiento?</label>
+                <div class="workout-difficulty">
+                    <button class="difficulty-btn light" onclick="setWorkoutDifficulty('cómodo')">😌 Cómodo</button>
+                    <button class="difficulty-btn medium" onclick="setWorkoutDifficulty('normal')">💪 Normal</button>
+                    <button class="difficulty-btn heavy" onclick="setWorkoutDifficulty('pesado')">🔥 Pesado</button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button onclick="closeSummary()" class="success" style="flex: 1;">Volver al Dashboard</button>
+            </div>
         </div>
     </div>
 
-    <!-- Create Cycle Modal -->
-    <div id="cycle-modal" class="modal">
+    <div id="routine-modal" class="modal">
         <div class="modal-content">
-            <h2>🔄 Crear Ciclo</h2>
-            <form onsubmit="handleCreateCycle(event)">
+            <button class="modal-close" onclick="closeRoutineModal()">&times;</button>
+            <h2>Nueva Rutina</h2>
+            
+            <form onsubmit="handleCreateRoutine(event)">
                 <div class="form-group">
-                    <label for="cycle-name">Nombre del ciclo</label>
-                    <input type="text" id="cycle-name" placeholder="Ej: Ciclo Volumen 8 semanas" required>
+                    <label for="routine-name">Nombre de la Rutina</label>
+                    <input type="text" id="routine-name" placeholder="Ej: Pecho y Tríceps" required>
                 </div>
+
                 <div class="form-group">
-                    <label for="cycle-description">Descripción</label>
-                    <textarea id="cycle-description" rows="2"></textarea>
+                    <label for="routine-description">Descripción</label>
+                    <input type="text" id="routine-description" placeholder="Opcional">
                 </div>
+
                 <div class="form-group">
-                    <label>Seleccionar rutinas</label>
-                    <div id="cycle-routines-list"></div>
+                    <label>Selecciona Grupo Muscular</label>
+                    <div class="muscle-group-tabs">
+                        <div class="muscle-group-tab active" onclick="filterByMuscle('Todos')">Todos</div>
+                        <div class="muscle-group-tab" onclick="filterByMuscle('Piernas')">Piernas</div>
+                        <div class="muscle-group-tab" onclick="filterByMuscle('Espalda')">Espalda</div>
+                        <div class="muscle-group-tab" onclick="filterByMuscle('Pecho')">Pecho</div>
+                        <div class="muscle-group-tab" onclick="filterByMuscle('Hombros')">Hombros</div>
+                        <div class="muscle-group-tab" onclick="filterByMuscle('Biceps')">Bíceps</div>
+                        <div class="muscle-group-tab" onclick="filterByMuscle('Triceps')">Tríceps</div>
+                        <div class="muscle-group-tab" onclick="filterByMuscle('Abs')">Abs</div>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <button type="submit" style="flex: 1;">✅ Crear</button>
-                    <button type="button" onclick="closeCycleModal()" class="secondary" style="flex: 1;">❌ Cancelar</button>
+
+                <div class="form-group">
+                    <label for="exercise-search">Buscar Ejercicio</label>
+                    <input type="text" id="exercise-search" class="search-input" placeholder="Buscar por nombre..." oninput="renderExerciseList()">
                 </div>
+
+                <div id="exercises-list" class="exercise-list"></div>
+
+                <button type="submit" style="width: 100%; margin-top: 1rem;">Crear Rutina</button>
             </form>
         </div>
     </div>
 
-    <script>
+    <div id="shared-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSharedModal()">&times;</button>
+            <h2>Rutinas Compartidas</h2>
+            <div id="shared-list"></div>
+        </div>
+    </div>
+           <script>
         // 🔥 CONFIGURACIÓN FIREBASE - REEMPLAZA CON TU CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
@@ -934,7 +1446,7 @@
         ];
 
         const adminEmails = ['toni@fitdata.com', 'kati@fitdata.com', 'paul@fitdata.com'];
-        const ACCESS_CODE = 'fityhab';
+        const ACCESS_CODE = 'fityhab'; // Código de acceso para nuevos usuarios
 
         let currentLanguage = 'es';
         let currentUser = null;
@@ -999,22 +1511,14 @@
             e.preventDefault();
             const username = document.getElementById('register-username').value.trim();
             const email = document.getElementById('register-email').value.trim().toLowerCase();
-            const accessCode = document.getElementById('register-access-code').value.trim().toLowerCase();
             const password = document.getElementById('register-password').value;
             const confirm = document.getElementById('register-confirm').value;
 
             document.getElementById('register-error').textContent = '';
             document.getElementById('register-confirm-error').textContent = '';
-            document.getElementById('register-code-error').textContent = '';
-
-            // Validar código de acceso
-            if (accessCode !== ACCESS_CODE) {
-                document.getElementById('register-code-error').textContent = '❌ Código incorrecto';
-                return;
-            }
 
             if (username.length < 3) {
-                document.getElementById('register-error').textContent = 'Nombre: mínimo 3 caracteres';
+                document.getElementById('register-error').textContent = 'Mínimo 3 caracteres';
                 return;
             }
 
@@ -1046,17 +1550,11 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert('✅ Cuenta creada. Tu entrenador la aprobará pronto.');
+                alert('¡Cuenta creada! Espera a que un administrador la apruebe.');
                 await auth.signOut();
                 switchToLogin();
             } catch (error) {
-                if (error.code === 'auth/email-already-in-use') {
-                    document.getElementById('register-error').textContent = '❌ Email ya registrado';
-                } else if (error.code === 'auth/invalid-email') {
-                    document.getElementById('register-error').textContent = '❌ Email inválido';
-                } else {
-                    document.getElementById('register-error').textContent = '❌ ' + error.message;
-                }
+                document.getElementById('register-error').textContent = error.message;
             }
         }
 
@@ -1070,7 +1568,7 @@
             try {
                 await auth.signInWithEmailAndPassword(email, password);
             } catch (error) {
-                document.getElementById('login-error').textContent = 'Email o contraseña incorrectos';
+                document.getElementById('login-error').textContent = '❌ Email o contraseña incorrectos';
             }
         }
 
@@ -1948,4 +2446,5 @@
     </script>
 </body>
 </html>
+
 
