@@ -1480,27 +1480,42 @@
         }
 
         function playBeep() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // Vibración prioritaria (más confiable en móvil)
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
             }
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => {
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    oscillator.frequency.value = 880;
-                    oscillator.type = 'square';
-                    gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.2);
 
-                    // Vibración de respaldo
-                    if (navigator.vibrate) {
-                        navigator.vibrate(200);
-                    }
-                }, i * 300);
+            // Intentar sonido Web Audio API
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                // Resume context si está suspendido (requerido en móviles)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        try {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            oscillator.frequency.value = 880;
+                            oscillator.type = 'square';
+                            gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.2);
+                        } catch (e) {
+                            console.log('Error beep:', e);
+                        }
+                    }, i * 300);
+                }
+            } catch (error) {
+                console.log('AudioContext no disponible:', error);
             }
         }
 
@@ -2219,7 +2234,8 @@
                 <div class="routine-card">
                     <h3>${w.routineName}</h3>
                     <p>📅 ${new Date(w.date).toLocaleDateString('es-ES')}</p>
-                    <p>💪 ${w.completedSeries} series completadas</p>
+                    <p>💪 ${w.completedSeries || 0} series</p>
+                    <p>🔁 ${w.totalReps || 0} repeticiones</p>
                     <p>🏋️ ${Math.round(w.totalVolume)} kg volumen</p>
                     ${w.difficulty ? `<p>Dificultad: ${w.difficulty}</p>` : ''}
                 </div>
