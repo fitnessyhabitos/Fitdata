@@ -1208,6 +1208,7 @@
                         <th>Entrenamientos</th>
                         <th>Volumen Total</th>
                         <th>Acción</th>
+                        <th>Eliminar</th>
                     </tr>
                 </thead>
                 <tbody id="admin-users-table"></tbody>
@@ -1861,7 +1862,7 @@
 
             const exercises = Array.from(selectedExercises).map(id => ({
                 id,
-                series: Array.from({length:5},(_,i)=>({reps:i===0?20:16,weight:'',completed:false}))
+                series: [{ weight: 0, reps: 0, completed: false }]
             }));
 
             const routine = { name, description, exercises, createdAt: new Date().toISOString() };
@@ -1940,31 +1941,35 @@
 
         function renderSerie(exIndex, serieIndex, serie, lastExerciseData) {
             const lastSerie = lastExerciseData?.series?.[serieIndex];
-            const weightPh = lastSerie?.weight ? `Último: ${lastSerie.weight}` : 'kg';
+            let rowClass = '';
+            if (serie.completed) rowClass = 'completed';
+            else if (lastSerie && serie.weight > lastSerie.weight) rowClass = 'gold';
+            else if (lastSerie && serie.weight < lastSerie.weight) rowClass = 'red';
 
             return `
-                <div class="series-row">
+                <div class="series-row ${rowClass}">
                     <div class="series-label">S${serieIndex + 1}</div>
-
-                    <div class="series-input-group">
-                        <label class="series-input-label">${t('Reps')}</label>
-                        <input type="number" value="${serie.reps || ''}" 
-                            onchange="updateSerie(${exIndex}, ${serieIndex}, 'reps', this.value)"
-                            placeholder="0">
-                    </div>
-
                     <div class="series-input-group">
                         <label class="series-input-label">${t('Peso')}</label>
-                        <input type="number" value="${serie.weight || ''}" 
-                            onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
-                            placeholder="${weightPh}">
+                        <div class="series-input">
+                            <input type="number" value="${serie.weight || ''}" 
+                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
+                                placeholder="kg">
+                        </div>
                     </div>
-
+                    <div class="series-input-group">
+                        <label class="series-input-label">${t('Reps')}</label>
+                        <div class="series-input">
+                            <input type="number" value="${serie.reps || ''}" 
+                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'reps', this.value)"
+                                placeholder="0">
+                        </div>
+                    </div>
                     <div class="checkbox-series">
-                         <input type="checkbox" ${serie.completed ? 'checked' : ''} 
+                        <input type="checkbox" ${serie.completed ? 'checked' : ''} 
                             onchange="toggleSerieComplete(${exIndex}, ${serieIndex})">
                     </div>
-                    <button onclick="removeSerie(${exIndex}, ${serieIndex})" class="secondary">🗑️</button>
+                    <button onclick="removeSerie(${exIndex}, ${serieIndex})" class="secondary" style="padding: 0.5rem;">🗑️</button>
                 </div>
             `;
         }
@@ -1980,8 +1985,7 @@
             
             if (serie.completed && serieIndex < currentWorkout.exercises[exIndex].series.length - 1) {
                 startRestTimer();
-            
-            if (currentWorkout.exercises[exIndex].series[serieIndex].completed) startRestCountdown(60);}
+            }
             
             renderWorkout();
         }
@@ -2290,9 +2294,11 @@
                         <td>${u.workouts?.length || 0}</td>
                         <td>${Math.round(totalVolume)} kg</td>
                         <td><button onclick="viewUserDetails('${u.uid}')" class="secondary">Ver Detalles</button></td>
+                        <td><button onclick="deleteUser('${u.uid}', '${u.username}')" class="secondary" style="background: var(--accent); color: white;">🗑️ Eliminar</button></td>
                     </tr>
                 `;
             }).join('');
+        }).join('');
         }
 
         async function approveUser(uid) {
@@ -2304,6 +2310,21 @@
             if (!confirm('¿Eliminar este usuario?')) return;
             await db.collection('users').doc(uid).delete();
             renderAdmin();
+        }
+
+        async function deleteUser(uid, username) {
+            if (!confirm(`⚠️ ¿Estás seguro de eliminar al usuario "${username}"?\n\nEsto eliminará todos sus datos (rutinas, entrenamientos, etc).`)) {
+                return;
+            }
+
+            try {
+                await db.collection('users').doc(uid).delete();
+                alert(`✅ Usuario "${username}" eliminado correctamente.`);
+                renderAdmin();
+            } catch (error) {
+                console.error('Error al eliminar usuario:', error);
+                alert('❌ Error al eliminar usuario. Revisa la consola.');
+            }
         }
 
         async function viewUserDetails(uid) {
