@@ -1495,6 +1495,33 @@
             return `<img src="${imageUrl}" alt="Músculos" class="${sizeClass}" onerror="this.style.display='none'">`;
         }
 
+        function renderMusclesSummary() {
+            const muscles = getWorkoutMuscles(currentWorkout.exercises);
+            if (muscles.primary.length === 0) return '';
+
+            const imageUrl = getMuscleImageUrl(muscles.primary, muscles.secondary);
+            if (!imageUrl) return '';
+
+            let html = '<div class="workout-summary-muscles">';
+            html += '<h4>💪 Músculos Trabajados</h4>';
+            html += `<img src="${imageUrl}" alt="Músculos" class="exercise-muscle-image" onerror="this.style.display='none'">`;
+            html += '<div class="muscle-legend">';
+            html += '<div class="muscle-legend-item">';
+            html += '<div class="muscle-legend-color primary-color"></div>';
+            html += '<span>Primarios: ' + muscles.primary.map(m => MUSCLE_GROUPS[m]).join(', ') + '</span>';
+            html += '</div>';
+
+            if (muscles.secondary.length > 0) {
+                html += '<div class="muscle-legend-item">';
+                html += '<div class="muscle-legend-color secondary-color"></div>';
+                html += '<span>Secundarios: ' + muscles.secondary.map(m => MUSCLE_GROUPS[m]).join(', ') + '</span>';
+                html += '</div>';
+            }
+
+            html += '</div></div>';
+            return html;
+        }
+
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -1999,31 +2026,22 @@
 
         function startWorkout(index) {
             currentRoutine = { ...currentUserData.routines[index], index, isShared: false };
-            currentWorkout = (() => {
-                const lastWorkout = currentUserData.workouts?.filter(w => w.routineId === currentRoutine.id).sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                return {
-                    routineId: currentRoutine.id,
-                    routineName: currentRoutine.name,
-                    date: new Date().toISOString(),
-                    exercises: currentRoutine.exercises.map(ex => ({
-                        ...ex,
-                        series: ex.series.map((serie, idx) => {
-                            const lastExercise = lastWorkout?.exercises?.find(e => e.name === ex.name);
-                            const lastSerie = lastExercise?.series[idx];
-                            return {
-                                reps: serie.reps,
-                                weight: 0,
-                                completed: false,
-                                rest: serie.rest || 60,
-                                primaryMuscles: serie.primaryMuscles || [],
-                                secondaryMuscles: serie.secondaryMuscles || [],
-                                previousWeight: lastSerie?.weight || 0,
-                                previousReps: lastSerie?.reps || 0
-                            };
-                        })
+            currentWorkout = {
+                routineName: currentRoutine.name,
+                date: new Date().toISOString(),
+                exercises: currentRoutine.exercises.map(ex => ({
+                    name: ex.name,
+                    sets: ex.sets,
+                    series: ex.series.map(serie => ({
+                        reps: serie.reps,
+                        weight: 0,  // RESETEAR A 0
+                        completed: false,  // RESETEAR A FALSE
+                        rest: serie.rest || 60,
+                        primaryMuscles: serie.primaryMuscles || [],
+                        secondaryMuscles: serie.secondaryMuscles || []
                     }))
-                };
-            })();
+                }))
+            };
             showScreen('workout-screen');
             renderWorkout();
         }
@@ -2204,36 +2222,7 @@
                 <div class="summary-stat">
                     <label>Series Completadas:</label>
                     <div class="value">${currentWorkout.completedSeries} / ${currentWorkout.totalSeries}</div>
-                </div
-
-                ${(() => {
-                    const muscles = getWorkoutMuscles(currentWorkout.exercises);
-                    if (muscles.primary.length > 0) {
-                        const imageUrl = getMuscleImageUrl(muscles.primary, muscles.secondary);
-                        if (imageUrl) {
-                            return `
-                                <div class="workout-summary-muscles">
-                                    <h4>💪 Músculos Trabajados</h4>
-                                    <img src="${imageUrl}" alt="Músculos" class="exercise-muscle-image" onerror="this.style.display='none'">
-                                    <div class="muscle-legend">
-                                        <div class="muscle-legend-item">
-                                            <div class="muscle-legend-color primary-color"></div>
-                                            <span>Primarios: ${muscles.primary.map(m => MUSCLE_GROUPS[m]).join(', ')}</span>
-                                        </div>
-                                        ${muscles.secondary.length > 0 ? `
-                                            <div class="muscle-legend-item">
-                                                <div class="muscle-legend-color secondary-color"></div>
-                                                <span>Secundarios: ${muscles.secondary.map(m => MUSCLE_GROUPS[m]).join(', ')}</span>
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }
-                    return '';
-                })()}
-            >
+                </div>
                 <div class="summary-stat">
                     <label>Volumen Total:</label>
                     <div class="value">${Math.round(currentWorkout.totalVolume)} kg</div>
@@ -2242,6 +2231,7 @@
                     <label>Ejercicios:</label>
                     <div class="value">${currentWorkout.exercises.length}</div>
                 </div>
+            ` + renderMusclesSummary() + `
             `;
 
             const totalWorkouts = (currentUserData.workouts?.length || 0) + 1;
@@ -2464,9 +2454,7 @@
                         <td>${u.routines?.length || 0}</td>
                         <td>${u.workouts?.length || 0}</td>
                         <td>${Math.round(totalVolume)} kg</td>
-                        <td><button onclick="viewUserDetails('${u.uid}')" class="secondary">Ver Detalles</button>
-                            <button onclick="deleteAllUserRoutines(user.uid)" class="danger" style="font-size: 0.8em;">🗑️ Rutinas</button>
-                            <button onclick="deleteAllUserWorkouts(user.uid)" class="danger" style="font-size: 0.8em;">🗑️ Entrenos</button></td>
+                        <td><button onclick="viewUserDetails('${u.uid}')" class="secondary">Ver Detalles</button></td>
                     </tr>
                 `;
             }).join('');
@@ -2617,69 +2605,6 @@
 
         console.log('✅ Fit Data by Toni con Firebase cargado');
         console.log('🔥 Recuerda reemplazar firebaseConfig con tu configuración');
-    
-
-        // ============================================
-        // FUNCIONES DE ADMIN PARA BORRAR
-        // ============================================
-        async function deleteUserRoutine(userId, routineId) {
-            if (!confirm('¿Seguro que quieres eliminar esta rutina? Esta acción no se puede deshacer.')) return;
-
-            try {
-                const userDoc = await db.collection('users').doc(userId).get();
-                const userData = userDoc.data();
-                userData.routines = userData.routines.filter(r => r.id !== routineId);
-                await db.collection('users').doc(userId).update({ routines: userData.routines });
-                alert('Rutina eliminada correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error al eliminar rutina:', error);
-                alert('Error al eliminar la rutina');
-            }
-        }
-
-        async function deleteUserWorkout(userId, workoutId) {
-            if (!confirm('¿Seguro que quieres eliminar este entrenamiento? Esta acción no se puede deshacer.')) return;
-
-            try {
-                const userDoc = await db.collection('users').doc(userId).get();
-                const userData = userDoc.data();
-                userData.workouts = userData.workouts.filter(w => w.id !== workoutId);
-                await db.collection('users').doc(userId).update({ workouts: userData.workouts });
-                alert('Entrenamiento eliminado correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error al eliminar entrenamiento:', error);
-                alert('Error al eliminar el entrenamiento');
-            }
-        }
-
-        async function deleteAllUserWorkouts(userId) {
-            if (!confirm('¿ELIMINAR TODOS LOS ENTRENAMIENTOS de este usuario? Esta acción no se puede deshacer.')) return;
-
-            try {
-                await db.collection('users').doc(userId).update({ workouts: [] });
-                alert('Todos los entrenamientos eliminados correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error al eliminar entrenamientos:', error);
-                alert('Error al eliminar los entrenamientos');
-            }
-        }
-
-        async function deleteAllUserRoutines(userId) {
-            if (!confirm('¿ELIMINAR TODAS LAS RUTINAS de este usuario? Esta acción no se puede deshacer.')) return;
-
-            try {
-                await db.collection('users').doc(userId).update({ routines: [] });
-                alert('Todas las rutinas eliminadas correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error al eliminar rutinas:', error);
-                alert('Error al eliminar las rutinas');
-            }
-        }
-
     </script>
 </body>
 </html>
