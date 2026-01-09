@@ -1861,11 +1861,7 @@
 
             const exercises = Array.from(selectedExercises).map(id => ({
                 id,
-                series: Array.from({ length: 5 }, (_, i) => ({
-                    reps: i === 0 ? 20 : 16,  // 1x20, 4x16
-                    weight: '',
-                    completed: false
-                }))
+                series: Array.from({length:5},(_,i)=>({reps:i===0?20:16,weight:'',completed:false}))
             }));
 
             const routine = { name, description, exercises, createdAt: new Date().toISOString() };
@@ -1883,17 +1879,7 @@
             currentWorkout = {
                 routineName: currentRoutine.name,
                 date: new Date().toISOString(),
-                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises)).map(ex => {
-                    // Force 5 series for new workouts
-                    if (!ex.series || ex.series.length <= 1) {
-                         ex.series = Array.from({ length: 5 }, (_, i) => ({
-                            reps: i === 0 ? 20 : 16,
-                            weight: '',
-                            completed: false
-                        }));
-                    }
-                    return ex;
-                })
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
             };
             showScreen('workout-screen');
             renderWorkout();
@@ -1904,17 +1890,7 @@
             currentWorkout = {
                 routineName: currentRoutine.name,
                 date: new Date().toISOString(),
-                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises)).map(ex => {
-                    // Force 5 series for new workouts
-                    if (!ex.series || ex.series.length <= 1) {
-                         ex.series = Array.from({ length: 5 }, (_, i) => ({
-                            reps: i === 0 ? 20 : 16,
-                            weight: '',
-                            completed: false
-                        }));
-                    }
-                    return ex;
-                })
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
             };
             showScreen('workout-screen');
             renderWorkout();
@@ -1964,45 +1940,31 @@
 
         function renderSerie(exIndex, serieIndex, serie, lastExerciseData) {
             const lastSerie = lastExerciseData?.series?.[serieIndex];
-            let rowClass = '';
-            if (serie.completed) rowClass = 'completed';
-            else if (lastSerie && serie.weight > lastSerie.weight) rowClass = 'gold';
-            else if (lastSerie && serie.weight < lastSerie.weight) rowClass = 'red';
-
-            // 💡 PLACEHOLDER LOGIC: Show last weight if current is empty
-            const weightPlaceholder = (lastSerie && lastSerie.weight) ? `Last: ${lastSerie.weight}` : 'kg';
-            // Translate 'Last' if needed or keep simple number
-            const phText = (lastSerie && lastSerie.weight) ? lastSerie.weight : '';
+            const weightPh = lastSerie?.weight ? `Último: ${lastSerie.weight}` : 'kg';
 
             return `
-                <div class="series-row ${rowClass}">
+                <div class="series-row">
                     <div class="series-label">S${serieIndex + 1}</div>
 
-                    <!-- REPS (Left) -->
                     <div class="series-input-group">
                         <label class="series-input-label">${t('Reps')}</label>
-                        <div class="series-input">
-                            <input type="number" value="${serie.reps || ''}" 
-                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'reps', this.value)"
-                                placeholder="0">
-                        </div>
+                        <input type="number" value="${serie.reps || ''}" 
+                            onchange="updateSerie(${exIndex}, ${serieIndex}, 'reps', this.value)"
+                            placeholder="0">
                     </div>
 
-                    <!-- WEIGHT (Right) -->
                     <div class="series-input-group">
                         <label class="series-input-label">${t('Peso')}</label>
-                        <div class="series-input">
-                            <input type="number" value="${serie.weight || ''}" 
-                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
-                                placeholder="${phText}">
-                        </div>
+                        <input type="number" value="${serie.weight || ''}" 
+                            onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
+                            placeholder="${weightPh}">
                     </div>
 
                     <div class="checkbox-series">
-                        <input type="checkbox" ${serie.completed ? 'checked' : ''} 
+                         <input type="checkbox" ${serie.completed ? 'checked' : ''} 
                             onchange="toggleSerieComplete(${exIndex}, ${serieIndex})">
                     </div>
-                    <button onclick="removeSerie(${exIndex}, ${serieIndex})" class="secondary" style="padding: 0.5rem;">🗑️</button>
+                    <button onclick="removeSerie(${exIndex}, ${serieIndex})" class="secondary">🗑️</button>
                 </div>
             `;
         }
@@ -2015,12 +1977,12 @@
         function toggleSerieComplete(exIndex, serieIndex) {
             const serie = currentWorkout.exercises[exIndex].series[serieIndex];
             serie.completed = !serie.completed;
-
-            // ⏱️ Start 60s Timer if checked
-            if (serie.completed) {
-                startRestCountdown(60); 
-            }
-
+            
+            if (serie.completed && serieIndex < currentWorkout.exercises[exIndex].series.length - 1) {
+                startRestTimer();
+            
+            if (currentWorkout.exercises[exIndex].series[serieIndex].completed) startRestCountdown(60);}
+            
             renderWorkout();
         }
 
