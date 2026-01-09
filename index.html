@@ -1511,14 +1511,22 @@
             e.preventDefault();
             const username = document.getElementById('register-username').value.trim();
             const email = document.getElementById('register-email').value.trim().toLowerCase();
+            const accessCode = document.getElementById('register-access-code').value.trim().toLowerCase();
             const password = document.getElementById('register-password').value;
             const confirm = document.getElementById('register-confirm').value;
 
             document.getElementById('register-error').textContent = '';
             document.getElementById('register-confirm-error').textContent = '';
+            document.getElementById('register-code-error').textContent = '';
+
+            // Validar código de acceso
+            if (accessCode !== ACCESS_CODE) {
+                document.getElementById('register-code-error').textContent = '❌ Código de acceso incorrecto';
+                return;
+            }
 
             if (username.length < 3) {
-                document.getElementById('register-error').textContent = 'Mínimo 3 caracteres';
+                document.getElementById('register-error').textContent = 'Nombre: mínimo 3 caracteres';
                 return;
             }
 
@@ -1550,11 +1558,19 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert('¡Cuenta creada! Espera a que un administrador la apruebe.');
+                alert('✅ Cuenta creada correctamente. Tu entrenador la aprobará pronto.');
                 await auth.signOut();
                 switchToLogin();
             } catch (error) {
-                document.getElementById('register-error').textContent = error.message;
+                if (error.code === 'auth/email-already-in-use') {
+                    document.getElementById('register-error').textContent = '❌ Este email ya está registrado';
+                } else if (error.code === 'auth/invalid-email') {
+                    document.getElementById('register-error').textContent = '❌ Email inválido';
+                } else if (error.code === 'auth/weak-password') {
+                    document.getElementById('register-error').textContent = '❌ Contraseña muy débil (mínimo 6 caracteres)';
+                } else {
+                    document.getElementById('register-error').textContent = '❌ Error: ' + error.message;
+                }
             }
         }
 
