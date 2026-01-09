@@ -967,16 +967,45 @@
 
     <div id="login-screen" class="screen">
         <div class="container-sm">
+            
             <div class="auth-form">
-                <h1>Fit Data by Toni</h1>
-                <p>Entrena más inteligente, crece más fuerte</p>
-                
-                <form onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" placeholder="tu@email.com" required>
-                        <div class="error" id="login-error"></div>
+                <h1 id="auth-title">Fit Data by Toni</h1>
+                <p id="auth-subtitle">Entrena más inteligente, crece más fuerte</p>
+
+                <form onsubmit="handleAuth(event)">
+                    <!-- Username (Register only) -->
+                    <div class="form-group hidden" id="group-username">
+                        <label>Nombre de Usuario</label>
+                        <input type="text" id="login-username" placeholder="Tu nombre">
                     </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" placeholder="tu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="login-password" placeholder="******" required>
+                    </div>
+
+                    <!-- Access Code (Register only) -->
+                    <div class="form-group hidden" id="group-code">
+                        <label style="color: var(--accent);">Código de Acceso</label>
+                        <input type="text" id="register-code" placeholder="Código secreto">
+                    </div>
+
+                    <div class="error" id="login-error"></div>
+
+                    <button type="submit" id="auth-submit-btn">Entrar</button>
+
+                    <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                        <span id="auth-switch-text">¿No tienes cuenta?</span>
+                        <a href="#" onclick="toggleAuthMode(event)" style="color: var(--accent); text-decoration: none; font-weight: bold;" id="auth-switch-link">Regístrate</a>
+                    </p>
+                </form>
+            </div>
+        </div>
                     <div class="form-group">
                         <label for="login-password">Contraseña</label>
                         <input type="password" id="login-password" placeholder="Tu contraseña" required>
@@ -1207,7 +1236,7 @@
                         <th>Rutinas</th>
                         <th>Entrenamientos</th>
                         <th>Volumen Total</th>
-                        <th>Acciones</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody id="admin-users-table"></tbody>
@@ -1558,16 +1587,92 @@
             }
         }
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
+        
+        let isRegistering = false;
 
-            document.getElementById('login-error').textContent = '';
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isRegistering = !isRegistering;
+
+            const title = document.getElementById('auth-title');
+            const btn = document.getElementById('auth-submit-btn');
+            const switchText = document.getElementById('auth-switch-text');
+            const switchLink = document.getElementById('auth-switch-link');
+            const groupUser = document.getElementById('group-username');
+            const groupCode = document.getElementById('group-code');
+            const error = document.getElementById('login-error');
+
+            error.textContent = '';
+
+            if (isRegistering) {
+                title.textContent = 'Crear Cuenta';
+                btn.textContent = 'Registrarse';
+                switchText.textContent = '¿Ya tienes cuenta?';
+                switchLink.textContent = 'Inicia Sesión';
+                groupUser.classList.remove('hidden');
+                groupCode.classList.remove('hidden');
+                document.getElementById('login-username').required = true;
+                document.getElementById('register-code').required = true;
+            } else {
+                title.textContent = 'Fit Data by Toni';
+                btn.textContent = 'Entrar';
+                switchText.textContent = '¿No tienes cuenta?';
+                switchLink.textContent = 'Regístrate';
+                groupUser.classList.add('hidden');
+                groupCode.classList.add('hidden');
+                document.getElementById('login-username').required = false;
+                document.getElementById('register-code').required = false;
+            }
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            errorEl.textContent = '';
 
             try {
-                await auth.signInWithEmailAndPassword(email, password);
+                if (isRegistering) {
+                    // REGISTER LOGIC
+                    const username = document.getElementById('login-username').value.trim();
+                    const code = document.getElementById('register-code').value.trim();
+
+                    if (code !== ACCESS_CODE) {
+                        throw new Error('Código de acceso incorrecto');
+                    }
+
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+
+                    // Create User Doc
+                    await db.collection('users').doc(userCredential.user.uid).set({
+                        username: username,
+                        email: email,
+                        createdAt: new Date().toISOString(),
+                        approved: false, // Requires admin approval
+                        routines: [],
+                        workouts: []
+                    });
+
+                    alert('Cuenta creada con éxito. Espera aprobación del administrador.');
+                } else {
+                    // LOGIN LOGIC
+                    await auth.signInWithEmailAndPassword(email, password);
+                }
             } catch (error) {
+                console.error(error);
+                if (error.code === 'auth/email-already-in-use') {
+                    errorEl.textContent = 'Este email ya está registrado';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorEl.textContent = 'Contraseña incorrecta';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorEl.textContent = 'Usuario no encontrado';
+                } else {
+                    errorEl.textContent = error.message;
+                }
+            }
+        }
+ catch (error) {
                 document.getElementById('login-error').textContent = '❌ Email o contraseña incorrectos';
             }
         }
@@ -2292,12 +2397,7 @@
                         <td>${u.routines?.length || 0}</td>
                         <td>${u.workouts?.length || 0}</td>
                         <td>${Math.round(totalVolume)} kg</td>
-                        <td>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button onclick="viewUserDetails('${u.uid}')" class="secondary" style="font-size: 0.8rem;">Ver</button>
-                                <button onclick="deleteUser('${u.uid}', '${u.username}')" class="secondary" style="background: var(--accent); color: white; font-size: 0.8rem;">🗑️</button>
-                            </div>
-                        </td>
+                        <td><button onclick="viewUserDetails('${u.uid}')" class="secondary">Ver Detalles</button></td>
                     </tr>
                 `;
             }).join('');
@@ -2308,29 +2408,11 @@
             renderAdmin();
         }
 
-        
         async function rejectUser(uid) {
-            if (!confirm('¿Rechazar usuario?')) return;
+            if (!confirm('¿Eliminar este usuario?')) return;
             await db.collection('users').doc(uid).delete();
             renderAdmin();
         }
-
-        async function deleteUser(uid, username) {
-            if (!confirm(`⚠️ ¿ELIMINAR USUARIO DEFINITIVAMENTE?
-
-Usuario: ${username}
-
-Se borrarán todos sus datos y progresos.`)) return;
-            try {
-                await db.collection('users').doc(uid).delete();
-                alert('✅ Usuario eliminado.');
-                renderAdmin();
-            } catch (e) {
-                console.error(e);
-                alert('Error al eliminar: ' + e.message);
-            }
-        }
-    
 
         async function viewUserDetails(uid) {
             const userDoc = await db.collection('users').doc(uid).get();
