@@ -1861,11 +1861,11 @@
 
             const exercises = Array.from(selectedExercises).map(id => ({
                 id,
-                series: Array.from({length: 5}, (_, i) => ({
-                reps: i === 0 ? 20 : 16,
-                weight: '',
-                completed: false
-            }))
+                series: Array.from({ length: 5 }, (_, i) => ({
+                    reps: i === 0 ? 20 : 16,  // 1x20, 4x16
+                    weight: '',
+                    completed: false
+                }))
             }));
 
             const routine = { name, description, exercises, createdAt: new Date().toISOString() };
@@ -1884,10 +1884,10 @@
                 routineName: currentRoutine.name,
                 date: new Date().toISOString(),
                 exercises: JSON.parse(JSON.stringify(currentRoutine.exercises)).map(ex => {
-                    // ⚡ FORCE 5 SERIES DEFAULT if series is empty or 'default/old' style (length 1 empty)
+                    // Force 5 series for new workouts
                     if (!ex.series || ex.series.length <= 1) {
-                        ex.series = Array.from({length: 5}, (_, i) => ({
-                            reps: i === 0 ? 20 : 16, // 1x20, 4x16
+                         ex.series = Array.from({ length: 5 }, (_, i) => ({
+                            reps: i === 0 ? 20 : 16,
                             weight: '',
                             completed: false
                         }));
@@ -1905,10 +1905,10 @@
                 routineName: currentRoutine.name,
                 date: new Date().toISOString(),
                 exercises: JSON.parse(JSON.stringify(currentRoutine.exercises)).map(ex => {
-                    // ⚡ FORCE 5 SERIES DEFAULT if series is empty or 'default/old' style (length 1 empty)
+                    // Force 5 series for new workouts
                     if (!ex.series || ex.series.length <= 1) {
-                        ex.series = Array.from({length: 5}, (_, i) => ({
-                            reps: i === 0 ? 20 : 16, // 1x20, 4x16
+                         ex.series = Array.from({ length: 5 }, (_, i) => ({
+                            reps: i === 0 ? 20 : 16,
                             weight: '',
                             completed: false
                         }));
@@ -1969,14 +1969,16 @@
             else if (lastSerie && serie.weight > lastSerie.weight) rowClass = 'gold';
             else if (lastSerie && serie.weight < lastSerie.weight) rowClass = 'red';
 
-            // Placeholder logic: Show last weight if current is empty
-            const weightPlaceholder = lastSerie && lastSerie.weight ? lastSerie.weight : 'kg';
+            // 💡 PLACEHOLDER LOGIC: Show last weight if current is empty
+            const weightPlaceholder = (lastSerie && lastSerie.weight) ? `Last: ${lastSerie.weight}` : 'kg';
+            // Translate 'Last' if needed or keep simple number
+            const phText = (lastSerie && lastSerie.weight) ? lastSerie.weight : '';
 
             return `
                 <div class="series-row ${rowClass}">
                     <div class="series-label">S${serieIndex + 1}</div>
 
-                    <!-- REPS (First) -->
+                    <!-- REPS (Left) -->
                     <div class="series-input-group">
                         <label class="series-input-label">${t('Reps')}</label>
                         <div class="series-input">
@@ -1986,13 +1988,13 @@
                         </div>
                     </div>
 
-                    <!-- WEIGHT (Second) -->
+                    <!-- WEIGHT (Right) -->
                     <div class="series-input-group">
                         <label class="series-input-label">${t('Peso')}</label>
                         <div class="series-input">
                             <input type="number" value="${serie.weight || ''}" 
                                 onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
-                                placeholder="${weightPlaceholder}"> <!-- Shows last weight -->
+                                placeholder="${phText}">
                         </div>
                     </div>
 
@@ -2014,15 +2016,11 @@
             const serie = currentWorkout.exercises[exIndex].series[serieIndex];
             serie.completed = !serie.completed;
 
-            // ⏱️ Auto-start timer if marked complete
+            // ⏱️ Start 60s Timer if checked
             if (serie.completed) {
-                // Default 60s or custom
-                startRestCountdown(typeof restTime !== 'undefined' ? restTime : 60);
+                startRestCountdown(60); 
             }
 
-            renderWorkout();
-        }
-            
             renderWorkout();
         }
 
