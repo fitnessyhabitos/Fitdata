@@ -947,6 +947,72 @@
         .hidden {
             display: none;
         }
+    
+        /* === ESTILOS PARA IMÁGENES MUSCULARES === */
+        .exercise-muscle-image {
+            width: 120px;
+            height: auto;
+            margin: 10px auto;
+            display: block;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .exercise-muscle-image-small {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            padding: 5px;
+        }
+
+        .exercise-muscle-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .muscle-legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 8px;
+            font-size: 0.8em;
+            flex-wrap: wrap;
+        }
+
+        .muscle-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .muscle-legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+
+        .primary-color { background: #FF4444; }
+        .secondary-color { background: #FFB344; }
+
+        .workout-summary-muscles {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+
+        .workout-summary-muscles h4 {
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+
+        select[multiple] {
+            min-height: 120px;
+        }
+
     </style>
 </head>
 <body>
@@ -1378,6 +1444,50 @@
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
+
+        // ============================================
+        // MUSCLE GROUP IMAGE GENERATOR API
+        // ============================================
+        const MUSCLE_API_BASE = 'https://musclegroupapi.p.rapidapi.com';
+
+        const MUSCLE_GROUPS = {
+            'chest': 'Pecho', 'shoulders': 'Hombros', 'biceps': 'Bíceps', 'triceps': 'Tríceps',
+            'forearms': 'Antebrazos', 'abs': 'Abdominales', 'obliques': 'Oblicuos',
+            'quadriceps': 'Cuádriceps', 'hamstrings': 'Isquiotibiales', 'glutes': 'Glúteos',
+            'calves': 'Gemelos', 'lats': 'Dorsales', 'traps': 'Trapecios',
+            'lower_back': 'Lumbar', 'middle_back': 'Espalda Media'
+        };
+
+        function getMuscleImageUrl(primaryMuscles, secondaryMuscles = []) {
+            if (!primaryMuscles || primaryMuscles.length === 0) return null;
+            const primaryColor = 'FF4444', secondaryColor = 'FFB344';
+            if (secondaryMuscles && secondaryMuscles.length > 0) {
+                return `${MUSCLE_API_BASE}/getMulticolorImage?primaryMuscleGroups=${primaryMuscles.join(',')}&secondaryMuscleGroups=${secondaryMuscles.join(',')}&primaryColor=${primaryColor}&secondaryColor=${secondaryColor}&transparentBackground=1`;
+            }
+            return `${MUSCLE_API_BASE}/getImage?muscleGroups=${primaryMuscles.join(',')}&color=${primaryColor}&transparentBackground=1`;
+        }
+
+        function getWorkoutMuscles(exercises) {
+            const primaryMuscles = new Set(), secondaryMuscles = new Set();
+            if (!exercises) return { primary: [], secondary: [] };
+            exercises.forEach(ex => {
+                if (ex.series) {
+                    ex.series.forEach(serie => {
+                        if (serie.primaryMuscles) serie.primaryMuscles.forEach(m => primaryMuscles.add(m));
+                        if (serie.secondaryMuscles) serie.secondaryMuscles.forEach(m => secondaryMuscles.add(m));
+                    });
+                }
+            });
+            return { primary: Array.from(primaryMuscles), secondary: Array.from(secondaryMuscles) };
+        }
+
+        function renderMuscleImage(primaryMuscles, secondaryMuscles = [], size = 'medium') {
+            const imageUrl = getMuscleImageUrl(primaryMuscles, secondaryMuscles);
+            if (!imageUrl) return '';
+            const sizeClass = size === 'small' ? 'exercise-muscle-image-small' : 'exercise-muscle-image';
+            return `<img src="${imageUrl}" alt="Músculos" class="${sizeClass}" onerror="this.style.display='none'">`;
+        }
+
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -1867,7 +1977,13 @@
 
             const exercises = Array.from(selectedExercises).map(id => ({
                 id,
-                series: [{ weight: 0, reps: 0, completed: false }]
+                series: [
+                        { reps: 20, weight: 0, completed: false, rest: 60, primaryMuscles: [], secondaryMuscles: [] },
+                        { reps: 16, weight: 0, completed: false, rest: 60, primaryMuscles: [], secondaryMuscles: [] },
+                        { reps: 16, weight: 0, completed: false, rest: 60, primaryMuscles: [], secondaryMuscles: [] },
+                        { reps: 16, weight: 0, completed: false, rest: 60, primaryMuscles: [], secondaryMuscles: [] },
+                        { reps: 16, weight: 0, completed: false, rest: 60, primaryMuscles: [], secondaryMuscles: [] }
+                    ]
             }));
 
             const routine = { name, description, exercises, createdAt: new Date().toISOString() };
@@ -2076,6 +2192,31 @@
                     <label>Ejercicios:</label>
                     <div class="value">${currentWorkout.exercises.length}</div>
                 </div>
+
+    \${(() => {
+        const muscles = getWorkoutMuscles(currentWorkout.exercises);
+        if (muscles.primary.length > 0) {
+            return \`
+                <div class="workout-summary-muscles">
+                    <h4>💪 Músculos Trabajados</h4>
+                    \${renderMuscleImage(muscles.primary, muscles.secondary, 'medium')}
+                    <div class="muscle-legend">
+                        <div class="muscle-legend-item">
+                            <div class="muscle-legend-color primary-color"></div>
+                            <span>Primarios: \${muscles.primary.map(m => MUSCLE_GROUPS[m]).join(', ')}</span>
+                        </div>
+                        \${muscles.secondary.length > 0 ? \`
+                            <div class="muscle-legend-item">
+                                <div class="muscle-legend-color secondary-color"></div>
+                                <span>Secundarios: \${muscles.secondary.map(m => MUSCLE_GROUPS[m]).join(', ')}</span>
+                            </div>
+                        \` : ''}
+                    </div>
+                </div>
+            \`;
+        }
+        return '';
+    })()}
             `;
 
             const totalWorkouts = (currentUserData.workouts?.length || 0) + 1;
