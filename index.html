@@ -384,7 +384,7 @@
 
         .series-row {
             display: grid;
-            grid-template-columns: 60px 80px 80px 80px 50px;
+            grid-template-columns: 50px 80px 80px 70px 50px 50px;
             gap: 0.8rem;
             margin-bottom: 0.8rem;
             align-items: center;
@@ -407,7 +407,6 @@
             text-align: center;
             font-style: italic;
         }
-
 
         .series-row.gold {
             border-color: var(--gold);
@@ -1944,7 +1943,15 @@
                         </div>
                         <div class="series-container">
                             <h4>${t('Series')}</h4>
-                            ${ex.series.map((serie, serieIndex) => renderSerie(exIndex, serieIndex, serie, lastExerciseData)).join('')}
+<div class="series-header" style="display: grid; grid-template-columns: 50px 80px 80px 70px 50px 50px; gap: 0.8rem; padding: 0.5rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--text-secondary); margin-bottom: 0.5rem;">
+                        <div style="text-align: center;">Serie</div>
+                        <div style="text-align: center;">Reps</div>
+                        <div style="text-align: center;">Peso (kg)</div>
+                        <div style="text-align: center;">Anterior</div>
+                        <div style="text-align: center;">✓</div>
+                        <div style="text-align: center;"></div>
+                    </div>
+                                                ${ex.series.map((serie, serieIndex) => renderSerie(exIndex, serieIndex, serie, lastExerciseData)).join('')}
                             <button onclick="addSerie(${exIndex})" class="secondary" style="width: 100%; margin-top: 1rem;">+ Agregar Serie</button>
                         </div>
                     </div>
@@ -1959,25 +1966,18 @@
             else if (lastSerie && serie.weight > lastSerie.weight) rowClass = 'gold';
             else if (lastSerie && serie.weight < lastSerie.weight) rowClass = 'red';
 
+            const previousWeight = lastSerie?.weight ? lastSerie.weight : '--';
+
             return `
                 <div class="series-row ${rowClass}">
                     <div class="series-label">S${serieIndex + 1}</div>
-                    <div class="series-input-group">
-                        <label class="series-input-label">${t('Peso')}</label>
-                        <div class="series-input">
-                            <input type="number" value="${serie.weight || ''}" 
-                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
-                                placeholder="kg">
-                        </div>
-                    </div>
-                    <div class="series-input-group">
-                        <label class="series-input-label">${t('Reps')}</label>
-                        <div class="series-input">
-                            <input type="number" value="${serie.reps || ''}" 
-                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'reps', this.value)"
-                                placeholder="0">
-                        </div>
-                    </div>
+                    <input type="number" value="${serie.reps || ''}" 
+                        onchange="updateSerie(${exIndex}, ${serieIndex}, 'reps', this.value)"
+                        placeholder="Reps" style="text-align: center; padding: 0.6rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px;">
+                    <input type="number" value="${serie.weight || ''}" 
+                        onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
+                        placeholder="Peso" step="0.5" style="text-align: center; padding: 0.6rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px;">
+                    <div class="previous-weight">${previousWeight}</div>
                     <div class="checkbox-series">
                         <input type="checkbox" ${serie.completed ? 'checked' : ''} 
                             onchange="toggleSerieComplete(${exIndex}, ${serieIndex})">
