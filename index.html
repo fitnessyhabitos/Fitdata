@@ -1,43 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <script>
-        window.onerror = function(msg, url, line, col, error) {
-            const loading = document.getElementById('loading-screen');
-            if (loading) {
-                loading.innerHTML = `
-                    <div style="color:red; padding:2rem; text-align:center;">
-                        <h3>⚠️ Error Crítico</h3>
-                        <p>${msg}</p>
-                        <p>Line: ${line}</p>
-                        <button onclick="location.reload()" style="padding:1rem; margin-top:1rem;">Recargar</button>
-                    </div>
-                `;
-            }
-            // Also alert for visibility
-            // alert("Error: " + msg); 
-            return false;
-        };
-
-        // Failsafe Timeout
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const loading = document.getElementById('loading-screen');
-                if (loading && loading.classList.contains('active')) {
-                    loading.innerHTML = `
-                        <div style="color:orange; padding:2rem; text-align:center;">
-                            <h3>⏳ Tarda demasiado...</h3>
-                            <p>La conexión con Firebase es lenta o ha fallado.</p>
-                            <button onclick="location.reload()" style="padding:1rem; background:white; color:black; border:none; border-radius:8px; cursor:pointer;">🔄 Reintentar</button>
-                            <br><br>
-                            <button onclick="document.getElementById('loading-screen').classList.remove('active')" style="background:transparent; border:1px solid white; color:white; padding:0.5rem; margin-top:1rem;">Saltar carga (Experimental)</button>
-                        </div>
-                    `;
-                }
-            }, 8000); // 8 seconds timeout
-        });
-    </script>
-
+<head><script>window.onerror=function(msg,url,line){const l=document.getElementById('loading-screen');if(l){l.innerHTML=`<div style="color:red;padding:2rem;text-align:center"><h3>⚠️ Error</h3><p>${msg}</p><p>Line: ${line}</p><button onclick="location.reload()">Reload</button></div>`}return false};window.addEventListener('load',()=>{setTimeout(()=>{const l=document.getElementById('loading-screen');if(l&&l.classList.contains('active')){l.innerHTML=`<div style="color:orange;padding:2rem;text-align:center"><h3>⏳ Lento...</h3><button onclick="location.reload()">Reintentar</button><br><br><button onclick="document.getElementById('loading-screen').classList.remove('active')">Saltar carga</button></div>`}},8000)});</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1017,6 +980,11 @@
                     <div class="form-group">
                         <label for="login-password">Contraseña</label>
                         <input type="password" id="login-password" placeholder="Tu contraseña" required>
+                    </div>
+
+                    <div class="form-group hidden" id="group-code">
+                        <label style="color: var(--accent);">Código de Acceso</label>
+                        <input type="text" id="register-code" placeholder="Código secreto">
                     </div>
                     <button type="submit">Iniciar Sesión</button>
                 </form>
