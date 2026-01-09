@@ -1009,6 +1009,12 @@
                         <input type="email" id="register-email" placeholder="tu@email.com" required>
                     </div>
                     <div class="form-group">
+                        <label for="register-access-code">Código de Acceso</label>
+                        <input type="text" id="register-access-code" placeholder="Solicita el código a tu entrenador" required autocomplete="off">
+                        <small style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-top: 0.5rem;">💡 Necesitas el código secreto para registrarte</small>
+                        <div class="error" id="register-code-error"></div>
+                    </div>
+                    <div class="form-group">
                         <label for="register-password">Contraseña</label>
                         <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" required>
                     </div>
@@ -1511,22 +1517,14 @@
             e.preventDefault();
             const username = document.getElementById('register-username').value.trim();
             const email = document.getElementById('register-email').value.trim().toLowerCase();
-            const accessCode = document.getElementById('register-access-code').value.trim().toLowerCase();
             const password = document.getElementById('register-password').value;
             const confirm = document.getElementById('register-confirm').value;
 
             document.getElementById('register-error').textContent = '';
             document.getElementById('register-confirm-error').textContent = '';
-            document.getElementById('register-code-error').textContent = '';
-
-            // Validar código de acceso
-            if (accessCode !== ACCESS_CODE) {
-                document.getElementById('register-code-error').textContent = '❌ Código de acceso incorrecto';
-                return;
-            }
 
             if (username.length < 3) {
-                document.getElementById('register-error').textContent = 'Nombre: mínimo 3 caracteres';
+                document.getElementById('register-error').textContent = 'Mínimo 3 caracteres';
                 return;
             }
 
@@ -1558,19 +1556,11 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert('✅ Cuenta creada correctamente. Tu entrenador la aprobará pronto.');
+                alert('¡Cuenta creada! Espera a que un administrador la apruebe.');
                 await auth.signOut();
                 switchToLogin();
             } catch (error) {
-                if (error.code === 'auth/email-already-in-use') {
-                    document.getElementById('register-error').textContent = '❌ Este email ya está registrado';
-                } else if (error.code === 'auth/invalid-email') {
-                    document.getElementById('register-error').textContent = '❌ Email inválido';
-                } else if (error.code === 'auth/weak-password') {
-                    document.getElementById('register-error').textContent = '❌ Contraseña muy débil (mínimo 6 caracteres)';
-                } else {
-                    document.getElementById('register-error').textContent = '❌ Error: ' + error.message;
-                }
+                document.getElementById('register-error').textContent = error.message;
             }
         }
 
