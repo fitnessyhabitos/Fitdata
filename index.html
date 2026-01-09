@@ -9,103 +9,7 @@
     <title>Fit Data by Toni - Entrenamiento Inteligente</title>
     
     <!-- 🔥 Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
-
-        // ✅ Defaults: 5 series (20 reps first, then 16)
-        function buildDefaultSeries() {
-            return Array.from({ length: 5 }, (_, i) => ({
-                reps: i === 0 ? 20 : 16,
-                weight: '',
-                completed: false
-            }));
-        }
-
-        // Returns last workout (most recent) for a given routine (id or name)
-        function getLastWorkoutForRoutine(routine) {
-            const workouts = (currentUserData && currentUserData.workouts) ? currentUserData.workouts : [];
-            const routineId = routine?.id || routine?.routineId;
-            const routineName = routine?.name || routine?.routineName;
-            const matches = workouts
-                .filter(w => (routineId && (w.routineId === routineId)) || (routineName && (w.routineName === routineName || w.routine === routineName)))
-                .sort((a, b) => (b.date || b.createdAt || 0) - (a.date || a.createdAt || 0));
-            return matches[0] || null;
-        }
-
-        // Get previous weight by exerciseId + series index
-        function getPrevWeight(lastWorkout, exerciseId, seriesIndex) {
-            if (!lastWorkout || !lastWorkout.exercises) return '';
-            const ex = lastWorkout.exercises.find(e => e.id === exerciseId);
-            if (!ex || !ex.series || !ex.series[seriesIndex]) return '';
-            const w = ex.series[seriesIndex].weight;
-            return (w === 0 || w) ? String(w) : '';
-        }
-
-
-        // ⏱️ Rest timer + beep (no external audio file)
-        let restInterval = null;
-        let restRemaining = 0;
-
-        function beep(durationMs = 250, freq = 880, volume = 0.15) {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = freq;
-                gain.gain.value = volume;
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                setTimeout(() => { osc.stop(); ctx.close(); }, durationMs);
-            } catch (e) {
-                // ignore
-            }
-        }
-
-        function showRestTimer() {
-            const el = document.getElementById('timer-display');
-            if (el) el.classList.add('active');
-        }
-
-        function hideRestTimer() {
-            const el = document.getElementById('timer-display');
-            if (el) el.classList.remove('active');
-        }
-
-        function formatSeconds(sec) {
-            const m = Math.floor(sec / 60);
-            const s = sec % 60;
-            return `${m}:${String(s).padStart(2, '0')}`;
-        }
-
-        function startRestCountdown(seconds = 60) {
-            const text = document.getElementById('timer-text');
-            restRemaining = Number(seconds) || 60;
-            if (restInterval) clearInterval(restInterval);
-            showRestTimer();
-            if (text) text.textContent = formatSeconds(restRemaining);
-
-            restInterval = setInterval(() => {
-                restRemaining -= 1;
-                if (text) text.textContent = formatSeconds(Math.max(restRemaining, 0));
-                if (restRemaining <= 0) {
-                    clearInterval(restInterval);
-                    restInterval = null;
-                    beep(350, 880);
-                    setTimeout(() => beep(350, 660), 200);
-                    hideRestTimer();
-                }
-            }, 1000);
-        }
-
-        function skipRestTime() {
-            if (restInterval) clearInterval(restInterval);
-            restInterval = null;
-            hideRestTimer();
-        }
-
-</script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
@@ -1957,7 +1861,11 @@
 
             const exercises = Array.from(selectedExercises).map(id => ({
                 id,
-                series: [{ weight: 0, reps: 0, completed: false }]
+                series: Array.from({length: 5}, (_, i) => ({
+                reps: i === 0 ? 20 : 16,
+                weight: '',
+                completed: false
+            }))
             }));
 
             const routine = { name, description, exercises, createdAt: new Date().toISOString() };
@@ -1975,7 +1883,17 @@
             currentWorkout = {
                 routineName: currentRoutine.name,
                 date: new Date().toISOString(),
-                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises)).map(ex => {
+                    // ⚡ FORCE 5 SERIES DEFAULT if series is empty or 'default/old' style (length 1 empty)
+                    if (!ex.series || ex.series.length <= 1) {
+                        ex.series = Array.from({length: 5}, (_, i) => ({
+                            reps: i === 0 ? 20 : 16, // 1x20, 4x16
+                            weight: '',
+                            completed: false
+                        }));
+                    }
+                    return ex;
+                })
             };
             showScreen('workout-screen');
             renderWorkout();
@@ -1986,7 +1904,17 @@
             currentWorkout = {
                 routineName: currentRoutine.name,
                 date: new Date().toISOString(),
-                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises)).map(ex => {
+                    // ⚡ FORCE 5 SERIES DEFAULT if series is empty or 'default/old' style (length 1 empty)
+                    if (!ex.series || ex.series.length <= 1) {
+                        ex.series = Array.from({length: 5}, (_, i) => ({
+                            reps: i === 0 ? 20 : 16, // 1x20, 4x16
+                            weight: '',
+                            completed: false
+                        }));
+                    }
+                    return ex;
+                })
             };
             showScreen('workout-screen');
             renderWorkout();
@@ -2041,17 +1969,14 @@
             else if (lastSerie && serie.weight > lastSerie.weight) rowClass = 'gold';
             else if (lastSerie && serie.weight < lastSerie.weight) rowClass = 'red';
 
+            // Placeholder logic: Show last weight if current is empty
+            const weightPlaceholder = lastSerie && lastSerie.weight ? lastSerie.weight : 'kg';
+
             return `
                 <div class="series-row ${rowClass}">
                     <div class="series-label">S${serieIndex + 1}</div>
-                    <div class="series-input-group">
-                        <label class="series-input-label">${t('Peso')}</label>
-                        <div class="series-input">
-                            <input type="number" value="${serie.weight || ''}" 
-                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
-                                placeholder="kg">
-                        </div>
-                    </div>
+
+                    <!-- REPS (First) -->
                     <div class="series-input-group">
                         <label class="series-input-label">${t('Reps')}</label>
                         <div class="series-input">
@@ -2060,6 +1985,17 @@
                                 placeholder="0">
                         </div>
                     </div>
+
+                    <!-- WEIGHT (Second) -->
+                    <div class="series-input-group">
+                        <label class="series-input-label">${t('Peso')}</label>
+                        <div class="series-input">
+                            <input type="number" value="${serie.weight || ''}" 
+                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
+                                placeholder="${weightPlaceholder}"> <!-- Shows last weight -->
+                        </div>
+                    </div>
+
                     <div class="checkbox-series">
                         <input type="checkbox" ${serie.completed ? 'checked' : ''} 
                             onchange="toggleSerieComplete(${exIndex}, ${serieIndex})">
@@ -2077,10 +2013,15 @@
         function toggleSerieComplete(exIndex, serieIndex) {
             const serie = currentWorkout.exercises[exIndex].series[serieIndex];
             serie.completed = !serie.completed;
-            
-            if (serie.completed && serieIndex < currentWorkout.exercises[exIndex].series.length - 1) {
-                startRestTimer();
+
+            // ⏱️ Auto-start timer if marked complete
+            if (serie.completed) {
+                // Default 60s or custom
+                startRestCountdown(typeof restTime !== 'undefined' ? restTime : 60);
             }
+
+            renderWorkout();
+        }
             
             renderWorkout();
         }
