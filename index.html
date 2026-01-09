@@ -967,7 +967,6 @@
 
     <div id="login-screen" class="screen">
         <div class="container-sm">
-            
             <div class="auth-form">
                 <h1 id="auth-title">Fit Data by Toni</h1>
                 <p id="auth-subtitle">Entrena más inteligente, crece más fuerte</p>
@@ -1005,380 +1004,6 @@
                     </p>
                 </form>
             </div>
-        </div>
-                    <div class="form-group">
-                        <label for="login-password">Contraseña</label>
-                        <input type="password" id="login-password" placeholder="Tu contraseña" required>
-                    </div>
-                    <button type="submit">Iniciar Sesión</button>
-                </form>
-
-                <div class="auth-toggle">
-                    <span>¿No tienes cuenta?</span>
-                    <button onclick="switchToRegister()">Regístrate</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="register-screen" class="screen">
-        <div class="container-sm">
-            <div class="auth-form">
-                <h1>Crea tu Cuenta</h1>
-                <p>Únete a Fit Data by Toni</p>
-                
-                <form onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label for="register-username">Nombre de usuario</label>
-                        <input type="text" id="register-username" placeholder="Elige tu nombre de usuario" required>
-                        <div class="error" id="register-error"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" placeholder="tu@email.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-password">Contraseña</label>
-                        <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-confirm">Confirmar Contraseña</label>
-                        <input type="password" id="register-confirm" placeholder="Repite tu contraseña" required>
-                        <div class="error" id="register-confirm-error"></div>
-                    </div>
-                    <button type="submit">Crear Cuenta</button>
-                </form>
-
-                <div class="auth-toggle">
-                    <span>¿Ya tienes cuenta?</span>
-                    <button onclick="switchToLogin()">Inicia Sesión</button>
-                </div>
-
-                <div class="auth-toggle" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--text-secondary); color: var(--text-secondary); font-size: 0.8rem;">
-                    <p>⏳ Tu cuenta necesitará ser aprobada por un administrador</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="dashboard-screen" class="screen">
-        <div class="container">
-            <div class="dashboard-header">
-                <h1>Mi Entrenamiento</h1>
-                <p style="color: var(--text-secondary);">Gestiona tus rutinas y controla tu progreso</p>
-            </div>
-
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <h3 id="stat-routines">0</h3>
-                    <p>Rutinas</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-workouts">0</h3>
-                    <p>Entrenamientos</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-volume">0</h3>
-                    <p>kg Volumen</p>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
-                <button onclick="showCreateRoutineModal()">+ Nueva Rutina</button>
-                <button onclick="showSharedRoutines()" class="secondary">Ver Compartidas</button>
-            </div>
-
-            <h2 class="section-title">Mis Rutinas</h2>
-            <div id="routines-container" class="routines-grid"></div>
-
-            <h2 class="section-title">Compartidas Conmigo</h2>
-            <div id="shared-routines-container" class="routines-grid"></div>
-
-            <div id="cycles-section" class="hidden">
-                <h2 class="section-title">Ciclos de Entrenamiento</h2>
-                <div id="cycles-container" class="routines-grid"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="workout-screen" class="screen">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1 id="workout-title" style="margin: 0;"></h1>
-                <button onclick="backToDashboard()" class="secondary">← Volver</button>
-            </div>
-
-            <div class="timer-display" id="timer-display">
-                <h2 id="timer-text">3:00</h2>
-                <p>Descansa antes del siguiente ejercicio</p>
-                <button onclick="skipRestTime()" class="secondary">Omitir Descanso</button>
-            </div>
-
-            <div class="muscle-map">
-                <h4>Músculos Trabajados Hoy</h4>
-                <div id="muscle-grid" class="muscle-grid"></div>
-            </div>
-
-            <div id="exercises-container"></div>
-
-            <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
-                <button onclick="finishWorkout()" class="success">✓ Finalizar Entrenamiento</button>
-                <button onclick="backToDashboard()" class="secondary">Cancelar</button>
-            </div>
-        </div>
-    </div>
-    <div id="profile-screen" class="screen">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1>Mi Perfil</h1>
-                <button onclick="backToDashboard()" class="secondary">← Volver</button>
-            </div>
-
-            <div class="profile-grid">
-                <div class="profile-card">
-                    <h3>📊 Estadísticas</h3>
-                    <p><strong>Usuario:</strong> <span id="profile-username"></span></p>
-                    <p><strong>Rutinas:</strong> <span id="profile-routines">0</span></p>
-                    <p><strong>Entrenamientos:</strong> <span id="profile-workouts">0</span></p>
-                    <p><strong>Volumen Total:</strong> <span id="profile-volume">0</span> kg</p>
-                </div>
-
-                <div class="profile-card">
-                    <h3>⏱️ Descanso</h3>
-                    <label for="rest-time">Tiempo de descanso (segundos):</label>
-                    <input type="number" id="rest-time" min="30" max="600" value="60" style="width: 100%; padding: 0.5rem; margin: 1rem 0; background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--text-secondary); border-radius: 6px;">
-                    <button onclick="saveRestTime()" class="success" style="width: 100%; margin-top: 1rem;">Guardar</button>
-                </div>
-            </div>
-
-            <h2 class="section-title">📊 Datos Físicos</h2>
-            <div class="profile-card" style="margin-bottom: 2rem;">
-                <div class="form-group">
-                    <label for="user-weight">Peso Actual (kg)</label>
-                    <input type="number" id="user-weight" step="0.1" min="30" max="300" placeholder="ej: 75.5">
-                </div>
-                <div class="form-group">
-                    <label for="user-height">Altura (cm)</label>
-                    <input type="number" id="user-height" min="100" max="250" placeholder="ej: 175">
-                </div>
-                <div class="form-group">
-                    <label>Estado Nutricional</label>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="nutrition-status" value="volumen">
-                            <span>💪 Volumen</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="nutrition-status" value="deficit">
-                            <span>🔥 Déficit</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="nutrition-status" value="mantenimiento">
-                            <span>⚖️ Mantenimiento</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group" id="kcal-group" style="display: none;">
-                    <label for="user-kcal">Calorías Objetivo (kcal/día)</label>
-                    <input type="number" id="user-kcal" min="1000" max="6000" placeholder="ej: 2500">
-                </div>
-                <div class="form-group" id="water-group" style="display: none;">
-                    <label for="user-water">Agua Objetivo (litros/día)</label>
-                    <input type="number" id="user-water" step="0.1" min="1" max="10" placeholder="ej: 3.5">
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                    <button onclick="saveBodyData()" class="success" style="flex: 1;">💾 Guardar Datos</button>
-                    <button onclick="registerWeeklyWeight()" class="secondary" style="flex: 1;">📊 Registrar Peso Semanal</button>
-                </div>
-            </div>
-
-            <h2 class="section-title">📈 Historial de Peso</h2>
-            <div id="weight-history-container" class="weight-history-list"></div>
-
-            <h2 class="section-title">Volumen por Grupo Muscular</h2>
-            <div class="volume-by-muscle" id="volume-by-muscle"></div>
-
-            <h2 class="section-title">Historial de Entrenamientos</h2>
-            <div id="workout-history" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;"></div>
-        </div>
-    </div>
-
-    <div id="admin-screen" class="screen">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h1>🔐 Panel Admin</h1>
-                <button onclick="backToDashboard()" class="secondary">← Volver</button>
-            </div>
-
-            <div class="profile-grid">
-                <div class="profile-card">
-                    <h3>Total de Usuarios</h3>
-                    <p style="font-size: 2rem; color: var(--accent);" id="admin-total-users">0</p>
-                </div>
-                <div class="profile-card">
-                    <h3>Total de Entrenamientos</h3>
-                    <p style="font-size: 2rem; color: var(--accent);" id="admin-total-workouts">0</p>
-                </div>
-                <div class="profile-card">
-                    <h3>Total de Rutinas</h3>
-                    <p style="font-size: 2rem; color: var(--accent);" id="admin-total-routines">0</p>
-                </div>
-            </div>
-
-            <h2 class="section-title">Usuarios Pendientes de Aprobación</h2>
-            <div class="pending-users-list" id="pending-users-list"></div>
-
-            <h2 class="section-title">Usuarios Aprobados y Progresos</h2>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Rutinas</th>
-                        <th>Entrenamientos</th>
-                        <th>Volumen Total</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-users-table"></tbody>
-            </table>
-
-            <h2 class="section-title">Crear Ciclos de Entrenamiento</h2>
-            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                <div class="form-group">
-                    <label for="cycle-name">Nombre del Ciclo</label>
-                    <input type="text" id="cycle-name" placeholder="ej: Split 3 días">
-                </div>
-                <div class="form-group">
-                    <label for="cycle-description">Descripción</label>
-                    <input type="text" id="cycle-description" placeholder="ej: Piernas, Espalda, Hombros">
-                </div>
-                <div class="form-group">
-                    <label>Selecciona Rutinas para el Ciclo</label>
-                    <div id="cycle-routines-list" style="max-height: 300px; overflow-y: auto;"></div>
-                </div>
-                <button onclick="createCycle()" style="width: 100%; margin-top: 1rem;">Crear Ciclo</button>
-            </div>
-
-            <h2 class="section-title">Asignar Ciclos o Rutinas a Usuarios</h2>
-            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                <div class="form-group">
-                    <label for="assign-user-select">Selecciona usuario:</label>
-                    <select id="assign-user-select" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
-                        <option value="">-- Selecciona un usuario --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="assign-type-select">Tipo de asignación:</label>
-                    <select id="assign-type-select" onchange="toggleAssignmentType()" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
-                        <option value="routine">Rutina Individual</option>
-                        <option value="cycle">Ciclo Completo</option>
-                    </select>
-                </div>
-                <div class="form-group" id="assign-routine-group">
-                    <label for="assign-routine-select">Selecciona rutina:</label>
-                    <select id="assign-routine-select" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
-                        <option value="">-- Selecciona una rutina --</option>
-                    </select>
-                </div>
-                <div class="form-group hidden" id="assign-cycle-group">
-                    <label for="assign-cycle-select">Selecciona ciclo:</label>
-                    <select id="assign-cycle-select" style="width: 100%; padding: 0.9rem; border: 1px solid var(--text-secondary); background-color: var(--bg-primary); color: var(--text-primary); border-radius: 6px; font-size: 1rem;">
-                        <option value="">-- Selecciona un ciclo --</option>
-                    </select>
-                </div>
-                <button onclick="assignToUser()" style="width: 100%; margin-top: 1rem;">Asignar</button>
-            </div>
-
-            <h2 class="section-title">Configuración de Seguimiento Nutricional</h2>
-            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                    <input type="checkbox" id="enable-nutrition-tracking" onchange="toggleNutritionTracking()" style="width: 20px; height: 20px;">
-                    <span>Habilitar seguimiento de calorías y agua para todos los usuarios</span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <div id="summary-modal" class="summary-modal">
-        <div class="summary-content">
-            <h2>Entrenamiento Completado ✓</h2>
-            <div id="summary-body"></div>
-
-            <h3 style="color: var(--accent); margin-top: 2rem; margin-bottom: 1rem;">📊 Resumen desde el inicio</h3>
-            <div id="summary-lifetime" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 2rem;">
-                <div class="summary-stat">
-                    <label>Total Entrenamientos:</label>
-                    <div class="value" id="lifetime-workouts">0</div>
-                </div>
-                <div class="summary-stat">
-                    <label>Volumen Total:</label>
-                    <div class="value" id="lifetime-volume">0 kg</div>
-                </div>
-                <div class="summary-stat">
-                    <label>Series Completadas:</label>
-                    <div class="value" id="lifetime-sets">0</div>
-                </div>
-                <div class="summary-stat">
-                    <label>Promedio por Entrenamiento:</label>
-                    <div class="value" id="lifetime-avg">0 kg</div>
-                </div>
-            </div>
-
-            <div style="margin-top: 2rem;">
-                <label style="display: block; margin-bottom: 1rem; color: var(--accent); font-weight: 600;">¿Cómo fue el entrenamiento?</label>
-                <div class="workout-difficulty">
-                    <button class="difficulty-btn light" onclick="setWorkoutDifficulty('cómodo')">😌 Cómodo</button>
-                    <button class="difficulty-btn medium" onclick="setWorkoutDifficulty('normal')">💪 Normal</button>
-                    <button class="difficulty-btn heavy" onclick="setWorkoutDifficulty('pesado')">🔥 Pesado</button>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button onclick="closeSummary()" class="success" style="flex: 1;">Volver al Dashboard</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="routine-modal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeRoutineModal()">&times;</button>
-            <h2>Nueva Rutina</h2>
-            
-            <form onsubmit="handleCreateRoutine(event)">
-                <div class="form-group">
-                    <label for="routine-name">Nombre de la Rutina</label>
-                    <input type="text" id="routine-name" placeholder="Ej: Pecho y Tríceps" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="routine-description">Descripción</label>
-                    <input type="text" id="routine-description" placeholder="Opcional">
-                </div>
-
-                <div class="form-group">
-                    <label>Selecciona Grupo Muscular</label>
-                    <div class="muscle-group-tabs">
-                        <div class="muscle-group-tab active" onclick="filterByMuscle('Todos')">Todos</div>
-                        <div class="muscle-group-tab" onclick="filterByMuscle('Piernas')">Piernas</div>
-                        <div class="muscle-group-tab" onclick="filterByMuscle('Espalda')">Espalda</div>
-                        <div class="muscle-group-tab" onclick="filterByMuscle('Pecho')">Pecho</div>
-                        <div class="muscle-group-tab" onclick="filterByMuscle('Hombros')">Hombros</div>
-                        <div class="muscle-group-tab" onclick="filterByMuscle('Biceps')">Bíceps</div>
-                        <div class="muscle-group-tab" onclick="filterByMuscle('Triceps')">Tríceps</div>
-                        <div class="muscle-group-tab" onclick="filterByMuscle('Abs')">Abs</div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="exercise-search">Buscar Ejercicio</label>
-                    <input type="text" id="exercise-search" class="search-input" placeholder="Buscar por nombre..." oninput="renderExerciseList()">
-                </div>
-
-                <div id="exercises-list" class="exercise-list"></div>
-
-                <button type="submit" style="width: 100%; margin-top: 1rem;">Crear Rutina</button>
-            </form>
-        </div>
     </div>
 
     <div id="shared-modal" class="modal">
@@ -1602,26 +1227,26 @@
             const groupCode = document.getElementById('group-code');
             const error = document.getElementById('login-error');
 
-            error.textContent = '';
+            if(error) error.textContent = '';
 
             if (isRegistering) {
-                title.textContent = 'Crear Cuenta';
-                btn.textContent = 'Registrarse';
-                switchText.textContent = '¿Ya tienes cuenta?';
-                switchLink.textContent = 'Inicia Sesión';
-                groupUser.classList.remove('hidden');
-                groupCode.classList.remove('hidden');
-                document.getElementById('login-username').required = true;
-                document.getElementById('register-code').required = true;
+                if(title) title.textContent = 'Crear Cuenta';
+                if(btn) btn.textContent = 'Registrarse';
+                if(switchText) switchText.textContent = '¿Ya tienes cuenta?';
+                if(switchLink) switchLink.textContent = 'Inicia Sesión';
+                if(groupUser) groupUser.classList.remove('hidden');
+                if(groupCode) groupCode.classList.remove('hidden');
+                const u = document.getElementById('login-username'); if(u) u.required = true;
+                const c = document.getElementById('register-code'); if(c) c.required = true;
             } else {
-                title.textContent = 'Fit Data by Toni';
-                btn.textContent = 'Entrar';
-                switchText.textContent = '¿No tienes cuenta?';
-                switchLink.textContent = 'Regístrate';
-                groupUser.classList.add('hidden');
-                groupCode.classList.add('hidden');
-                document.getElementById('login-username').required = false;
-                document.getElementById('register-code').required = false;
+                if(title) title.textContent = 'Fit Data by Toni';
+                if(btn) btn.textContent = 'Entrar';
+                if(switchText) switchText.textContent = '¿No tienes cuenta?';
+                if(switchLink) switchLink.textContent = 'Regístrate';
+                if(groupUser) groupUser.classList.add('hidden');
+                if(groupCode) groupCode.classList.add('hidden');
+                const u = document.getElementById('login-username'); if(u) u.required = false;
+                const c = document.getElementById('register-code'); if(c) c.required = false;
             }
         }
 
@@ -1630,11 +1255,11 @@
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
             const errorEl = document.getElementById('login-error');
-            errorEl.textContent = '';
+            if(errorEl) errorEl.textContent = '';
 
             try {
                 if (isRegistering) {
-                    // REGISTER LOGIC
+                    // REGISTER
                     const username = document.getElementById('login-username').value.trim();
                     const code = document.getElementById('register-code').value.trim();
 
@@ -1644,32 +1269,28 @@
 
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
 
-                    // Create User Doc
                     await db.collection('users').doc(userCredential.user.uid).set({
                         username: username,
                         email: email,
                         createdAt: new Date().toISOString(),
-                        approved: false, // Requires admin approval
+                        approved: false,
                         routines: [],
                         workouts: []
                     });
 
                     alert('Cuenta creada con éxito. Espera aprobación del administrador.');
                 } else {
-                    // LOGIN LOGIC
+                    // LOGIN
                     await auth.signInWithEmailAndPassword(email, password);
                 }
             } catch (error) {
                 console.error(error);
-                if (error.code === 'auth/email-already-in-use') {
-                    errorEl.textContent = 'Este email ya está registrado';
-                } else if (error.code === 'auth/wrong-password') {
-                    errorEl.textContent = 'Contraseña incorrecta';
-                } else if (error.code === 'auth/user-not-found') {
-                    errorEl.textContent = 'Usuario no encontrado';
-                } else {
-                    errorEl.textContent = error.message;
-                }
+                let msg = error.message;
+                if (error.code === 'auth/email-already-in-use') msg = 'Email ya registrado';
+                if (error.code === 'auth/wrong-password') msg = 'Contraseña incorrecta';
+                if (error.code === 'auth/user-not-found') msg = 'Usuario no encontrado';
+                if(errorEl) errorEl.textContent = msg;
+                else alert(msg);
             }
         }
  catch (error) {
