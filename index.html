@@ -1226,23 +1226,6 @@
                 <tbody id="admin-users-table"></tbody>
             </table>
 
-            <h2 class="section-title">Crear Ciclos de Entrenamiento</h2>
-            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                <div class="form-group">
-                    <label for="cycle-name">Nombre del Ciclo</label>
-                    <input type="text" id="cycle-name" placeholder="ej: Split 3 días">
-                </div>
-                <div class="form-group">
-                    <label for="cycle-description">Descripción</label>
-                    <input type="text" id="cycle-description" placeholder="ej: Piernas, Espalda, Hombros">
-                </div>
-                <div class="form-group">
-                    <label>Selecciona Rutinas para el Ciclo</label>
-                    <div id="cycle-routines-list" style="max-height: 300px; overflow-y: auto;"></div>
-                </div>
-                <button onclick="createCycle()" style="width: 100%; margin-top: 1rem;">Crear Ciclo</button>
-            </div>
-
             <h2 class="section-title">Asignar Rutinas a Usuarios</h2>
             <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
                 <div class="form-group">
@@ -1403,7 +1386,7 @@
             { id: 17, name_es: 'Abducción de Cadera en Máquina', name_en: 'Hip Abduction Machine', muscle: 'Piernas', emoji: '⚙️' },
             { id: 18, name_es: 'Prensa de Glúteos', name_en: 'Glute Press', muscle: 'Piernas', emoji: '⚙️' },
             { id: 19, name_es: 'Peso Muerto', name_en: 'Deadlift', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 20, name_es: 'Peso Muerto Rumano', name_en: 'Romanian Deadlift', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 20, name_es: 'Peso Muerto Rumano', name_en: 'Romanian Deadlift', muscle: 'Piernas', emoji: '🏋️' },
             { id: 21, name_es: 'Peso Muerto Sumo', name_en: 'Sumo Deadlift', muscle: 'Espalda', emoji: '🏋️' },
             { id: 22, name_es: 'Remo con Barra', name_en: 'Barbell Row', muscle: 'Espalda', emoji: '🏋️' },
             { id: 23, name_es: 'Remo con Mancuernas', name_en: 'Dumbbell Row', muscle: 'Espalda', emoji: '🏋️' },
@@ -1450,6 +1433,22 @@
             { id: 64, name_es: 'Abdominales en Banco', name_en: 'Decline Sit-ups', muscle: 'Abs', emoji: '🏋️' },
             { id: 65, name_es: 'Crunch en Máquina', name_en: 'Crunch Machine', muscle: 'Abs', emoji: '⚙️' },
             { id: 66, name_es: 'Levantamiento de Rodillas Colgado', name_en: 'Hanging Knee Raises', muscle: 'Abs', emoji: '🤸' },
+            { id: 67, name_es: 'Pectoral Fly', name_en: 'Pectoral Fly', muscle: 'Pecho', emoji: '🦅' },
+            { id: 68, name_es: 'Press Inclinado', name_en: 'Incline Press', muscle: 'Pecho', emoji: '🏋️' },
+            { id: 69, name_es: 'Press Plano', name_en: 'Flat Press', muscle: 'Pecho', emoji: '🏋️' },
+            { id: 70, name_es: 'Iso Lateral Press', name_en: 'Iso Lateral Press', muscle: 'Pecho', emoji: '⚙️' },
+            { id: 71, name_es: 'Chest Press', name_en: 'Chest Press', muscle: 'Pecho', emoji: '⚙️' },
+            { id: 72, name_es: 'Triceps Pulley', name_en: 'Triceps Pulley', muscle: 'Triceps', emoji: '🔗' },
+            { id: 73, name_es: 'Triceps Barra', name_en: 'Barbell Triceps Extension', muscle: 'Triceps', emoji: '🏋️' },
+            { id: 74, name_es: 'Remo Hammer', name_en: 'Hammer Row', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 75, name_es: 'Jalón Agarre Cerrado', name_en: 'Close Grip Pulldown', muscle: 'Espalda', emoji: '🔗' },
+            { id: 76, name_es: 'Jalón Agarre Abierto', name_en: 'Wide Grip Pulldown', muscle: 'Espalda', emoji: '🔗' },
+            { id: 77, name_es: 'High Row', name_en: 'High Row', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 78, name_es: 'Shoulder Press', name_en: 'Shoulder Press', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 79, name_es: 'Face Pull', name_en: 'Face Pull', muscle: 'Hombros', emoji: '🔗' },
+            { id: 80, name_es: 'Curl Predicador', name_en: 'Preacher Curl', muscle: 'Biceps', emoji: '💪' },
+            { id: 81, name_es: 'Curl Concentrado', name_en: 'Concentration Curl', muscle: 'Biceps', emoji: '💪' },
+            { id: 82, name_es: 'Prensa 45°', name_en: '45 Degree Leg Press', muscle: 'Piernas', emoji: '⚙️' },
         ];
 
         const adminEmails = ['toni@fitdata.com', 'kati@fitdata.com', 'paul@fitdata.com'];
@@ -1490,12 +1489,17 @@
                     const gainNode = audioContext.createGain();
                     oscillator.connect(gainNode);
                     gainNode.connect(audioContext.destination);
-                    oscillator.frequency.value = 800;
-                    oscillator.type = 'sine';
-                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    oscillator.frequency.value = 880;
+                    oscillator.type = 'square';
+                    gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
                     oscillator.start(audioContext.currentTime);
                     oscillator.stop(audioContext.currentTime + 0.2);
+
+                    // Vibración de respaldo
+                    if (navigator.vibrate) {
+                        navigator.vibrate(200);
+                    }
                 }, i * 300);
             }
         }
@@ -2077,6 +2081,10 @@
                     <div class="value">${currentWorkout.completedSeries} / ${currentWorkout.totalSeries}</div>
                 </div>
                 <div class="summary-stat">
+                    <label>Repeticiones Totales:</label>
+                    <div class="value">${currentWorkout.totalReps || 0}</div>
+                </div>
+                <div class="summary-stat">
                     <label>Volumen Total:</label>
                     <div class="value">${Math.round(currentWorkout.totalVolume)} kg</div>
                 </div>
@@ -2089,6 +2097,7 @@
             const totalWorkouts = (currentUserData.workouts?.length || 0) + 1;
             const totalVolume = (currentUserData.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0) + currentWorkout.totalVolume;
             const totalSeries = (currentUserData.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0) + currentWorkout.completedSeries;
+            const totalReps = (currentUserData.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0) + (currentWorkout.totalReps || 0);
             const avgVolume = Math.round(totalVolume / totalWorkouts);
 
             document.getElementById('lifetime-workouts').textContent = totalWorkouts;
@@ -2460,5 +2469,3 @@
     </script>
 </body>
 </html>
-
-
