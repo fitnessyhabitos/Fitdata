@@ -964,13 +964,13 @@
 
     <nav class="navbar hidden" id="main-navbar">
         <div class="navbar-brand">Fit Data by Toni</div>
-       <div class="nav-right" id="navbar-content">
-    <span id="navbar-user"></span>
-    <button onclick="goToProfile()" id="profile-btn" class="secondary hidden">Perfil</button>
-    <button onclick="goToAdmin()" id="admin-btn" class="secondary hidden">Admin</button>
-    <button onclick="goToUserPanel()" id="back-to-user-btn" class="secondary hidden">← Usuario</button>
-    <button onclick="logout()" id="logout-btn" class="hidden">Salir</button>
-</div>
+        <div class="nav-right" id="navbar-content">
+            <span id="navbar-user"></span>
+            <button onclick="goToProfile()" id="profile-btn" class="secondary hidden">👤 Perfil</button>
+            <button onclick="goToAdmin()" id="admin-btn" class="secondary hidden">🔐 Admin</button>
+            <button onclick="goToUserPanel()" id="back-to-user-btn" class="secondary hidden">👤 Usuario</button>
+            <button onclick="logout()" id="logout-btn" class="hidden">Salir</button>
+        </div>
     </nav>
 
     <div id="login-screen" class="screen">
@@ -1635,32 +1635,30 @@
         }
 
         function updateNavbar() {
-    const navbarUser = document.getElementById('navbar-user');
-    const logoutBtn = document.getElementById('logout-btn');
-    const profileBtn = document.getElementById('profile-btn');
-    const adminBtn = document.getElementById('admin-btn');
-    const backToUserBtn = document.getElementById('back-to-user-btn');
+            const navbarUser = document.getElementById('navbar-user');
+            const logoutBtn = document.getElementById('logout-btn');
+            const profileBtn = document.getElementById('profile-btn');
+            const adminBtn = document.getElementById('admin-btn');
+            const backToUserBtn = document.getElementById('back-to-user-btn');
 
-    if (currentUser) {
-        // Mostrar solo el nombre de usuario (sin (Admin))
-        navbarUser.textContent = `👤 ${currentUser.username}`;
-        logoutBtn.classList.remove('hidden');
-        profileBtn.classList.remove('hidden');
-        
-        if (isAdmin()) {
-            adminBtn.classList.remove('hidden');
-            if (document.getElementById('admin-screen').classList.contains('active')) {
-                backToUserBtn.classList.remove('hidden');
-            } else {
-                backToUserBtn.classList.add('hidden');
+            if (currentUser) {
+                navbarUser.textContent = `👤 ${currentUser.username}${isAdmin() ? ' (Admin)' : ''}`;
+                logoutBtn.classList.remove('hidden');
+                profileBtn.classList.remove('hidden');
+                
+                if (isAdmin()) {
+                    adminBtn.classList.remove('hidden');
+                    if (document.getElementById('admin-screen').classList.contains('active')) {
+                        backToUserBtn.classList.remove('hidden');
+                    } else {
+                        backToUserBtn.classList.add('hidden');
+                    }
+                } else {
+                    adminBtn.classList.add('hidden');
+                    backToUserBtn.classList.add('hidden');
+                }
             }
-        } else {
-            adminBtn.classList.add('hidden');
-            backToUserBtn.classList.add('hidden');
         }
-    }
-}
-
 
         async function goToDashboard() {
             showScreen('dashboard-screen');
@@ -2057,36 +2055,25 @@
             document.getElementById('timer-display').classList.remove('active');
         }
 
-      async function finishWorkout() {
-    const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
-    const completedSeries = currentWorkout.exercises.reduce((sum, ex) => 
-        sum + ex.series.filter(s => s.completed).length, 0);
-    
-    const totalVolume = currentWorkout.exercises.reduce((sum, ex) => 
-        sum + ex.series.reduce((exSum, s) => exSum + (s.weight * s.reps), 0), 0);
-    
-    const totalReps = currentWorkout.exercises.reduce((sum, ex) => 
-        sum + ex.series.reduce((exSum, s) => exSum + (s.completed ? s.reps : 0), 0), 0);
+        async function finishWorkout() {
+            const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
+            const completedSeries = currentWorkout.exercises.reduce((sum, ex) => 
+                sum + ex.series.filter(s => s.completed).length, 0);
+            
+            const totalVolume = currentWorkout.exercises.reduce((sum, ex) => 
+                sum + ex.series.reduce((exSum, s) => exSum + (s.weight * s.reps), 0), 0);
 
-    currentWorkout.totalSeries = totalSeries;
-    currentWorkout.completedSeries = completedSeries;
-    currentWorkout.totalVolume = totalVolume;
-    currentWorkout.totalReps = totalReps;
-    currentWorkout.difficulty = null;
+            currentWorkout.totalSeries = totalSeries;
+            currentWorkout.completedSeries = completedSeries;
+            currentWorkout.totalVolume = totalVolume;
+            currentWorkout.difficulty = null;
 
-    showSummaryModal();
-}
-
+            showSummaryModal();
+        }
 
         function showSummaryModal() {
             const modal = document.getElementById('summary-modal');
             const summaryBody = document.getElementById('summary-body');
-            const totalWorkouts = (currentUserData.workouts?.length || 0) + 1;
-            const totalVolume = (currentUserData.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0) + currentWorkout.totalVolume;
-            const totalSeries = (currentUserData.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0) + currentWorkout.completedSeries;
-            const totalReps = (currentUserData.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0) + (currentWorkout.totalReps || 0);
-            const avgVolume = Math.round(totalVolume / totalWorkouts);
-
 
             summaryBody.innerHTML = `
                 <div class="summary-stat">
@@ -2228,17 +2215,15 @@
                 return;
             }
 
-           container.innerHTML = workouts.slice(-10).reverse().map(w => `
-    <div class="routine-card">
-        <h3>${w.routineName}</h3>
-        <p>📅 ${new Date(w.date).toLocaleDateString('es-ES')}</p>
-        <p>💪 ${w.completedSeries || 0} series</p>
-        <p>🔁 ${w.totalReps || 0} repeticiones</p>
-        <p>🏋️ ${Math.round(w.totalVolume)} kg volumen</p>
-        ${w.difficulty ? `<p>Dificultad: ${w.difficulty}</p>` : ''}
-    </div>
-`).join('');
-
+            container.innerHTML = workouts.slice(-10).reverse().map(w => `
+                <div class="routine-card">
+                    <h3>${w.routineName}</h3>
+                    <p>📅 ${new Date(w.date).toLocaleDateString('es-ES')}</p>
+                    <p>💪 ${w.completedSeries} series completadas</p>
+                    <p>🏋️ ${Math.round(w.totalVolume)} kg volumen</p>
+                    ${w.difficulty ? `<p>Dificultad: ${w.difficulty}</p>` : ''}
+                </div>
+            `).join('');
         }
 
         async function saveRestTime() {
