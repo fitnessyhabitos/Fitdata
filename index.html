@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+<head><script>window.onerror=function(m,u,l){var d=document.getElementById('loading-screen');if(d){d.innerHTML='<div style="color:red;padding:2rem;text-align:center;background:#000"><h2>⚠️ ERROR CRÍTICO</h2><p>'+m+'</p><p>Línea: '+l+'</p><button onclick="location.reload()" style="padding:10px">Recargar</button></div>';d.classList.add('active')}return false}</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1007,11 +1007,6 @@
                     <div class="form-group">
                         <label for="register-email">Email</label>
                         <input type="email" id="register-email" placeholder="tu@email.com" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="register-code" style="color: var(--accent);">Código de acceso</label>
-                        <input type="text" id="register-code" placeholder="Código secreto" required>
                     </div>
                     <div class="form-group">
                         <label for="register-password">Contraseña</label>
@@ -2449,6 +2444,7 @@
         console.log('✅ Fit Data by Toni con Firebase cargado');
         console.log('🔥 Recuerda reemplazar firebaseConfig con tu configuración');
     </script>
+<script>setTimeout(()=>{var d=document.getElementById('loading-screen');if(d&&d.classList.contains('active')){var b=document.createElement('div');b.innerHTML='<div style="position:fixed;bottom:20px;left:0;right:0;text-align:center;z-index:99999"><button onclick="document.getElementById(\'loading-screen\').classList.remove(\'active\')" style="background:orange;color:black;padding:10px 20px;border:none;border-radius:20px;font-weight:bold">SALTAR CARGA (Forzar Entrada)</button></div>';d.appendChild(b)}},8000)</script>
 </body>
 </html>
 
