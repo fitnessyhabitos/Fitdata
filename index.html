@@ -9,7 +9,103 @@
     <title>Fit Data by Toni - Entrenamiento Inteligente</title>
     
     <!-- 🔥 Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+
+        // ✅ Defaults: 5 series (20 reps first, then 16)
+        function buildDefaultSeries() {
+            return Array.from({ length: 5 }, (_, i) => ({
+                reps: i === 0 ? 20 : 16,
+                weight: '',
+                completed: false
+            }));
+        }
+
+        // Returns last workout (most recent) for a given routine (id or name)
+        function getLastWorkoutForRoutine(routine) {
+            const workouts = (currentUserData && currentUserData.workouts) ? currentUserData.workouts : [];
+            const routineId = routine?.id || routine?.routineId;
+            const routineName = routine?.name || routine?.routineName;
+            const matches = workouts
+                .filter(w => (routineId && (w.routineId === routineId)) || (routineName && (w.routineName === routineName || w.routine === routineName)))
+                .sort((a, b) => (b.date || b.createdAt || 0) - (a.date || a.createdAt || 0));
+            return matches[0] || null;
+        }
+
+        // Get previous weight by exerciseId + series index
+        function getPrevWeight(lastWorkout, exerciseId, seriesIndex) {
+            if (!lastWorkout || !lastWorkout.exercises) return '';
+            const ex = lastWorkout.exercises.find(e => e.id === exerciseId);
+            if (!ex || !ex.series || !ex.series[seriesIndex]) return '';
+            const w = ex.series[seriesIndex].weight;
+            return (w === 0 || w) ? String(w) : '';
+        }
+
+
+        // ⏱️ Rest timer + beep (no external audio file)
+        let restInterval = null;
+        let restRemaining = 0;
+
+        function beep(durationMs = 250, freq = 880, volume = 0.15) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.value = volume;
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                setTimeout(() => { osc.stop(); ctx.close(); }, durationMs);
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        function showRestTimer() {
+            const el = document.getElementById('timer-display');
+            if (el) el.classList.add('active');
+        }
+
+        function hideRestTimer() {
+            const el = document.getElementById('timer-display');
+            if (el) el.classList.remove('active');
+        }
+
+        function formatSeconds(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m}:${String(s).padStart(2, '0')}`;
+        }
+
+        function startRestCountdown(seconds = 60) {
+            const text = document.getElementById('timer-text');
+            restRemaining = Number(seconds) || 60;
+            if (restInterval) clearInterval(restInterval);
+            showRestTimer();
+            if (text) text.textContent = formatSeconds(restRemaining);
+
+            restInterval = setInterval(() => {
+                restRemaining -= 1;
+                if (text) text.textContent = formatSeconds(Math.max(restRemaining, 0));
+                if (restRemaining <= 0) {
+                    clearInterval(restInterval);
+                    restInterval = null;
+                    beep(350, 880);
+                    setTimeout(() => beep(350, 660), 200);
+                    hideRestTimer();
+                }
+            }, 1000);
+        }
+
+        function skipRestTime() {
+            if (restInterval) clearInterval(restInterval);
+            restInterval = null;
+            hideRestTimer();
+        }
+
+</script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
@@ -1007,12 +1103,6 @@
                     <div class="form-group">
                         <label for="register-email">Email</label>
                         <input type="email" id="register-email" placeholder="tu@email.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-access-code">Código de Acceso</label>
-                        <input type="text" id="register-access-code" placeholder="Solicita el código a tu entrenador" required autocomplete="off">
-                        <small style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-top: 0.5rem;">💡 Necesitas el código secreto para registrarte</small>
-                        <div class="error" id="register-code-error"></div>
                     </div>
                     <div class="form-group">
                         <label for="register-password">Contraseña</label>
