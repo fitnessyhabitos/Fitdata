@@ -948,7 +948,7 @@
             display: none;
         }
     
-        /* === IMÁGENES MUSCULARES === */
+        /* === ESTILOS NUEVOS v3.0 === */
         .exercise-muscle-image {
             width: 150px;
             height: auto;
@@ -966,12 +966,6 @@
             border: 1px solid rgba(75, 181, 67, 0.3);
             border-radius: 12px;
             text-align: center;
-        }
-
-        .workout-summary-muscles h4 {
-            margin: 0 0 15px 0;
-            color: #4CAF50;
-            font-size: 1.2em;
         }
 
         .muscle-legend {
@@ -992,12 +986,7 @@
             font-size: 0.9em;
         }
 
-        .muscle-legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-        }
-
+        .muscle-legend-color { width: 12px; height: 12px; border-radius: 2px; }
         .primary-color { background: #FF4444; }
         .secondary-color { background: #FFB344; }
 
@@ -1005,6 +994,9 @@
             font-size: 0.85em;
             color: #4CAF50;
             margin-left: 8px;
+            opacity: 0.8;
+            display: block; 
+            margin-top: 2px;
         }
 
     </style>
@@ -1371,7 +1363,7 @@
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button onclick="goToDashboard()" class="primary">Volver al Dashboard</button>
+                <button onclick="closeSummary()" class="success" style="flex: 1;">Volver al Dashboard</button>
             </div>
         </div>
     </div>
@@ -1439,11 +1431,7 @@
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
 
-        // ============================================
-        // MUSCLE GROUP API
-        // ============================================
         const MUSCLE_API_BASE = 'https://musclegroupapi.p.rapidapi.com';
-
         const MUSCLE_GROUPS = {
             'chest': 'Pecho', 'shoulders': 'Hombros', 'biceps': 'Bíceps', 'triceps': 'Tríceps',
             'forearms': 'Antebrazos', 'abs': 'Abdominales', 'obliques': 'Oblicuos',
@@ -1452,41 +1440,25 @@
             'lower_back': 'Lumbar', 'middle_back': 'Espalda Media'
         };
 
-        function getMuscleImageUrl(primaryMuscles, secondaryMuscles) {
-            if (!primaryMuscles || primaryMuscles.length === 0) return null;
-            secondaryMuscles = secondaryMuscles || [];
-            const pc = 'FF4444', sc = 'FFB344';
-            if (secondaryMuscles.length > 0) {
-                return MUSCLE_API_BASE + '/getMulticolorImage?primaryMuscleGroups=' + primaryMuscles.join(',') + 
-                       '&secondaryMuscleGroups=' + secondaryMuscles.join(',') + 
-                       '&primaryColor=' + pc + '&secondaryColor=' + sc + '&transparentBackground=1';
-            }
-            return MUSCLE_API_BASE + '/getImage?muscleGroups=' + primaryMuscles.join(',') + 
-                   '&color=' + pc + '&transparentBackground=1';
+        function getMuscleImageUrl(pm, sm) {
+            if (!pm || pm.length === 0) return null;
+            sm = sm || [];
+            return sm.length > 0 ? 
+                MUSCLE_API_BASE + '/getMulticolorImage?primaryMuscleGroups=' + pm.join(',') + '&secondaryMuscleGroups=' + sm.join(',') + '&primaryColor=FF4444&secondaryColor=FFB344&transparentBackground=1' :
+                MUSCLE_API_BASE + '/getImage?muscleGroups=' + pm.join(',') + '&color=FF4444&transparentBackground=1';
         }
 
-        function getWorkoutMuscles(exercises) {
+        function getWorkoutMuscles(exs) {
             var pm = [], sm = [];
-            if (!exercises) return { primary: [], secondary: [] };
-            exercises.forEach(function(ex) {
-                if (ex.series) {
-                    ex.series.forEach(function(serie) {
-                        if (serie.primaryMuscles) {
-                            serie.primaryMuscles.forEach(function(m) {
-                                if (pm.indexOf(m) === -1) pm.push(m);
-                            });
-                        }
-                        if (serie.secondaryMuscles) {
-                            serie.secondaryMuscles.forEach(function(m) {
-                                if (sm.indexOf(m) === -1) sm.push(m);
-                            });
-                        }
-                    });
-                }
+            if(!exs) return {primary:[], secondary:[]};
+            exs.forEach(function(e){
+                if(e.series) e.series.forEach(function(s){
+                    if(s.primaryMuscles) s.primaryMuscles.forEach(function(m){ if(pm.indexOf(m)===-1) pm.push(m); });
+                    if(s.secondaryMuscles) s.secondaryMuscles.forEach(function(m){ if(sm.indexOf(m)===-1) sm.push(m); });
+                });
             });
-            return { primary: pm, secondary: sm };
+            return {primary:pm, secondary:sm};
         }
-
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -1558,20 +1530,6 @@
             { id: 64, name_es: 'Abdominales en Banco', name_en: 'Decline Sit-ups', muscle: 'Abs', emoji: '🏋️' },
             { id: 65, name_es: 'Crunch en Máquina', name_en: 'Crunch Machine', muscle: 'Abs', emoji: '⚙️' },
             { id: 66, name_es: 'Levantamiento de Rodillas Colgado', name_en: 'Hanging Knee Raises', muscle: 'Abs', emoji: '🤸' },
-        ,
-            { id: 100, name_es: 'Pectoral Fly', name_en: 'Pectoral Fly', muscle: 'Pecho', emoji: '🦅' },
-            { id: 101, name_es: 'Iso Lateral Superior Incline Press', name_en: 'Iso Lateral Superior Incline', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 102, name_es: 'Iso Lateral Bench Press', name_en: 'Iso Lateral Bench Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 103, name_es: 'Bench Press Plano', name_en: 'Flat Bench Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 104, name_es: 'Chest Press', name_en: 'Chest Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 105, name_es: 'Tríceps Polea', name_en: 'Cable Triceps', muscle: 'Tríceps', emoji: '💪' },
-            { id: 106, name_es: 'Tríceps Barra', name_en: 'Barbell Triceps', muscle: 'Tríceps', emoji: '🏋️' },
-            { id: 107, name_es: 'Remo Máquina', name_en: 'Machine Row', muscle: 'Espalda', emoji: '🚣' },
-            { id: 108, name_es: 'Jalón Neutro', name_en: 'Neutral Grip Pulldown', muscle: 'Espalda', emoji: '⬇️' },
-            { id: 109, name_es: 'High Row', name_en: 'High Row', muscle: 'Espalda', emoji: '🚣' },
-            { id: 110, name_es: 'Pulldown', name_en: 'Lat Pulldown', muscle: 'Espalda', emoji: '⬇️' },
-            { id: 111, name_es: 'Shoulder Press', name_en: 'Shoulder Press', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 112, name_es: 'Face Pull', name_en: 'Face Pull', muscle: 'Hombros', emoji: '🎯' }
         ];
 
         const adminEmails = ['toni@fitdata.com', 'kati@fitdata.com', 'paul@fitdata.com'];
@@ -2005,74 +1963,22 @@
 
         function startWorkout(index) {
             currentRoutine = { ...currentUserData.routines[index], index, isShared: false };
-            currentWorkout = (function() {
-                var lw = currentUserData.workouts ? currentUserData.workouts.filter(function(w) {
-                    return w.routineName === currentRoutine.name;
-                }).sort(function(a,b) {
-                    return new Date(b.date) - new Date(a.date);
-                })[0] : null;
-
-                return {
-                    routineName: currentRoutine.name,
-                    date: new Date().toISOString(),
-                    exercises: currentRoutine.exercises.map(function(ex) {
-                        var le = lw && lw.exercises ? lw.exercises.find(function(e) { return e.name === ex.name; }) : null;
-                        return {
-                            name: ex.name,
-                            sets: ex.sets,
-                            series: ex.series.map(function(s, i) {
-                                var ls = le && le.series ? le.series[i] : null;
-                                return {
-                                    reps: s.reps,
-                                    weight: 0,
-                                    completed: false,
-                                    rest: s.rest || 60,
-                                    primaryMuscles: s.primaryMuscles || [],
-                                    secondaryMuscles: s.secondaryMuscles || [],
-                                    previousWeight: ls ? ls.weight || 0 : 0
-                                };
-                            })
-                        };
-                    })
-                };
-            })();
+            currentWorkout = {
+                routineName: currentRoutine.name,
+                date: new Date().toISOString(),
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+            };
             showScreen('workout-screen');
             renderWorkout();
         }
 
         function startSharedWorkout(index) {
             currentRoutine = { ...currentUserData.sharedRoutines[index], index, isShared: true };
-            currentWorkout = (function() {
-                var lw = currentUserData.workouts ? currentUserData.workouts.filter(function(w) {
-                    return w.routineName === currentRoutine.name;
-                }).sort(function(a,b) {
-                    return new Date(b.date) - new Date(a.date);
-                })[0] : null;
-
-                return {
-                    routineName: currentRoutine.name,
-                    date: new Date().toISOString(),
-                    exercises: currentRoutine.exercises.map(function(ex) {
-                        var le = lw && lw.exercises ? lw.exercises.find(function(e) { return e.name === ex.name; }) : null;
-                        return {
-                            name: ex.name,
-                            sets: ex.sets,
-                            series: ex.series.map(function(s, i) {
-                                var ls = le && le.series ? le.series[i] : null;
-                                return {
-                                    reps: s.reps,
-                                    weight: 0,
-                                    completed: false,
-                                    rest: s.rest || 60,
-                                    primaryMuscles: s.primaryMuscles || [],
-                                    secondaryMuscles: s.secondaryMuscles || [],
-                                    previousWeight: ls ? ls.weight || 0 : 0
-                                };
-                            })
-                        };
-                    })
-                };
-            })();
+            currentWorkout = {
+                routineName: currentRoutine.name,
+                date: new Date().toISOString(),
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+            };
             showScreen('workout-screen');
             renderWorkout();
         }
@@ -2119,40 +2025,43 @@
             }).join('');
         }
 
-        function renderSerie(exIndex, serieIndex, serie, lastExerciseData) {
-            const lastSerie = lastExerciseData?.series?.[serieIndex];
-            let rowClass = '';
-            if (serie.completed) rowClass = 'completed';
-            else if (lastSerie && serie.weight > lastSerie.weight) rowClass = 'gold';
-            else if (lastSerie && serie.weight < lastSerie.weight) rowClass = 'red';
+        
+        function renderSerie(exIndex, sIndex, serie, lastEx) {
+            const lastSerie = lastEx && lastEx.series ? lastEx.series[sIndex] : null;
+            const prevWeight = lastSerie ? lastSerie.weight : 0;
+            const rowClass = serie.completed ? 'completed' : '';
 
             return `
                 <div class="series-row ${rowClass}">
-                    <div class="series-label">S${serieIndex + 1}</div>
+                    <div class="series-label">S${sIndex + 1}</div>
+
+                    <!-- REPS PRIMERO -->
                     <div class="series-input-group">
-                        <label class="series-input-label">${t('Peso')}</label>
+                        <label class="series-input-label">Reps</label>
                         <div class="series-input">
-                            <input type="number" value="${serie.weight || ''}" 
-                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'weight', this.value)"
-                                placeholder="kg">
+                            <input type="number" value="${serie.reps}" 
+                                onchange="updateSerie(${exIndex}, ${sIndex}, 'reps', this.value)">
                         </div>
                     </div>
+
+                    <!-- WEIGHT DESPUÉS -->
                     <div class="series-input-group">
-                        <label class="series-input-label">${t('Reps')}</label>
+                        <label class="series-input-label">Peso</label>
                         <div class="series-input">
-                            <input type="number" value="${serie.reps || ''}" 
-                                onchange="updateSerie(${exIndex}, ${serieIndex}, 'reps', this.value)"
-                                placeholder="0">
+                            <input type="number" value="${serie.weight}" 
+                                onchange="updateSerie(${exIndex}, ${sIndex}, 'weight', this.value)" placeholder="kg">
                         </div>
+                         ${prevWeight > 0 ? `<span class="previous-weight">↗️ ${prevWeight}kg</span>` : ''}
                     </div>
-                    <div class="checkbox-series">
-                        <input type="checkbox" ${serie.completed ? 'checked' : ''} 
-                            onchange="toggleSerieComplete(${exIndex}, ${serieIndex})">
-                    </div>
-                    <button onclick="removeSerie(${exIndex}, ${serieIndex})" class="secondary" style="padding: 0.5rem;">🗑️</button>
+
+                    <button class="check-btn ${serie.completed ? 'completed' : ''}" 
+                        onclick="toggleSerie(${exIndex}, ${sIndex})">
+                        ${serie.completed ? '✓' : ''}
+                    </button>
                 </div>
             `;
         }
+
 
         function updateSerie(exIndex, serieIndex, field, value) {
             currentWorkout.exercises[exIndex].series[serieIndex][field] = parseFloat(value) || 0;
@@ -2234,64 +2143,43 @@
             showSummaryModal();
         }
 
+        
         function showSummaryModal() {
             const modal = document.getElementById('summary-modal');
             const summaryBody = document.getElementById('summary-body');
 
-            summaryBody.innerHTML = `
-                <div class="summary-stat">
-                    <label>Series Completadas:</label>
-                    <div class="value">${currentWorkout.completedSeries} / ${currentWorkout.totalSeries}</div>
-                </div>
-                <div class="summary-stat">
-                    <label>Volumen Total:</label>
-                    <div class="value">${Math.round(currentWorkout.totalVolume)} kg</div>
-                </div>
-                <div class="summary-stat">
-                    <label>Ejercicios:</label>
-                    <div class="value">${currentWorkout.exercises.length}</div>
-                </div>
+            // Métricas
+            let html = `
+                <div class="summary-stat"><label>Series:</label><div class="value">${currentWorkout.completedSeries}/${currentWorkout.totalSeries}</div></div>
+                <div class="summary-stat"><label>Volumen:</label><div class="value">${Math.round(currentWorkout.totalVolume)} kg</div></div>
             `;
 
-            const totalWorkouts = (currentUserData.workouts?.length || 0) + 1;
-            const totalVolume = (currentUserData.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0) + currentWorkout.totalVolume;
-            const totalSeries = (currentUserData.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0) + currentWorkout.completedSeries;
-            const avgVolume = Math.round(totalVolume / totalWorkouts);
+            summaryBody.innerHTML = html;
 
-            document.getElementById('lifetime-workouts').textContent = totalWorkouts;
-            document.getElementById('lifetime-volume').textContent = Math.round(totalVolume) + ' kg';
-            document.getElementById('lifetime-sets').textContent = totalSeries;
-            document.getElementById('lifetime-avg').textContent = avgVolume + ' kg';
-
-            
-            // Agregar músculos al resumen
-            var muscles = getWorkoutMuscles(currentWorkout.exercises);
-            if (muscles.primary.length > 0) {
-                var url = getMuscleImageUrl(muscles.primary, muscles.secondary);
-                if (url) {
-                    var div = document.createElement('div');
+            // IMAGEN MUSCULAR (DOM)
+            const muscles = getWorkoutMuscles(currentWorkout.exercises);
+            if(muscles.primary.length > 0) {
+                const url = getMuscleImageUrl(muscles.primary, muscles.secondary);
+                if(url) {
+                    const div = document.createElement('div');
                     div.className = 'workout-summary-muscles';
-                    var h = '<h4>💪 Músculos Trabajados</h4>';
-                    h += '<img src="' + url + '" class="exercise-muscle-image" onerror="this.style.display=\'none\'">';
-                    h += '<div class="muscle-legend">';
-                    h += '<div class="muscle-legend-item">';
-                    h += '<div class="muscle-legend-color primary-color"></div>';
-                    h += '<span>Primarios: ' + muscles.primary.map(function(m) { return MUSCLE_GROUPS[m]; }).join(', ') + '</span>';
-                    h += '</div>';
-                    if (muscles.secondary.length > 0) {
-                        h += '<div class="muscle-legend-item">';
-                        h += '<div class="muscle-legend-color secondary-color"></div>';
-                        h += '<span>Secundarios: ' + muscles.secondary.map(function(m) { return MUSCLE_GROUPS[m]; }).join(', ') + '</span>';
-                        h += '</div>';
-                    }
-                    h += '</div>';
-                    div.innerHTML = h;
+                    div.innerHTML = `<h4>💪 Músculos Trabajados</h4><img src="${url}" class="exercise-muscle-image">
+                        <div class="muscle-legend">
+                            <div class="muscle-legend-item"><div class="muscle-legend-color primary-color"></div><span>${muscles.primary.join(', ')}</span></div>
+                        </div>`;
                     summaryBody.appendChild(div);
                 }
             }
 
+            // Botón Dashboard CORREGIDO
+            const btnDiv = document.createElement('div');
+            btnDiv.style.marginTop = "20px";
+            btnDiv.innerHTML = '<button onclick="goToDashboard()" class="primary" style="width:100%">Volver al Dashboard</button>';
+            summaryBody.appendChild(btnDiv);
+
             modal.classList.add('active');
         }
+
 
         function setWorkoutDifficulty(difficulty) {
             currentWorkoutDifficulty = difficulty;
@@ -2304,7 +2192,7 @@
             currentWorkout.finishedAt = new Date().toISOString();
 
             currentUserData.workouts = currentUserData.workouts || [];
-            currentUserData.workouts.push(currentWorkout);
+            // Guardado en subcolección
 
             if (!currentRoutine.isShared) {
                 currentUserData.routines[currentRoutine.index].exercises = currentWorkout.exercises;
@@ -2651,35 +2539,6 @@
 
         console.log('✅ Fit Data by Toni con Firebase cargado');
         console.log('🔥 Recuerda reemplazar firebaseConfig con tu configuración');
-    
-
-        // ============================================
-        // FUNCIONES DE ADMIN
-        // ============================================
-        async function deleteAllUserRoutines(userId) {
-            if (!confirm('¿Eliminar todas las rutinas de este usuario?')) return;
-            try {
-                await db.collection('users').doc(userId).update({ routines: [] });
-                alert('Rutinas eliminadas correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al eliminar rutinas');
-            }
-        }
-
-        async function deleteAllUserWorkouts(userId) {
-            if (!confirm('¿Eliminar todos los entrenamientos de este usuario?')) return;
-            try {
-                await db.collection('users').doc(userId).update({ workouts: [] });
-                alert('Entrenamientos eliminados correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al eliminar entrenamientos');
-            }
-        }
-
     </script>
 </body>
 </html>
