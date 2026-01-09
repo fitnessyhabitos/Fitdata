@@ -947,66 +947,6 @@
         .hidden {
             display: none;
         }
-    
-        /* === IMÁGENES MUSCULARES === */
-        .exercise-muscle-image {
-            width: 150px;
-            height: auto;
-            margin: 15px auto;
-            display: block;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            padding: 10px;
-        }
-
-        .workout-summary-muscles {
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(75, 181, 67, 0.1);
-            border: 1px solid rgba(75, 181, 67, 0.3);
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .workout-summary-muscles h4 {
-            margin: 0 0 15px 0;
-            color: #4CAF50;
-            font-size: 1.2em;
-        }
-
-        .muscle-legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .muscle-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 5px;
-            font-size: 0.9em;
-        }
-
-        .muscle-legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-        }
-
-        .primary-color { background: #FF4444; }
-        .secondary-color { background: #FFB344; }
-
-        .previous-weight {
-            font-size: 0.85em;
-            color: #4CAF50;
-            margin-left: 8px;
-        }
-
     </style>
 </head>
 <body>
@@ -1371,7 +1311,7 @@
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                <button onclick="goToDashboard()" class="primary">Volver al Dashboard</button>
+                <button onclick="closeSummary()" class="success" style="flex: 1;">Volver al Dashboard</button>
             </div>
         </div>
     </div>
@@ -1438,55 +1378,6 @@
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
-
-        // ============================================
-        // MUSCLE GROUP API
-        // ============================================
-        const MUSCLE_API_BASE = 'https://musclegroupapi.p.rapidapi.com';
-
-        const MUSCLE_GROUPS = {
-            'chest': 'Pecho', 'shoulders': 'Hombros', 'biceps': 'Bíceps', 'triceps': 'Tríceps',
-            'forearms': 'Antebrazos', 'abs': 'Abdominales', 'obliques': 'Oblicuos',
-            'quadriceps': 'Cuádriceps', 'hamstrings': 'Isquiotibiales', 'glutes': 'Glúteos',
-            'calves': 'Gemelos', 'lats': 'Dorsales', 'traps': 'Trapecios',
-            'lower_back': 'Lumbar', 'middle_back': 'Espalda Media'
-        };
-
-        function getMuscleImageUrl(primaryMuscles, secondaryMuscles) {
-            if (!primaryMuscles || primaryMuscles.length === 0) return null;
-            secondaryMuscles = secondaryMuscles || [];
-            const pc = 'FF4444', sc = 'FFB344';
-            if (secondaryMuscles.length > 0) {
-                return MUSCLE_API_BASE + '/getMulticolorImage?primaryMuscleGroups=' + primaryMuscles.join(',') + 
-                       '&secondaryMuscleGroups=' + secondaryMuscles.join(',') + 
-                       '&primaryColor=' + pc + '&secondaryColor=' + sc + '&transparentBackground=1';
-            }
-            return MUSCLE_API_BASE + '/getImage?muscleGroups=' + primaryMuscles.join(',') + 
-                   '&color=' + pc + '&transparentBackground=1';
-        }
-
-        function getWorkoutMuscles(exercises) {
-            var pm = [], sm = [];
-            if (!exercises) return { primary: [], secondary: [] };
-            exercises.forEach(function(ex) {
-                if (ex.series) {
-                    ex.series.forEach(function(serie) {
-                        if (serie.primaryMuscles) {
-                            serie.primaryMuscles.forEach(function(m) {
-                                if (pm.indexOf(m) === -1) pm.push(m);
-                            });
-                        }
-                        if (serie.secondaryMuscles) {
-                            serie.secondaryMuscles.forEach(function(m) {
-                                if (sm.indexOf(m) === -1) sm.push(m);
-                            });
-                        }
-                    });
-                }
-            });
-            return { primary: pm, secondary: sm };
-        }
-
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -1558,20 +1449,6 @@
             { id: 64, name_es: 'Abdominales en Banco', name_en: 'Decline Sit-ups', muscle: 'Abs', emoji: '🏋️' },
             { id: 65, name_es: 'Crunch en Máquina', name_en: 'Crunch Machine', muscle: 'Abs', emoji: '⚙️' },
             { id: 66, name_es: 'Levantamiento de Rodillas Colgado', name_en: 'Hanging Knee Raises', muscle: 'Abs', emoji: '🤸' },
-        ,
-            { id: 100, name_es: 'Pectoral Fly', name_en: 'Pectoral Fly', muscle: 'Pecho', emoji: '🦅' },
-            { id: 101, name_es: 'Iso Lateral Superior Incline Press', name_en: 'Iso Lateral Superior Incline', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 102, name_es: 'Iso Lateral Bench Press', name_en: 'Iso Lateral Bench Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 103, name_es: 'Bench Press Plano', name_en: 'Flat Bench Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 104, name_es: 'Chest Press', name_en: 'Chest Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 105, name_es: 'Tríceps Polea', name_en: 'Cable Triceps', muscle: 'Tríceps', emoji: '💪' },
-            { id: 106, name_es: 'Tríceps Barra', name_en: 'Barbell Triceps', muscle: 'Tríceps', emoji: '🏋️' },
-            { id: 107, name_es: 'Remo Máquina', name_en: 'Machine Row', muscle: 'Espalda', emoji: '🚣' },
-            { id: 108, name_es: 'Jalón Neutro', name_en: 'Neutral Grip Pulldown', muscle: 'Espalda', emoji: '⬇️' },
-            { id: 109, name_es: 'High Row', name_en: 'High Row', muscle: 'Espalda', emoji: '🚣' },
-            { id: 110, name_es: 'Pulldown', name_en: 'Lat Pulldown', muscle: 'Espalda', emoji: '⬇️' },
-            { id: 111, name_es: 'Shoulder Press', name_en: 'Shoulder Press', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 112, name_es: 'Face Pull', name_en: 'Face Pull', muscle: 'Hombros', emoji: '🎯' }
         ];
 
         const adminEmails = ['toni@fitdata.com', 'kati@fitdata.com', 'paul@fitdata.com'];
@@ -2005,74 +1882,22 @@
 
         function startWorkout(index) {
             currentRoutine = { ...currentUserData.routines[index], index, isShared: false };
-            currentWorkout = (function() {
-                var lw = currentUserData.workouts ? currentUserData.workouts.filter(function(w) {
-                    return w.routineName === currentRoutine.name;
-                }).sort(function(a,b) {
-                    return new Date(b.date) - new Date(a.date);
-                })[0] : null;
-
-                return {
-                    routineName: currentRoutine.name,
-                    date: new Date().toISOString(),
-                    exercises: currentRoutine.exercises.map(function(ex) {
-                        var le = lw && lw.exercises ? lw.exercises.find(function(e) { return e.name === ex.name; }) : null;
-                        return {
-                            name: ex.name,
-                            sets: ex.sets,
-                            series: ex.series.map(function(s, i) {
-                                var ls = le && le.series ? le.series[i] : null;
-                                return {
-                                    reps: s.reps,
-                                    weight: 0,
-                                    completed: false,
-                                    rest: s.rest || 60,
-                                    primaryMuscles: s.primaryMuscles || [],
-                                    secondaryMuscles: s.secondaryMuscles || [],
-                                    previousWeight: ls ? ls.weight || 0 : 0
-                                };
-                            })
-                        };
-                    })
-                };
-            })();
+            currentWorkout = {
+                routineName: currentRoutine.name,
+                date: new Date().toISOString(),
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+            };
             showScreen('workout-screen');
             renderWorkout();
         }
 
         function startSharedWorkout(index) {
             currentRoutine = { ...currentUserData.sharedRoutines[index], index, isShared: true };
-            currentWorkout = (function() {
-                var lw = currentUserData.workouts ? currentUserData.workouts.filter(function(w) {
-                    return w.routineName === currentRoutine.name;
-                }).sort(function(a,b) {
-                    return new Date(b.date) - new Date(a.date);
-                })[0] : null;
-
-                return {
-                    routineName: currentRoutine.name,
-                    date: new Date().toISOString(),
-                    exercises: currentRoutine.exercises.map(function(ex) {
-                        var le = lw && lw.exercises ? lw.exercises.find(function(e) { return e.name === ex.name; }) : null;
-                        return {
-                            name: ex.name,
-                            sets: ex.sets,
-                            series: ex.series.map(function(s, i) {
-                                var ls = le && le.series ? le.series[i] : null;
-                                return {
-                                    reps: s.reps,
-                                    weight: 0,
-                                    completed: false,
-                                    rest: s.rest || 60,
-                                    primaryMuscles: s.primaryMuscles || [],
-                                    secondaryMuscles: s.secondaryMuscles || [],
-                                    previousWeight: ls ? ls.weight || 0 : 0
-                                };
-                            })
-                        };
-                    })
-                };
-            })();
+            currentWorkout = {
+                routineName: currentRoutine.name,
+                date: new Date().toISOString(),
+                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+            };
             showScreen('workout-screen');
             renderWorkout();
         }
@@ -2262,33 +2087,6 @@
             document.getElementById('lifetime-volume').textContent = Math.round(totalVolume) + ' kg';
             document.getElementById('lifetime-sets').textContent = totalSeries;
             document.getElementById('lifetime-avg').textContent = avgVolume + ' kg';
-
-            
-            // Agregar músculos al resumen
-            var muscles = getWorkoutMuscles(currentWorkout.exercises);
-            if (muscles.primary.length > 0) {
-                var url = getMuscleImageUrl(muscles.primary, muscles.secondary);
-                if (url) {
-                    var div = document.createElement('div');
-                    div.className = 'workout-summary-muscles';
-                    var h = '<h4>💪 Músculos Trabajados</h4>';
-                    h += '<img src="' + url + '" class="exercise-muscle-image" onerror="this.style.display=\'none\'">';
-                    h += '<div class="muscle-legend">';
-                    h += '<div class="muscle-legend-item">';
-                    h += '<div class="muscle-legend-color primary-color"></div>';
-                    h += '<span>Primarios: ' + muscles.primary.map(function(m) { return MUSCLE_GROUPS[m]; }).join(', ') + '</span>';
-                    h += '</div>';
-                    if (muscles.secondary.length > 0) {
-                        h += '<div class="muscle-legend-item">';
-                        h += '<div class="muscle-legend-color secondary-color"></div>';
-                        h += '<span>Secundarios: ' + muscles.secondary.map(function(m) { return MUSCLE_GROUPS[m]; }).join(', ') + '</span>';
-                        h += '</div>';
-                    }
-                    h += '</div>';
-                    div.innerHTML = h;
-                    summaryBody.appendChild(div);
-                }
-            }
 
             modal.classList.add('active');
         }
@@ -2651,35 +2449,6 @@
 
         console.log('✅ Fit Data by Toni con Firebase cargado');
         console.log('🔥 Recuerda reemplazar firebaseConfig con tu configuración');
-    
-
-        // ============================================
-        // FUNCIONES DE ADMIN
-        // ============================================
-        async function deleteAllUserRoutines(userId) {
-            if (!confirm('¿Eliminar todas las rutinas de este usuario?')) return;
-            try {
-                await db.collection('users').doc(userId).update({ routines: [] });
-                alert('Rutinas eliminadas correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al eliminar rutinas');
-            }
-        }
-
-        async function deleteAllUserWorkouts(userId) {
-            if (!confirm('¿Eliminar todos los entrenamientos de este usuario?')) return;
-            try {
-                await db.collection('users').doc(userId).update({ workouts: [] });
-                alert('Entrenamientos eliminados correctamente');
-                renderAdmin();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al eliminar entrenamientos');
-            }
-        }
-
     </script>
 </body>
 </html>
