@@ -1207,8 +1207,7 @@
                         <th>Rutinas</th>
                         <th>Entrenamientos</th>
                         <th>Volumen Total</th>
-                        <th>Acción</th>
-                        <th>Eliminar</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="admin-users-table"></tbody>
@@ -2293,12 +2292,15 @@
                         <td>${u.routines?.length || 0}</td>
                         <td>${u.workouts?.length || 0}</td>
                         <td>${Math.round(totalVolume)} kg</td>
-                        <td><button onclick="viewUserDetails('${u.uid}')" class="secondary">Ver Detalles</button></td>
-                        <td><button onclick="deleteUser('${u.uid}', '${u.username}')" class="secondary" style="background: var(--accent); color: white;">🗑️ Eliminar</button></td>
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="viewUserDetails('${u.uid}')" class="secondary" style="font-size: 0.8rem;">Ver</button>
+                                <button onclick="deleteUser('${u.uid}', '${u.username}')" class="secondary" style="background: var(--accent); color: white; font-size: 0.8rem;">🗑️</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             }).join('');
-        }).join('');
         }
 
         async function approveUser(uid) {
@@ -2306,26 +2308,29 @@
             renderAdmin();
         }
 
+        
         async function rejectUser(uid) {
-            if (!confirm('¿Eliminar este usuario?')) return;
+            if (!confirm('¿Rechazar usuario?')) return;
             await db.collection('users').doc(uid).delete();
             renderAdmin();
         }
 
         async function deleteUser(uid, username) {
-            if (!confirm(`⚠️ ¿Estás seguro de eliminar al usuario "${username}"?\n\nEsto eliminará todos sus datos (rutinas, entrenamientos, etc).`)) {
-                return;
-            }
+            if (!confirm(`⚠️ ¿ELIMINAR USUARIO DEFINITIVAMENTE?
 
+Usuario: ${username}
+
+Se borrarán todos sus datos y progresos.`)) return;
             try {
                 await db.collection('users').doc(uid).delete();
-                alert(`✅ Usuario "${username}" eliminado correctamente.`);
+                alert('✅ Usuario eliminado.');
                 renderAdmin();
-            } catch (error) {
-                console.error('Error al eliminar usuario:', error);
-                alert('❌ Error al eliminar usuario. Revisa la consola.');
+            } catch (e) {
+                console.error(e);
+                alert('Error al eliminar: ' + e.message);
             }
         }
+    
 
         async function viewUserDetails(uid) {
             const userDoc = await db.collection('users').doc(uid).get();
