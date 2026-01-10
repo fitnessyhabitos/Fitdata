@@ -1568,7 +1568,6 @@ function playBeepSound() {
             } catch (error) {
                 console.log('AudioContext no disponible:', error);
             }
-        }
 
         function isAdmin() {
             return currentUser && adminEmails.includes(currentUser.email);
