@@ -1461,7 +1461,8 @@
         let currentMuscleFilter = 'Todos';
         let selectedExercises = new Set();
         let currentWorkoutDifficulty = null;
-        let audioContext = null;
+        let audioContext = null
+let wakeLock = null  // Wake Lock para mantener pantalla encendida;
 
         function t(key) {
             const translations = {
@@ -1595,6 +1596,46 @@ async function playBeep() {
             } catch (error) {
                 console.log('AudioContext no disponible:', error);
             }
+
+        
+// ========== WAKE LOCK API - Mantener pantalla encendida ==========
+async function enableWakeLock() {
+    if (!('wakeLock' in navigator)) {
+        console.log('⚠️ Wake Lock no soportado en este navegador');
+        return;
+    }
+
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('✅ Wake Lock activado - pantalla permanecerá encendida');
+
+        wakeLock.addEventListener('release', () => {
+            console.log('⚠️ Wake Lock liberado');
+        });
+    } catch (err) {
+        console.log('❌ Error activando Wake Lock:', err);
+    }
+}
+
+async function disableWakeLock() {
+    if (wakeLock !== null) {
+        try {
+            await wakeLock.release();
+            wakeLock = null;
+            console.log('✅ Wake Lock desactivado');
+        } catch (err) {
+            console.log('❌ Error desactivando Wake Lock:', err);
+        }
+    }
+}
+
+// Reactivar Wake Lock si el usuario vuelve a la app
+document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && currentWorkout !== null) {
+        await enableWakeLock();
+    }
+});
+
 
         function isAdmin() {
             return currentUser && adminEmails.includes(currentUser.email);
@@ -1773,7 +1814,8 @@ async function playBeep() {
             renderAdmin();
         }
 
-        function backToDashboard() {
+        async function backToDashboard() {
+    await disableWakeLock();
             goToDashboard();
         }
 
@@ -2021,6 +2063,9 @@ async function playBeep() {
         date: new Date().toISOString(),
         exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
     };
+    // Activar Wake Lock para mantener pantalla encendida
+    enableWakeLock();
+
     showScreen('workout-screen');
     renderWorkout();
 }
@@ -2055,6 +2100,10 @@ async function playBeep() {
         date: new Date().toISOString(),
         exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
     };
+
+    // Activar Wake Lock
+    enableWakeLock();
+
     showScreen('workout-screen');
     renderWorkout();
 }
@@ -2209,7 +2258,8 @@ async function playBeep() {
         }
 
         async function finishWorkout() {
-            const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
+    await disableWakeLock();
+                const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
             const completedSeries = currentWorkout.exercises.reduce((sum, ex) => 
                 sum + ex.series.filter(s => s.completed).length, 0);
             
