@@ -1363,90 +1363,138 @@
         const db = firebase.firestore();
 
         // Base de datos de ejercicios
-        const exercisesDB = [
-            { id: 1, name_es: 'Sentadilla con Barra', name_en: 'Barbell Squat', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 2, name_es: 'Sentadilla Jaca', name_en: 'Smith Machine Squat', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 3, name_es: 'Sentadilla con Cinturón', name_en: 'Belt Squat', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 4, name_es: 'Prensa de Piernas', name_en: 'Leg Press', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 5, name_es: 'Extensión de Cuádriceps', name_en: 'Leg Extension', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 6, name_es: 'Estocadas con Mancuernas', name_en: 'Dumbbell Lunges', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 7, name_es: 'Curl de Pierna Tumbado', name_en: 'Lying Hamstring Curl', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 8, name_es: 'Curl de Pierna Sentado', name_en: 'Seated Leg Curl', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 9, name_es: 'Prensa Horizontal', name_en: 'Hack Squat', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 10, name_es: 'Prensa de piernas 45°', name_en: '45 Degree Leg Press', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 11, name_es: 'Elevación de Talones Sentado', name_en: 'Seated Calf Raise', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 12, name_es: 'Elevación de Talones de Pie', name_en: 'Standing Calf Raise', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 13, name_es: 'Elevación de Talones en Máquina', name_en: 'Calf Raise Machine', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 14, name_es: 'Elevación de Cadera', name_en: 'Hip Thrust', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 15, name_es: 'Sentadilla Búlgara', name_en: 'Bulgarian Split Squat', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 16, name_es: 'Patada de Glúteo en Polea', name_en: 'Cable Glute Kickback', muscle: 'Piernas', emoji: '🔗' },
-            { id: 17, name_es: 'Abducción de Cadera en Máquina', name_en: 'Hip Abduction Machine', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 18, name_es: 'Prensa de Glúteos', name_en: 'Glute Press', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 19, name_es: 'Peso Muerto', name_en: 'Deadlift', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 20, name_es: 'Peso Muerto Rumano', name_en: 'Romanian Deadlift', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 21, name_es: 'Peso Muerto Sumo', name_en: 'Sumo Deadlift', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 22, name_es: 'Remo con Barra', name_en: 'Barbell Row', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 23, name_es: 'Remo con Mancuernas', name_en: 'Dumbbell Row', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 24, name_es: 'Jalón Lateral', name_en: 'Lat Pulldown', muscle: 'Espalda', emoji: '🔗' },
-            { id: 25, name_es: 'Jalón Lateral Cerrado', name_en: 'Close Grip Lat Pulldown', muscle: 'Espalda', emoji: '🔗' },
-            { id: 26, name_es: 'Remo en Máquina', name_en: 'Seated Row Machine', muscle: 'Espalda', emoji: '⚙️' },
-            { id: 27, name_es: 'Remo en Polea Baja', name_en: 'Cable Row', muscle: 'Espalda', emoji: '🔗' },
-            { id: 28, name_es: 'Dominadas', name_en: 'Pull-ups', muscle: 'Espalda', emoji: '🤸' },
-            { id: 29, name_es: 'Dominadas Asistidas', name_en: 'Assisted Pull-ups', muscle: 'Espalda', emoji: '⚙️' },
-            { id: 30, name_es: 'Remo Invertido', name_en: 'Inverted Row', muscle: 'Espalda', emoji: '🤸' },
-            { id: 31, name_es: 'Remo T', name_en: 'T-Bar Row', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 32, name_es: 'Hiperextensión', name_en: 'Back Extension', muscle: 'Espalda', emoji: '⚙️' },
-            { id: 33, name_es: 'Buenos Días', name_en: 'Good Morning', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 34, name_es: 'Press de Banca', name_en: 'Bench Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 35, name_es: 'Press Inclinado con Mancuernas', name_en: 'Incline Dumbbell Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 36, name_es: 'Aperturas con Mancuernas', name_en: 'Dumbbell Flyes', muscle: 'Pecho', emoji: '🦅' },
-            { id: 37, name_es: 'Cruces en Polea', name_en: 'Cable Crossover', muscle: 'Pecho', emoji: '🔗' },
-            { id: 38, name_es: 'Prensa de Pecho en Máquina', name_en: 'Chest Press Machine', muscle: 'Pecho', emoji: '⚙️' },
-            { id: 39, name_es: 'Prensa de Pecho Declinado', name_en: 'Decline Bench Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 40, name_es: 'Fondos en Paralelas', name_en: 'Dips', muscle: 'Pecho', emoji: '🤸' },
-            { id: 41, name_es: 'Encogimiento de Hombros', name_en: 'Barbell Shrug', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 42, name_es: 'Encogimiento con Mancuernas', name_en: 'Dumbbell Shrug', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 43, name_es: 'Press Militar', name_en: 'Military Press', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 44, name_es: 'Press de Hombros con Mancuernas', name_en: 'Dumbbell Shoulder Press', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 45, name_es: 'Press de Hombros en Máquina', name_en: 'Shoulder Press Machine', muscle: 'Hombros', emoji: '⚙️' },
-            { id: 46, name_es: 'Elevación Lateral', name_en: 'Lateral Raise', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 47, name_es: 'Elevación Frontal', name_en: 'Front Raise', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 48, name_es: 'Pájaros Inversos', name_en: 'Reverse Pec Deck', muscle: 'Hombros', emoji: '🦅' },
-            { id: 49, name_es: 'Elevación Lateral en Polea', name_en: 'Cable Lateral Raise', muscle: 'Hombros', emoji: '🔗' },
-            { id: 50, name_es: 'Press Arnold', name_en: 'Arnold Press', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 51, name_es: 'Curl de Barra', name_en: 'Barbell Curl', muscle: 'Biceps', emoji: '💪' },
-            { id: 52, name_es: 'Curl de Mancuernas', name_en: 'Dumbbell Curl', muscle: 'Biceps', emoji: '💪' },
-            { id: 53, name_es: 'Curl en Polea', name_en: 'Cable Curl', muscle: 'Biceps', emoji: '🔗' },
-            { id: 54, name_es: 'Curl Martillo', name_en: 'Hammer Curl', muscle: 'Biceps', emoji: '💪' },
-            { id: 55, name_es: 'Curl Concentrado', name_en: 'Concentration Curl', muscle: 'Biceps', emoji: '💪' },
-            { id: 56, name_es: 'Extensión de Tríceps en Polea', name_en: 'Tricep Pushdown', muscle: 'Triceps', emoji: '🔗' },
-            { id: 57, name_es: 'Extensión Francesa', name_en: 'French Press', muscle: 'Triceps', emoji: '🏋️' },
-            { id: 58, name_es: 'Extensiones Acostadas', name_en: 'Skull Crushers', muscle: 'Triceps', emoji: '🏋️' },
-            { id: 59, name_es: 'Fondos en Paralelas', name_en: 'Tricep Dips', muscle: 'Triceps', emoji: '🤸' },
-            { id: 60, name_es: 'Extensión Unilateral Tríceps', name_en: 'Single Arm Tricep Extension', muscle: 'Triceps', emoji: '💪' },
-            { id: 61, name_es: 'Abdominales con Rueda', name_en: 'Ab Wheel Rollout', muscle: 'Abs', emoji: '⭕' },
-            { id: 62, name_es: 'Crunch en Polea', name_en: 'Cable Crunch', muscle: 'Abs', emoji: '🔗' },
-            { id: 63, name_es: 'Elevaciones de Pierna Colgadas', name_en: 'Hanging Leg Raise', muscle: 'Abs', emoji: '🤸' },
-            { id: 64, name_es: 'Abdominales en Banco', name_en: 'Decline Sit-ups', muscle: 'Abs', emoji: '🏋️' },
-            { id: 65, name_es: 'Crunch en Máquina', name_en: 'Crunch Machine', muscle: 'Abs', emoji: '⚙️' },
-            { id: 66, name_es: 'Levantamiento de Rodillas Colgado', name_en: 'Hanging Knee Raises', muscle: 'Abs', emoji: '🤸' },
-            { id: 67, name_es: 'Aperturas de Pecho', name_en: 'Pectoral Fly', muscle: 'Pecho', emoji: '🦅' },
-            { id: 68, name_es: 'Press Inclinado', name_en: 'Incline Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 69, name_es: 'Press Plano', name_en: 'Flat Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 70, name_es: 'Prensa Lateral Iso', name_en: 'Iso Lateral Press', muscle: 'Pecho', emoji: '⚙️' },
-            { id: 71, name_es: 'Prensa de Pecho', name_en: 'Chest Press', muscle: 'Pecho', emoji: '⚙️' },
-            { id: 72, name_es: 'Triceps Polea', name_en: 'Triceps Pulley', muscle: 'Triceps', emoji: '🔗' },
-            { id: 73, name_es: 'Triceps Barra', name_en: 'Barbell Triceps Extension', muscle: 'Triceps', emoji: '🏋️' },
-            { id: 74, name_es: 'Remo Hammer', name_en: 'Hammer Row', muscle: 'Espalda', emoji: '⚙️' },
-            { id: 75, name_es: 'Jalón Agarre Cerrado', name_en: 'Close Grip Pulldown', muscle: 'Espalda', emoji: '🔗' },
-            { id: 76, name_es: 'Jalón Agarre Abierto', name_en: 'Wide Grip Pulldown', muscle: 'Espalda', emoji: '🔗' },
-            { id: 77, name_es: 'Remo alto', name_en: 'High Row', muscle: 'Espalda', emoji: '⚙️' },
-            { id: 78, name_es: 'Press de Hombros', name_en: 'Shoulder Press', muscle: 'Hombros', emoji: '🏋️' },
-            { id: 79, name_es: 'Face Pull', name_en: 'Face Pull', muscle: 'Hombros', emoji: '🔗' },
-            { id: 80, name_es: 'Curl Predicador', name_en: 'Preacher Curl', muscle: 'Biceps', emoji: '💪' },
-            { id: 81, name_es: 'Curl Concentrado', name_en: 'Concentration Curl', muscle: 'Biceps', emoji: '💪' },
-            { id: 82, name_es: 'Prensa 45°', name_en: '45 Degree Leg Press', muscle: 'Piernas', emoji: '⚙️' },
-        ];
+        // ========== EJERCICIOS DINÁMICOS ==========
+// El array exercisesDB ahora se carga dinámicamente desde ExerciseDB API (1300+ ejercicios)
+// El array anterior de 70 ejercicios ha sido reemplazado por carga dinámica
+
+// Array original comentado - ahora se llena dinámicamente
+let exercisesDB = []; // Se llenará con loadExerciseDBListFull()
+
+// ========== MAPEO Y TRANSFORMACIÓN DE EXERCISEDB ==========
+
+const bodyPartToMuscle = {
+    'back': 'Espalda',
+    'cardio': 'Cardio',
+    'chest': 'Pecho',
+    'lower arms': 'Antebrazos',
+    'lower legs': 'Piernas',
+    'neck': 'Cuello',
+    'shoulders': 'Hombros',
+    'upper arms': 'Brazos',
+    'upper legs': 'Piernas',
+    'waist': 'Abs'
+};
+
+const targetToMuscle = {
+    'abs': 'Abs',
+    'calves': 'Piernas',
+    'cardiovascular system': 'Cardio',
+    'delts': 'Hombros',
+    'forearms': 'Antebrazos',
+    'glutes': 'Piernas',
+    'hamstrings': 'Piernas',
+    'lats': 'Espalda',
+    'levator scapulae': 'Espalda',
+    'pectorals': 'Pecho',
+    'quads': 'Piernas',
+    'serratus anterior': 'Pecho',
+    'spine': 'Espalda',
+    'traps': 'Espalda',
+    'triceps': 'Triceps',
+    'biceps': 'Biceps',
+    'upper back': 'Espalda',
+    'lower back': 'Espalda',
+    'adductors': 'Piernas',
+    'abductors': 'Piernas'
+};
+
+const muscleEmojis = {
+    'Piernas': '🦵',
+    'Espalda': '💪',
+    'Pecho': '💪',
+    'Hombros': '💪',
+    'Biceps': '💪',
+    'Triceps': '💪',
+    'Abs': '💪',
+    'Brazos': '💪',
+    'Antebrazos': '💪',
+    'Cardio': '🏃',
+    'Cuello': '💪',
+    'General': '💪'
+};
+
+function transformExerciseDBToLocal(apiExercises) {
+    return apiExercises.map((ex) => {
+        const muscle = targetToMuscle[ex.target] || bodyPartToMuscle[ex.bodyPart] || 'General';
+        const nameen = ex.name;
+        const namees = nameen.split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+
+        return {
+            id: ex.id,
+            namees: namees,
+            nameen: nameen,
+            muscle: muscle,
+            emoji: muscleEmojis[muscle] || '💪',
+            equipment: ex.equipment,
+            target: ex.target,
+            bodyPart: ex.bodyPart,
+            gifUrl: ex.gifUrl,
+            secondaryMuscles: ex.secondaryMuscles || [],
+            instructions: ex.instructions || []
+        };
+    });
+}
+
+function getDefaultExercises() {
+    return [
+        {id: '0001', namees: 'Sentadilla con Barra', nameen: 'Barbell Squat', muscle: 'Piernas', emoji: '🦵'},
+        {id: '0002', namees: 'Press de Banca', nameen: 'Bench Press', muscle: 'Pecho', emoji: '💪'},
+        {id: '0003', namees: 'Peso Muerto', nameen: 'Deadlift', muscle: 'Espalda', emoji: '💪'},
+        {id: '0004', namees: 'Press Militar', nameen: 'Military Press', muscle: 'Hombros', emoji: '💪'},
+        {id: '0005', namees: 'Dominadas', nameen: 'Pull-ups', muscle: 'Espalda', emoji: '💪'},
+        {id: '0006', namees: 'Curl de Barra', nameen: 'Barbell Curl', muscle: 'Biceps', emoji: '💪'},
+        {id: '0007', namees: 'Extensión de Tríceps', nameen: 'Triceps Extension', muscle: 'Triceps', emoji: '💪'},
+        {id: '0008', namees: 'Abdominales', nameen: 'Crunches', muscle: 'Abs', emoji: '💪'}
+    ];
+}
+
+async function loadExerciseDBListFull() {
+    if (exerciseDBList && exercisesDB.length > 0) {
+        console.log('✅ Ejercicios ya cargados:', exercisesDB.length);
+        return { list: exerciseDBList, transformed: exercisesDB };
+    }
+
+    try {
+        console.log('🔄 Cargando 1300+ ejercicios desde ExerciseDB API...');
+
+        const response = await fetch(`${EXERCISEDB_CONFIG.baseUrl}/exercises?limit=1500`, {
+            method: 'GET',
+            headers: EXERCISEDB_CONFIG.headers
+        });
+
+        if (response.ok) {
+            exerciseDBList = await response.json();
+            exercisesDB = transformExerciseDBToLocal(exerciseDBList);
+
+            console.log(`✅ ${exercisesDB.length} ejercicios disponibles`);
+            console.log('📊 Grupos:', [...new Set(exercisesDB.map(e => e.muscle))].join(', '));
+
+            return { list: exerciseDBList, transformed: exercisesDB };
+        }
+    } catch (error) {
+        console.log('❌ Error cargando ejercicios:', error);
+        if (exercisesDB.length === 0) {
+            console.log('⚠️ Usando 8 ejercicios básicos como fallback');
+            exercisesDB = getDefaultExercises();
+        }
+    }
+
+    return { list: exerciseDBList || [], transformed: exercisesDB };
+}
+
+        
 
         const adminEmails = ['toni@fitdata.com', 'kati@fitdata.com', 'paul@fitdata.com'];
         const ACCESS_CODE = 'fityhab'; // Código de acceso para nuevos usuarios
@@ -1461,173 +1509,7 @@
         let currentMuscleFilter = 'Todos';
         let selectedExercises = new Set();
         let currentWorkoutDifficulty = null;
-        let audioContext = null
-// ========== EXERCISEDB API - IMÁGENES DE EJERCICIOS ==========
-const EXERCISEDB_CONFIG = {
-    baseUrl: 'https://exercisedb.p.rapidapi.com',
-    apiKey: '43ad655501msh0f11d2f2ca4308dp13255cjsnfd3de748f04b',
-    headers: {
-        'x-rapidapi-host': 'exercisedb.p.rapidapi.com',
-        'x-rapidapi-key': '43ad655501msh0f11d2f2ca4308dp13255cjsnfd3de748f04b'
-    }
-};
-
-let exerciseDBCache = {};
-let exerciseDBList = null;
-
-async function loadExerciseDBList() {
-    if (exerciseDBList) return exerciseDBList;
-
-    try {
-        const response = await fetch(`${EXERCISEDB_CONFIG.baseUrl}/exercises?limit=1500`, {
-            method: 'GET',
-            headers: EXERCISEDB_CONFIG.headers
-        });
-
-        if (response.ok) {
-            exerciseDBList = await response.json();
-            console.log(`✅ ExerciseDB: ${exerciseDBList.length} ejercicios cargados`);
-            return exerciseDBList;
-        }
-    } catch (error) {
-        console.log('⚠️ Error cargando ExerciseDB:', error);
-    }
-
-    return [];
-}
-
-const exerciseNameMapping = {
-    'Sentadilla con Barra': 'barbell squat',
-    'Sentadilla Jaca': 'smith machine squat',
-    'Sentadilla con Cinturón': 'belt squat',
-    'Prensa de Piernas': 'leg press',
-    'Extensión de Cuádriceps': 'leg extension',
-    'Estocadas con Mancuernas': 'dumbbell lunges',
-    'Curl de Pierna Tumbado': 'lying leg curl',
-    'Curl de Pierna Sentado': 'seated leg curl',
-    'Prensa Horizontal': 'hack squat',
-    'Prensa de piernas 45': '45 degree leg press',
-    'Elevación de Talones Sentado': 'seated calf raise',
-    'Elevación de Talones de Pie': 'standing calf raise',
-    'Elevación de Cadera': 'barbell hip thrust',
-    'Sentadilla Búlgara': 'bulgarian split squat',
-    'Peso Muerto': 'barbell deadlift',
-    'Peso Muerto Rumano': 'romanian deadlift',
-    'Peso Muerto Sumo': 'sumo deadlift',
-    'Remo con Barra': 'barbell row',
-    'Remo con Mancuernas': 'dumbbell row',
-    'Jalón Lateral': 'lat pulldown',
-    'Jalón Lateral Cerrado': 'close grip lat pulldown',
-    'Remo en Máquina': 'seated cable row',
-    'Remo en Polea Baja': 'cable row',
-    'Dominadas': 'pull up',
-    'Dominadas Asistidas': 'assisted pull up',
-    'Remo Invertido': 'inverted row',
-    'Remo T': 't bar row',
-    'Press de Banca': 'barbell bench press',
-    'Press Inclinado con Mancuernas': 'incline dumbbell press',
-    'Aperturas con Mancuernas': 'dumbbell fly',
-    'Cruces en Polea': 'cable crossover',
-    'Prensa de Pecho en Máquina': 'chest press machine',
-    'Fondos en Paralelas': 'chest dip',
-    'Press Militar': 'military press',
-    'Press de Hombros con Mancuernas': 'dumbbell shoulder press',
-    'Press de Hombros en Máquina': 'shoulder press machine',
-    'Elevación Lateral': 'dumbbell lateral raise',
-    'Elevación Frontal': 'dumbbell front raise',
-    'Pájaros Inversos': 'reverse pec deck fly',
-    'Elevación Lateral en Polea': 'cable lateral raise',
-    'Press Arnold': 'arnold press',
-    'Face Pull': 'cable face pull',
-    'Curl de Barra': 'barbell curl',
-    'Curl de Mancuernas': 'dumbbell curl',
-    'Curl en Polea': 'cable curl',
-    'Curl Martillo': 'hammer curl',
-    'Curl Concentrado': 'concentration curl',
-    'Curl Predicador': 'preacher curl',
-    'Extensión de Tríceps en Polea': 'cable triceps pushdown',
-    'Extensión Francesa': 'lying triceps extension',
-    'Extensiones Acostadas': 'skull crusher',
-    'Fondos en Paralelas': 'tricep dips',
-    'Abdominales con Rueda': 'ab wheel rollout',
-    'Crunch en Polea': 'cable crunch',
-    'Elevaciones de Pierna Colgadas': 'hanging leg raise',
-    'Abdominales en Banco': 'decline sit up',
-    'Crunch en Máquina': 'ab crunch machine'
-};
-
-async function getExerciseImage(exerciseName) {
-    if (exerciseDBCache[exerciseName]) {
-        return exerciseDBCache[exerciseName];
-    }
-
-    try {
-        const englishName = exerciseNameMapping[exerciseName] || exerciseName.toLowerCase();
-
-        if (!exerciseDBList) {
-            await loadExerciseDBList();
-        }
-
-        const found = exerciseDBList?.find(ex => 
-            ex.name.toLowerCase().includes(englishName.toLowerCase()) ||
-            englishName.toLowerCase().includes(ex.name.toLowerCase())
-        );
-
-        if (found) {
-            const result = {
-                gifUrl: found.gifUrl,
-                imageUrl: found.gifUrl,
-                name: found.name,
-                target: found.target,
-                equipment: found.equipment,
-                bodyPart: found.bodyPart,
-                id: found.id
-            };
-
-            exerciseDBCache[exerciseName] = result;
-            return result;
-        }
-    } catch (error) {
-        console.log('⚠️ Error buscando ejercicio:', exerciseName, error);
-    }
-
-    return null;
-}
-
-function renderExerciseImage(exercise, showGif = false) {
-    const exerciseData = exerciseDBCache[exercise.namees];
-
-    if (exerciseData) {
-        const imageUrl = showGif ? exerciseData.gifUrl : exerciseData.imageUrl;
-        return `
-            <img 
-                src="${imageUrl}" 
-                alt="${exercise.namees}"
-                style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-            >
-            <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 3rem;">
-                ${exercise.emoji}
-            </div>
-        `;
-    }
-
-    return exercise.emoji;
-}
-
-let showingGif = {};
-
-function toggleExerciseGif(exIndex) {
-    const exercise = exercisesDB.find(e => e.id === currentWorkout.exercises[exIndex].id);
-    if (!exercise) return;
-
-    showingGif[exIndex] = !showingGif[exIndex];
-
-    const container = document.getElementById(`exercise-image-${exIndex}`);
-    if (container) {
-        container.innerHTML = renderExerciseImage(exercise, showingGif[exIndex]);
-    }
-};
+        let audioContext = null;
 
         function t(key) {
             const translations = {
@@ -2227,14 +2109,6 @@ async function playBeep() {
 
 
         function renderWorkout() {
-            // Precargar imágenes de ejercicios
-            currentWorkout.exercises.forEach(ex => {
-                const exercise = exercisesDB.find(e => e.id === ex.id);
-                if (exercise && !exerciseDBCache[exercise.namees]) {
-                    getExerciseImage(exercise.namees);
-                }
-            });
-
             document.getElementById('workout-title').textContent = currentWorkout.routineName;
             
             const muscles = [...new Set(currentWorkout.exercises.map(ex => {
@@ -2264,12 +2138,7 @@ async function playBeep() {
                                 <h3>${getExerciseName(exercise)}</h3>
                                 <p>${exercise.muscle}</p>
                             </div>
-                            <div class="exercise-image" id="exercise-image-${exIndex}" onclick="toggleExerciseGif(${exIndex})" style="cursor: pointer; position: relative;">
-                                ${renderExerciseImage(exercise, false)}
-                                <div style="position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.7); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem;">
-                                    🎬 GIF
-                                </div>
-                            </div>
+                            <div class="exercise-image">${exercise.emoji}</div>
                         </div>
                         <div class="series-container">
                             <h4>${t('Series')}</h4>
