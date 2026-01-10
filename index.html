@@ -965,12 +965,18 @@
     <nav class="navbar hidden" id="main-navbar">
         <div class="navbar-brand">Fit Data by Toni</div>
         <div class="nav-right" id="navbar-content">
-            <span id="navbar-user"></span>
-            <button onclick="goToProfile()" id="profile-btn" class="secondary hidden">👤 Perfil</button>
-            <button onclick="goToAdmin()" id="admin-btn" class="secondary hidden">🔐 Admin</button>
-            <button onclick="goToUserPanel()" id="back-to-user-btn" class="secondary hidden">👤 Usuario</button>
-            <button onclick="logout()" id="logout-btn" class="hidden">Salir</button>
-        </div>
+    <select id="language-selector" onchange="changeLanguage(this.value)" 
+        style="padding: 0.5rem; background-color: var(--bg-primary); color: var(--text-primary); 
+        border: 1px solid var(--accent); border-radius: 4px; cursor: pointer;">
+        <option value="es">🇪🇸 ES</option>
+        <option value="en">🇬🇧 EN</option>
+    </select>
+    <span id="navbar-user"></span>
+    <button onclick="goToProfile()" id="profile-btn" class="secondary hidden">Perfil</button>
+    <button onclick="goToAdmin()" id="admin-btn" class="secondary hidden">Admin</button>
+    <button onclick="goToUserPanel()" id="back-to-user-btn" class="secondary hidden">Usuario</button>
+    <button onclick="logout()" id="logout-btn" class="hidden">Salir</button>
+</div>
     </nav>
 
     <div id="login-screen" class="screen">
@@ -1367,17 +1373,17 @@
             { id: 1, name_es: 'Sentadilla con Barra', name_en: 'Barbell Squat', muscle: 'Piernas', emoji: '🏋️' },
             { id: 2, name_es: 'Sentadilla Jaca', name_en: 'Smith Machine Squat', muscle: 'Piernas', emoji: '⚙️' },
             { id: 3, name_es: 'Sentadilla con Cinturón', name_en: 'Belt Squat', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 4, name_es: 'Leg Press', name_en: 'Leg Press', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 4, name_es: 'Prensa Pierna', name_en: 'Leg Press', muscle: 'Piernas', emoji: '⚙️' },
             { id: 5, name_es: 'Extensión de Cuádriceps', name_en: 'Leg Extension', muscle: 'Piernas', emoji: '⚙️' },
             { id: 6, name_es: 'Estocadas con Mancuernas', name_en: 'Dumbbell Lunges', muscle: 'Piernas', emoji: '🏋️' },
             { id: 7, name_es: 'Curl de Pierna Tumbado', name_en: 'Lying Hamstring Curl', muscle: 'Piernas', emoji: '⚙️' },
             { id: 8, name_es: 'Curl de Pierna Sentado', name_en: 'Seated Leg Curl', muscle: 'Piernas', emoji: '⚙️' },
             { id: 9, name_es: 'Prensa Horizontal', name_en: 'Hack Squat', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 10, name_es: 'Leg Press 45°', name_en: '45 Degree Leg Press', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 10, name_es: 'Prensa de Pierna 45°', name_en: '45 Degree Leg Press', muscle: 'Piernas', emoji: '⚙️' },
             { id: 11, name_es: 'Elevación de Talones Sentado', name_en: 'Seated Calf Raise', muscle: 'Piernas', emoji: '⚙️' },
             { id: 12, name_es: 'Elevación de Talones de Pie', name_en: 'Standing Calf Raise', muscle: 'Piernas', emoji: '🏋️' },
             { id: 13, name_es: 'Elevación de Talones en Máquina', name_en: 'Calf Raise Machine', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 14, name_es: 'Hip Thrust', name_en: 'Hip Thrust', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 14, name_es: 'Elevación de Cadera', name_en: 'Hip Thrust', muscle: 'Piernas', emoji: '🏋️' },
             { id: 15, name_es: 'Sentadilla Búlgara', name_en: 'Bulgarian Split Squat', muscle: 'Piernas', emoji: '🏋️' },
             { id: 16, name_es: 'Patada de Glúteo en Polea', name_en: 'Cable Glute Kickback', muscle: 'Piernas', emoji: '🔗' },
             { id: 17, name_es: 'Abducción de Cadera en Máquina', name_en: 'Hip Abduction Machine', muscle: 'Piernas', emoji: '⚙️' },
@@ -1396,7 +1402,7 @@
             { id: 30, name_es: 'Remo Invertido', name_en: 'Inverted Row', muscle: 'Espalda', emoji: '🤸' },
             { id: 31, name_es: 'Remo T', name_en: 'T-Bar Row', muscle: 'Espalda', emoji: '🏋️' },
             { id: 32, name_es: 'Hiperextensión', name_en: 'Back Extension', muscle: 'Espalda', emoji: '⚙️' },
-            { id: 33, name_es: 'Goodmorning', name_en: 'Good Morning', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 33, name_es: 'Buenos Dias', name_en: 'Good Morning', muscle: 'Espalda', emoji: '🏋️' },
             { id: 34, name_es: 'Press de Banca', name_en: 'Bench Press', muscle: 'Pecho', emoji: '🏋️' },
             { id: 35, name_es: 'Press Inclinado con Mancuernas', name_en: 'Incline Dumbbell Press', muscle: 'Pecho', emoji: '🏋️' },
             { id: 36, name_es: 'Aperturas con Mancuernas', name_en: 'Dumbbell Flyes', muscle: 'Pecho', emoji: '🦅' },
@@ -1430,18 +1436,18 @@
             { id: 64, name_es: 'Abdominales en Banco', name_en: 'Decline Sit-ups', muscle: 'Abs', emoji: '🏋️' },
             { id: 65, name_es: 'Crunch en Máquina', name_en: 'Crunch Machine', muscle: 'Abs', emoji: '⚙️' },
             { id: 66, name_es: 'Levantamiento de Rodillas Colgado', name_en: 'Hanging Knee Raises', muscle: 'Abs', emoji: '🤸' },
-            { id: 67, name_es: 'Pectoral Fly', name_en: 'Pectoral Fly', muscle: 'Pecho', emoji: '🦅' },
+            { id: 67, name_es: 'Aperturas de Pecho', name_en: 'Pectoral Fly', muscle: 'Pecho', emoji: '🦅' },
             { id: 68, name_es: 'Press Inclinado', name_en: 'Incline Press', muscle: 'Pecho', emoji: '🏋️' },
             { id: 69, name_es: 'Press Plano', name_en: 'Flat Press', muscle: 'Pecho', emoji: '🏋️' },
-            { id: 70, name_es: 'Iso Lateral Press', name_en: 'Iso Lateral Press', muscle: 'Pecho', emoji: '⚙️' },
-            { id: 71, name_es: 'Chest Press', name_en: 'Chest Press', muscle: 'Pecho', emoji: '⚙️' },
+            { id: 70, name_es: 'Press lateral iso', name_en: 'Iso Lateral Press', muscle: 'Pecho', emoji: '⚙️' },
+            { id: 71, name_es: 'Press de pecho', name_en: 'Chest Press', muscle: 'Pecho', emoji: '⚙️' },
             { id: 72, name_es: 'Triceps Pulley', name_en: 'Triceps Pulley', muscle: 'Triceps', emoji: '🔗' },
             { id: 73, name_es: 'Triceps Barra', name_en: 'Barbell Triceps Extension', muscle: 'Triceps', emoji: '🏋️' },
             { id: 74, name_es: 'Remo Hammer', name_en: 'Hammer Row', muscle: 'Espalda', emoji: '⚙️' },
             { id: 75, name_es: 'Jalón Agarre Cerrado', name_en: 'Close Grip Pulldown', muscle: 'Espalda', emoji: '🔗' },
             { id: 76, name_es: 'Jalón Agarre Abierto', name_en: 'Wide Grip Pulldown', muscle: 'Espalda', emoji: '🔗' },
-            { id: 77, name_es: 'High Row', name_en: 'High Row', muscle: 'Espalda', emoji: '⚙️' },
-            { id: 78, name_es: 'Shoulder Press', name_en: 'Shoulder Press', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 77, name_es: 'Remo Alto', name_en: 'High Row', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 78, name_es: 'Press de Hombro', name_en: 'Shoulder Press', muscle: 'Hombros', emoji: '🏋️' },
             { id: 79, name_es: 'Face Pull', name_en: 'Face Pull', muscle: 'Hombros', emoji: '🔗' },
             { id: 80, name_es: 'Curl Predicador', name_en: 'Preacher Curl', muscle: 'Biceps', emoji: '💪' },
             { id: 81, name_es: 'Curl Concentrado', name_en: 'Concentration Curl', muscle: 'Biceps', emoji: '💪' },
@@ -1451,7 +1457,7 @@
         const adminEmails = ['toni@fitdata.com', 'kati@fitdata.com', 'paul@fitdata.com'];
         const ACCESS_CODE = 'fityhab'; // Código de acceso para nuevos usuarios
 
-        let currentLanguage = 'es';
+        let currentLanguage = localStorage.getItem('language') || 'es';
         let currentUser = null;
         let currentUserData = null;
         let currentRoutine = null;
@@ -1470,6 +1476,43 @@
             };
             return translations[currentLanguage][key] || key;
         }
+        // Función para cambiar el idioma
+function changeLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('language', lang);
+    document.getElementById('language-selector').value = lang;
+    updateAllTranslations();
+    
+    const activeScreen = document.querySelector('.screen.active');
+    if (activeScreen) {
+        const screenId = activeScreen.id;
+        if (screenId === 'dashboard-screen') renderDashboard();
+        if (screenId === 'profile-screen') renderProfile();
+        if (screenId === 'admin-screen') renderAdmin();
+        if (screenId === 'workout-screen') renderWorkout();
+    }
+}
+
+// Función para actualizar todas las traducciones
+function updateAllTranslations() {
+    document.querySelector('#profile-btn').textContent = t('nav.profile');
+    document.querySelector('#admin-btn').textContent = t('nav.admin');
+    document.querySelector('#back-to-user-btn').textContent = t('nav.user');
+    document.querySelector('#logout-btn').textContent = t('nav.logout');
+    
+    const dashTitle = document.querySelector('#dashboard-screen .dashboard-header h1');
+    if (dashTitle) dashTitle.textContent = t('dashboard.title');
+    const profTitle = document.querySelector('#profile-screen h1');
+    if (profTitle) profTitle.textContent = t('profile.title');
+    const adminTitle = document.querySelector('#admin-screen h1');
+    if (adminTitle) adminTitle.textContent = t('admin.title');
+}
+
+// Inicializar idioma al cargar
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('language-selector').value = currentLanguage;
+    updateAllTranslations();
+});
 
         function getExerciseName(exercise) {
             return currentLanguage === 'es' ? exercise.name_es : exercise.name_en;
