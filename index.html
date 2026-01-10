@@ -1065,14 +1065,6 @@
                     <h3 id="stat-volume">0</h3>
                     <p>kg Volumen</p>
                 </div>
-                <div class="stat-card">
-                    <h3 id="stat-sets">0</h3>
-                    <p>Series Totales</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-reps">0</h3>
-                    <p>Repeticiones Totales</p>
-                </div>
             </div>
 
             <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
@@ -1393,9 +1385,9 @@
             { id: 16, name_es: 'Patada de Glúteo en Polea', name_en: 'Cable Glute Kickback', muscle: 'Piernas', emoji: '🔗' },
             { id: 17, name_es: 'Abducción de Cadera en Máquina', name_en: 'Hip Abduction Machine', muscle: 'Piernas', emoji: '⚙️' },
             { id: 18, name_es: 'Prensa de Glúteos', name_en: 'Glute Press', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 19, name_es: 'Peso Muerto', name_en: 'Deadlift', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 19, name_es: 'Peso Muerto', name_en: 'Deadlift', muscle: 'Espalda', emoji: '🏋️' },
             { id: 20, name_es: 'Peso Muerto Rumano', name_en: 'Romanian Deadlift', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 21, name_es: 'Peso Muerto Sumo', name_en: 'Sumo Deadlift', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 21, name_es: 'Peso Muerto Sumo', name_en: 'Sumo Deadlift', muscle: 'Espalda', emoji: '🏋️' },
             { id: 22, name_es: 'Remo con Barra', name_en: 'Barbell Row', muscle: 'Espalda', emoji: '🏋️' },
             { id: 23, name_es: 'Remo con Mancuernas', name_en: 'Dumbbell Row', muscle: 'Espalda', emoji: '🏋️' },
             { id: 24, name_es: 'Jalón Lateral', name_en: 'Lat Pulldown', muscle: 'Espalda', emoji: '🔗' },
@@ -1718,16 +1710,11 @@
 
             const totalWorkouts = currentUserData.workouts?.length || 0;
             const totalVolume = currentUserData.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0;
-            const totalSets = currentUserData.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0;
-            const totalReps = currentUserData.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0;
             const totalRoutines = currentUserData.routines?.length || 0;
 
             document.getElementById('stat-routines').textContent = totalRoutines;
             document.getElementById('stat-workouts').textContent = totalWorkouts;
             document.getElementById('stat-volume').textContent = Math.round(totalVolume);
-            document.getElementById('stat-sets').textContent = totalSets;
-            document.getElementById('stat-reps').textContent = totalReps;
-
 
             renderRoutines();
             renderSharedRoutines();
@@ -2338,13 +2325,18 @@
             const tbody = document.getElementById('admin-users-table');
             tbody.innerHTML = users.map(u => {
                 const totalVolume = u.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0;
+                const totalSets = u.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0;
+                const totalReps = u.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0;
                 return `
                     <tr>
                         <td>${u.username}</td>
                         <td>${u.routines?.length || 0}</td>
                         <td>${u.workouts?.length || 0}</td>
-                        <td>${Math.round(totalVolume)} kg</td>
-                        <td><button onclick="viewUserDetails('${u.uid}')" class="secondary">Ver Detalles</button></td>
+                        <td>${Math.round(totalVolume)} kg / ${totalSets} Se / ${totalReps} Reps</td>
+                        <td>
+                            <button onclick="viewUserDetails('${u.uid}')" class="secondary" style="margin-right: 0.5rem;">Ver Detalles</button>
+                            <button onclick="deleteUser('${u.uid}', '${u.username}')" class="secondary" style="background-color: #ff4444;">Eliminar</button>
+                        </td>
                     </tr>
                 `;
             }).join('');
