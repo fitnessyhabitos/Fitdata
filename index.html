@@ -1511,7 +1511,7 @@ document.addEventListener('visibilitychange', async () => {
     if (document.visibilityState === 'visible' && currentWorkout !== null) {
         await enableWakeLock();
     }
-});
+}
 
         function getExerciseName(exercise) {
             return currentLanguage === 'es' ? exercise.name_es : exercise.name_en;
