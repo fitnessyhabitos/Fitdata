@@ -1221,6 +1221,7 @@
                         <th>Rutinas</th>
                         <th>Entrenamientos</th>
                         <th>Volumen Total</th>
+                        <th>Nutrición</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
@@ -1249,14 +1250,6 @@
                     </select>
                 </div>
                 <button onclick="assignToUser()" style="width: 100%; margin-top: 1rem;">Asignar</button>
-            </div>
-
-            <h2 class="section-title">Configuración de Seguimiento Nutricional</h2>
-            <div style="background-color: var(--bg-secondary); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                <label style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-                    <input type="checkbox" id="enable-nutrition-tracking" onchange="toggleNutritionTracking()" style="width: 20px; height: 20px;">
-                    <span>Habilitar seguimiento de calorías y agua para todos los usuarios</span>
-                </label>
             </div>
         </div>
     </div>
@@ -1465,7 +1458,6 @@
         let currentMuscleFilter = 'Todos';
         let selectedExercises = new Set();
         let currentWorkoutDifficulty = null;
-        let nutritionTrackingEnabled = false;
         let audioContext = null;
 
         function t(key) {
@@ -2174,13 +2166,18 @@
                 document.querySelector(`input[name="nutrition-status"][value="${body.nutritionStatus}"]`).checked = true;
             }
 
-            const configSnap = await db.collection('config').doc('nutrition').get();
-            nutritionTrackingEnabled = configSnap.exists ? configSnap.data().enabled : false;
+            // Leer configuración individual del usuario
+const userDoc = await db.collection('users').doc(currentUser.uid).get();
+const nutritionEnabled = userDoc.data().nutritionEnabled || false;
 
-            if (nutritionTrackingEnabled) {
-                document.getElementById('kcal-group').style.display = 'block';
-                document.getElementById('water-group').style.display = 'block';
-            }
+if (nutritionEnabled) {
+    document.getElementById('kcal-group').style.display = 'block';
+    document.getElementById('water-group').style.display = 'block';
+} else {
+    document.getElementById('kcal-group').style.display = 'none';
+    document.getElementById('water-group').style.display = 'none';
+}
+
 
             renderWeightHistory();
             renderVolumeByMuscle();
@@ -2301,7 +2298,6 @@
             renderPendingUsers(pendingUsers);
             renderUsersTable(approvedUsers);
             await populateAssignSelects(approvedUsers);
-            await loadNutritionConfig();
         }
 
         function renderPendingUsers(users) {
@@ -2326,26 +2322,33 @@
         }
 
         function renderUsersTable(users) {
-            const tbody = document.getElementById('admin-users-table');
-            tbody.innerHTML = users.map(u => {
-                const totalVolume = u.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0;
-                const totalSets = u.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0;
-                const totalReps = u.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0;
-                return `
-                    <tr>
-                        <td>${u.username}</td>
-                        <td>${u.routines?.length || 0}</td>
-                        <td>${u.workouts?.length || 0}</td>
-                        <td>${Math.round(totalVolume)} kg / ${totalSets} Se / ${totalReps} Reps</td>
-                        <td>
-                            <button onclick="viewUserDetails('${u.uid}')" class="secondary" style="margin-right: 0.5rem;">Ver Detalles</button>
-                            <button onclick="deleteUser('${u.uid}', '${u.username}')" style="background-color: #ff4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">Eliminar</button>
+    const tbody = document.getElementById('admin-users-table');
+    tbody.innerHTML = users.map(u => {
+        const totalVolume = u.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0;
+        const totalSets = u.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0;
+        const totalReps = u.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0;
+        const nutritionEnabled = u.nutritionEnabled || false;
+        return `
+            <tr>
+                <td>${u.username}</td>
+                <td>${u.routines?.length || 0}</td>
+                <td>${u.workouts?.length || 0}</td>
+                <td>${Math.round(totalVolume)} kg / ${totalSets} Se / ${totalReps} Reps</td>
+                <td>
+                    <button onclick="toggleUserNutrition('${u.uid}', ${!nutritionEnabled})" 
+                        style="background-color: ${nutritionEnabled ? '#22dd88' : '#666'}; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
+                        ${nutritionEnabled ? '✓ Activa' : 'Inactiva'}
+                    </button>
+                </td>
+                <td>
+                    <button onclick="viewUserDetails('${u.uid}')" class="secondary" style="margin-right: 0.5rem;">Ver Detalles</button>
+                    <button onclick="deleteUser('${u.uid}', '${u.username}')" style="background-color: #ff4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">Eliminar</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
 
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
 
         async function approveUser(uid) {
             await db.collection('users').doc(uid).update({ approved: true });
@@ -2470,17 +2473,16 @@
             renderAdmin();
         }
 
-        async function loadNutritionConfig() {
-            const configSnap = await db.collection('config').doc('nutrition').get();
-            const enabled = configSnap.exists ? configSnap.data().enabled : false;
-            document.getElementById('enable-nutrition-tracking').checked = enabled;
-        }
+        async function toggleUserNutrition(uid, enable) {
+    try {
+        await db.collection('users').doc(uid).update({ nutritionEnabled: enable });
+        alert(enable ? 'Seguimiento nutricional activado para este usuario' : 'Seguimiento nutricional desactivado para este usuario');
+        renderAdmin();
+    } catch (error) {
+        alert('Error al actualizar: ' + error.message);
+    }
+}
 
-        async function toggleNutritionTracking() {
-            const enabled = document.getElementById('enable-nutrition-tracking').checked;
-            await db.collection('config').doc('nutrition').set({ enabled });
-            alert(enabled ? 'Seguimiento nutricional habilitado' : 'Seguimiento nutricional deshabilitado');
-        }
 
         function showSharedRoutines() {
             alert('Funcionalidad de rutinas compartidas - Ver en dashboard');
