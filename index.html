@@ -2106,40 +2106,40 @@ function startSharedWorkout(index) {
 
 
         function renderWorkout() {
-            document.getElementById('workout-title').textContent = currentWorkout.routineName;
-            
-            const muscles = [...new Set(currentWorkout.exercises.map(ex => {
-                const exercise = exercisesDB.find(e => e.id === ex.id);
-                return exercise ? exercise.muscle : null;
-            }).filter(Boolean))];
+    document.getElementById('workout-title').textContent = currentWorkout.routineName;
+    
+    const muscles = [...new Set(currentWorkout.exercises.map(ex => {
+        const exercise = exercisesDB.find(e => e.id === ex.id);
+        return exercise ? exercise.muscle : null;
+    }).filter(Boolean))];
 
-            document.getElementById('muscle-grid').innerHTML = muscles.map(m => 
-                `<div class="muscle-badge active">${m}</div>`
-            ).join('');
+    document.getElementById('muscle-grid').innerHTML = muscles.map(m => 
+        `<div class="muscle-badge active">${m}</div>`
+    ).join('');
 
-            const container = document.getElementById('exercises-container');
-            container.innerHTML = currentWorkout.exercises.map((ex, exIndex) => {
-                const exercise = exercisesDB.find(e => e.id === ex.id);
-                if (!exercise) return '';
+    const container = document.getElementById('exercises-container');
+    container.innerHTML = currentWorkout.exercises.map((ex, exIndex) => {
+        const exercise = exercisesDB.find(e => e.id === ex.id);
+        if (!exercise) return '';
 
-                const lastWorkout = currentUserData.workouts?.filter(w => 
-                    w.exercises.some(e => e.id === ex.id)
-                ).pop();
+        const lastWorkout = currentUserData.workouts?.filter(w => 
+            w.exercises.some(e => e.id === ex.id)
+        ).pop();
 
-                const lastExerciseData = lastWorkout?.exercises.find(e => e.id === ex.id);
+        const lastExerciseData = lastWorkout?.exercises.find(e => e.id === ex.id);
 
-                return `
-                    <div class="exercise-block">
-                        <div class="exercise-header">
-                            <div class="exercise-info">
-                                <h3>${getExerciseName(exercise)}</h3>
-                                <p>${exercise.muscle}</p>
-                            </div>
-                            <div class="exercise-image">${exercise.emoji}</div>
-                        </div>
-                        <div class="series-container">
-                            <h4>${t('Series')}</h4>
-<div class="series-header" style="display: grid; grid-template-columns: 50px 80px 80px 70px 50px 50px; gap: 0.8rem; padding: 0.5rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--text-secondary); margin-bottom: 0.5rem;">
+        return `
+            <div class="exercise-block">
+                <div class="exercise-header">
+                    <div class="exercise-info">
+                        <h3>${getExerciseName(exercise)}</h3>
+                        <p>${exercise.muscle}</p>
+                    </div>
+                    <div class="exercise-image">${exercise.emoji}</div>
+                </div>
+                <div class="series-container">
+                    <h4>Series</h4>
+                    <div class="series-header" style="display: grid; grid-template-columns: 50px 80px 80px 70px 50px 50px; gap: 0.8rem; padding: 0.5rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--text-secondary); margin-bottom: 0.5rem;">
                         <div style="text-align: center;">Serie</div>
                         <div style="text-align: center;">Reps</div>
                         <div style="text-align: center;">Peso (Kg)</div>
@@ -2147,13 +2147,13 @@ function startSharedWorkout(index) {
                         <div style="text-align: center;">✓</div>
                         <div style="text-align: center;"></div>
                     </div>
-                                                ${ex.series.map((serie, serieIndex) => renderSerie(exIndex, serieIndex, serie, lastExerciseData)).join('')}
-                            <button onclick="addSerie(${exIndex})" class="secondary" style="width: 100%; margin-top: 1rem;">+ Agregar Serie</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+                    ${ex.series.map((serie, serieIndex) => renderSerie(exIndex, serieIndex, serie, lastExerciseData)).join('')}
+                    <button onclick="addSerie(${exIndex})" class="secondary" style="width: 100%; margin-top: 1rem;">+ Agregar Serie</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
         function renderSerie(exIndex, serieIndex, serie, lastExerciseData) {
             const lastSerie = lastExerciseData?.series?.[serieIndex];
