@@ -1462,45 +1462,171 @@
         let selectedExercises = new Set();
         let currentWorkoutDifficulty = null;
         let audioContext = null
-
-// ========== PERSISTENCIA - No perder entrenamiento al refrescar ==========
-function saveWorkoutToStorage() {
-    if (currentWorkout && currentRoutine) {
-        const workoutState = {
-            workout: currentWorkout,
-            routine: currentRoutine,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('fitdata_current_workout', JSON.stringify(workoutState));
-        console.log('💾 Entrenamiento guardado automáticamente');
+// ========== EXERCISEDB API - IMÁGENES DE EJERCICIOS ==========
+const EXERCISEDB_CONFIG = {
+    baseUrl: 'https://exercisedb.p.rapidapi.com',
+    apiKey: '43ad655501msh0f11d2f2ca4308dp13255cjsnfd3de748f04b',
+    headers: {
+        'x-rapidapi-host': 'exercisedb.p.rapidapi.com',
+        'x-rapidapi-key': '43ad655501msh0f11d2f2ca4308dp13255cjsnfd3de748f04b'
     }
-}
+};
 
-function loadWorkoutFromStorage() {
+let exerciseDBCache = {};
+let exerciseDBList = null;
+
+async function loadExerciseDBList() {
+    if (exerciseDBList) return exerciseDBList;
+
     try {
-        const saved = localStorage.getItem('fitdata_current_workout');
-        if (saved) {
-            const workoutState = JSON.parse(saved);
-            const hours = (Date.now() - workoutState.timestamp) / (1000 * 60 * 60);
-            if (hours < 12) {
-                currentWorkout = workoutState.workout;
-                currentRoutine = workoutState.routine;
-                console.log('✅ Entrenamiento restaurado desde localStorage');
-                return true;
-            } else {
-                localStorage.removeItem('fitdata_current_workout');
-                console.log('⚠️ Entrenamiento antiguo eliminado (>12h)');
-            }
+        const response = await fetch(`${EXERCISEDB_CONFIG.baseUrl}/exercises?limit=1500`, {
+            method: 'GET',
+            headers: EXERCISEDB_CONFIG.headers
+        });
+
+        if (response.ok) {
+            exerciseDBList = await response.json();
+            console.log(`✅ ExerciseDB: ${exerciseDBList.length} ejercicios cargados`);
+            return exerciseDBList;
         }
-    } catch (e) {
-        console.log('❌ Error cargando workout:', e);
+    } catch (error) {
+        console.log('⚠️ Error cargando ExerciseDB:', error);
     }
-    return false;
+
+    return [];
 }
 
-function clearWorkoutFromStorage() {
-    localStorage.removeItem('fitdata_current_workout');
-    console.log('🗑️ Entrenamiento eliminado del storage');
+const exerciseNameMapping = {
+    'Sentadilla con Barra': 'barbell squat',
+    'Sentadilla Jaca': 'smith machine squat',
+    'Sentadilla con Cinturón': 'belt squat',
+    'Prensa de Piernas': 'leg press',
+    'Extensión de Cuádriceps': 'leg extension',
+    'Estocadas con Mancuernas': 'dumbbell lunges',
+    'Curl de Pierna Tumbado': 'lying leg curl',
+    'Curl de Pierna Sentado': 'seated leg curl',
+    'Prensa Horizontal': 'hack squat',
+    'Prensa de piernas 45': '45 degree leg press',
+    'Elevación de Talones Sentado': 'seated calf raise',
+    'Elevación de Talones de Pie': 'standing calf raise',
+    'Elevación de Cadera': 'barbell hip thrust',
+    'Sentadilla Búlgara': 'bulgarian split squat',
+    'Peso Muerto': 'barbell deadlift',
+    'Peso Muerto Rumano': 'romanian deadlift',
+    'Peso Muerto Sumo': 'sumo deadlift',
+    'Remo con Barra': 'barbell row',
+    'Remo con Mancuernas': 'dumbbell row',
+    'Jalón Lateral': 'lat pulldown',
+    'Jalón Lateral Cerrado': 'close grip lat pulldown',
+    'Remo en Máquina': 'seated cable row',
+    'Remo en Polea Baja': 'cable row',
+    'Dominadas': 'pull up',
+    'Dominadas Asistidas': 'assisted pull up',
+    'Remo Invertido': 'inverted row',
+    'Remo T': 't bar row',
+    'Press de Banca': 'barbell bench press',
+    'Press Inclinado con Mancuernas': 'incline dumbbell press',
+    'Aperturas con Mancuernas': 'dumbbell fly',
+    'Cruces en Polea': 'cable crossover',
+    'Prensa de Pecho en Máquina': 'chest press machine',
+    'Fondos en Paralelas': 'chest dip',
+    'Press Militar': 'military press',
+    'Press de Hombros con Mancuernas': 'dumbbell shoulder press',
+    'Press de Hombros en Máquina': 'shoulder press machine',
+    'Elevación Lateral': 'dumbbell lateral raise',
+    'Elevación Frontal': 'dumbbell front raise',
+    'Pájaros Inversos': 'reverse pec deck fly',
+    'Elevación Lateral en Polea': 'cable lateral raise',
+    'Press Arnold': 'arnold press',
+    'Face Pull': 'cable face pull',
+    'Curl de Barra': 'barbell curl',
+    'Curl de Mancuernas': 'dumbbell curl',
+    'Curl en Polea': 'cable curl',
+    'Curl Martillo': 'hammer curl',
+    'Curl Concentrado': 'concentration curl',
+    'Curl Predicador': 'preacher curl',
+    'Extensión de Tríceps en Polea': 'cable triceps pushdown',
+    'Extensión Francesa': 'lying triceps extension',
+    'Extensiones Acostadas': 'skull crusher',
+    'Fondos en Paralelas': 'tricep dips',
+    'Abdominales con Rueda': 'ab wheel rollout',
+    'Crunch en Polea': 'cable crunch',
+    'Elevaciones de Pierna Colgadas': 'hanging leg raise',
+    'Abdominales en Banco': 'decline sit up',
+    'Crunch en Máquina': 'ab crunch machine'
+};
+
+async function getExerciseImage(exerciseName) {
+    if (exerciseDBCache[exerciseName]) {
+        return exerciseDBCache[exerciseName];
+    }
+
+    try {
+        const englishName = exerciseNameMapping[exerciseName] || exerciseName.toLowerCase();
+
+        if (!exerciseDBList) {
+            await loadExerciseDBList();
+        }
+
+        const found = exerciseDBList?.find(ex => 
+            ex.name.toLowerCase().includes(englishName.toLowerCase()) ||
+            englishName.toLowerCase().includes(ex.name.toLowerCase())
+        );
+
+        if (found) {
+            const result = {
+                gifUrl: found.gifUrl,
+                imageUrl: found.gifUrl,
+                name: found.name,
+                target: found.target,
+                equipment: found.equipment,
+                bodyPart: found.bodyPart,
+                id: found.id
+            };
+
+            exerciseDBCache[exerciseName] = result;
+            return result;
+        }
+    } catch (error) {
+        console.log('⚠️ Error buscando ejercicio:', exerciseName, error);
+    }
+
+    return null;
+}
+
+function renderExerciseImage(exercise, showGif = false) {
+    const exerciseData = exerciseDBCache[exercise.namees];
+
+    if (exerciseData) {
+        const imageUrl = showGif ? exerciseData.gifUrl : exerciseData.imageUrl;
+        return `
+            <img 
+                src="${imageUrl}" 
+                alt="${exercise.namees}"
+                style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            >
+            <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 3rem;">
+                ${exercise.emoji}
+            </div>
+        `;
+    }
+
+    return exercise.emoji;
+}
+
+let showingGif = {};
+
+function toggleExerciseGif(exIndex) {
+    const exercise = exercisesDB.find(e => e.id === currentWorkout.exercises[exIndex].id);
+    if (!exercise) return;
+
+    showingGif[exIndex] = !showingGif[exIndex];
+
+    const container = document.getElementById(`exercise-image-${exIndex}`);
+    if (container) {
+        container.innerHTML = renderExerciseImage(exercise, showingGif[exIndex]);
+    }
 };
 
         function t(key) {
@@ -1795,18 +1921,6 @@ async function playBeep() {
         async function goToDashboard() {
             showScreen('dashboard-screen');
             updateNavbar();
-
-            // Verificar si hay un entrenamiento guardado
-            if (loadWorkoutFromStorage()) {
-                if (confirm('¿Quieres continuar con tu entrenamiento anterior?')) {
-                    showScreen('workout-screen');
-                    renderWorkout();
-                    return;
-                } else {
-                    clearWorkoutFromStorage();
-                }
-            }
-
             await renderDashboard();
         }
 
@@ -2113,6 +2227,14 @@ async function playBeep() {
 
 
         function renderWorkout() {
+            // Precargar imágenes de ejercicios
+            currentWorkout.exercises.forEach(ex => {
+                const exercise = exercisesDB.find(e => e.id === ex.id);
+                if (exercise && !exerciseDBCache[exercise.namees]) {
+                    getExerciseImage(exercise.namees);
+                }
+            });
+
             document.getElementById('workout-title').textContent = currentWorkout.routineName;
             
             const muscles = [...new Set(currentWorkout.exercises.map(ex => {
@@ -2142,7 +2264,12 @@ async function playBeep() {
                                 <h3>${getExerciseName(exercise)}</h3>
                                 <p>${exercise.muscle}</p>
                             </div>
-                            <div class="exercise-image">${exercise.emoji}</div>
+                            <div class="exercise-image" id="exercise-image-${exIndex}" onclick="toggleExerciseGif(${exIndex})" style="cursor: pointer; position: relative;">
+                                ${renderExerciseImage(exercise, false)}
+                                <div style="position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.7); color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem;">
+                                    🎬 GIF
+                                </div>
+                            </div>
                         </div>
                         <div class="series-container">
                             <h4>${t('Series')}</h4>
@@ -2160,7 +2287,6 @@ async function playBeep() {
                     </div>
                 `;
             }).join('');
-            saveWorkoutToStorage();  // Guardar automáticamente
         }
 
         function renderSerie(exIndex, serieIndex, serie, lastExerciseData) {
@@ -2193,7 +2319,6 @@ async function playBeep() {
 
         function updateSerie(exIndex, serieIndex, field, value) {
             currentWorkout.exercises[exIndex].series[serieIndex][field] = parseFloat(value) || 0;
-            saveWorkoutToStorage();
             renderWorkout();
         }
 
@@ -2205,7 +2330,6 @@ async function playBeep() {
                 startRestTimer();
             }
             
-            saveWorkoutToStorage();
             renderWorkout();
         }
 
@@ -2264,7 +2388,6 @@ async function playBeep() {
         }
 
         async function finishWorkout() {
-            clearWorkoutFromStorage();
             const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
             const completedSeries = currentWorkout.exercises.reduce((sum, ex) => 
                 sum + ex.series.filter(s => s.completed).length, 0);
