@@ -1062,7 +1062,7 @@
         <p>Entrenamientos</p>
     </div>
     <div class="stat-card">
-        <h3 id="stat-combined">0 kg / 0 Se / 0 Reps</h3>
+        <h3 id="stat-combined">0 Kg / 0 Se / 0 Reps</h3>
         <p>Volumen / Series / Reps</p>
     </div>
 </div>
@@ -1125,7 +1125,7 @@
                     <p><strong>Usuario:</strong> <span id="profile-username"></span></p>
                     <p><strong>Rutinas:</strong> <span id="profile-routines">0</span></p>
                     <p><strong>Entrenamientos:</strong> <span id="profile-workouts">0</span></p>
-                    <p><strong>Volumen Total:</strong> <span id="profile-volume">0</span> kg</p>
+                    <p><strong>Volumen Total:</strong> <span id="profile-volume">0</span> Kg</p>
                     <p><strong>Series Totales:</strong> <span id="profile-sets">0</span></p>
                     <p><strong>Repeticiones Totales:</strong> <span id="profile-reps">0</span></p>
                 </div>
@@ -1142,7 +1142,7 @@
             <h2 class="section-title">📊 Datos Físicos</h2>
             <div class="profile-card" style="margin-bottom: 2rem;">
                 <div class="form-group">
-                    <label for="user-weight">Peso Actual (kg)</label>
+                    <label for="user-weight">Peso Actual (Kg)</label>
                     <input type="number" id="user-weight" step="0.1" min="30" max="300" placeholder="ej: 75.5">
                 </div>
                 <div class="form-group">
@@ -1270,7 +1270,7 @@
                 </div>
                 <div class="summary-stat">
                     <label>Volumen Total:</label>
-                    <div class="value" id="lifetime-volume">0 kg</div>
+                    <div class="value" id="lifetime-volume">0 Kg</div>
                 </div>
                 <div class="summary-stat">
                     <label>Series Completadas:</label>
@@ -1278,7 +1278,7 @@
                 </div>
                 <div class="summary-stat">
                     <label>Promedio por Entrenamiento:</label>
-                    <div class="value" id="lifetime-avg">0 kg</div>
+                    <div class="value" id="lifetime-avg">0 Kg</div>
                 </div>
             </div>
 
@@ -1465,8 +1465,8 @@
 
         function t(key) {
             const translations = {
-                es: { 'Peso': 'Peso (kg)', 'Reps': 'Repeticiones', 'Series': 'Series', 'Kg': 'Kg', 'Entrenar': 'Entrenar', 'Compartir': 'Compartir' },
-                en: { 'Peso': 'Weight (kg)', 'Reps': 'Reps', 'Series': 'Sets', 'Kg': 'Kg', 'Entrenar': 'Train', 'Compartir': 'Share' }
+                es: { 'Peso': 'Peso (Kg)', 'Reps': 'Repeticiones', 'Series': 'Series', 'Kg': 'Kg', 'Entrenar': 'Entrenar', 'Compartir': 'Compartir' },
+                en: { 'Peso': 'Weight (Kg)', 'Reps': 'Reps', 'Series': 'Sets', 'Kg': 'Kg', 'Entrenar': 'Train', 'Compartir': 'Share' }
             };
             return translations[currentLanguage][key] || key;
         }
@@ -1712,7 +1712,7 @@
 
             document.getElementById('stat-routines').textContent = totalRoutines;
             document.getElementById('stat-workouts').textContent = totalWorkouts;
-            document.getElementById('stat-combined').textContent = `${Math.round(totalVolume)} kg / ${totalSets} Se / ${totalReps} Reps`;
+            document.getElementById('stat-combined').textContent = `${Math.round(totalVolume)} Kg / ${totalSets} Se / ${totalReps} Reps`;
 
 
             renderRoutines();
@@ -1964,7 +1964,7 @@
 <div class="series-header" style="display: grid; grid-template-columns: 50px 80px 80px 70px 50px 50px; gap: 0.8rem; padding: 0.5rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--text-secondary); margin-bottom: 0.5rem;">
                         <div style="text-align: center;">Serie</div>
                         <div style="text-align: center;">Reps</div>
-                        <div style="text-align: center;">Peso (kg)</div>
+                        <div style="text-align: center;">Peso (Kg)</div>
                         <div style="text-align: center;">Anterior</div>
                         <div style="text-align: center;">✓</div>
                         <div style="text-align: center;"></div>
@@ -2100,7 +2100,7 @@
                 </div>
                 <div class="summary-stat">
                     <label>Volumen Total:</label>
-                    <div class="value">${Math.round(currentWorkout.totalVolume)} kg</div>
+                    <div class="value">${Math.round(currentWorkout.totalVolume)} Kg</div>
                 </div>
                 <div class="summary-stat">
                     <label>Ejercicios:</label>
@@ -2115,9 +2115,9 @@
             const avgVolume = Math.round(totalVolume / totalWorkouts);
 
             document.getElementById('lifetime-workouts').textContent = totalWorkouts;
-            document.getElementById('lifetime-volume').textContent = Math.round(totalVolume) + ' kg';
+            document.getElementById('lifetime-volume').textContent = Math.round(totalVolume) + ' Kg';
             document.getElementById('lifetime-sets').textContent = totalSeries;
-            document.getElementById('lifetime-avg').textContent = avgVolume + ' kg';
+            document.getElementById('lifetime-avg').textContent = avgVolume + ' Kg';
 
             modal.classList.add('active');
         }
@@ -2206,7 +2206,7 @@ if (nutritionEnabled) {
             container.innerHTML = history.slice(-8).reverse().map(entry => `
                 <div class="weight-history-item">
                     <span>${new Date(entry.date).toLocaleDateString('es-ES')}</span>
-                    <strong>${entry.weight} kg</strong>
+                    <strong>${entry.weight} Kg</strong>
                 </div>
             `).join('');
         }
@@ -2235,7 +2235,7 @@ if (nutritionEnabled) {
     container.innerHTML = Object.entries(volumeByMuscle).map(([muscle, volume]) => `
         <div class="volume-muscle-item">
             <span>${muscle}</span>
-            <strong>${Math.round(volume)} kg / ${setsByMuscle[muscle] || 0} Se / ${repsByMuscle[muscle] || 0} Reps</strong>
+            <strong>${Math.round(volume)} Kg / ${setsByMuscle[muscle] || 0} Se / ${repsByMuscle[muscle] || 0} Reps</strong>
         </div>
     `).join('');
 }
@@ -2256,7 +2256,7 @@ if (nutritionEnabled) {
                     <p>📅 ${new Date(w.date).toLocaleDateString('es-ES')}</p>
                     <p>💪 ${w.completedSeries || 0} series</p>
                     <p>🔁 ${w.totalReps || 0} repeticiones</p>
-                    <p>🏋️ ${Math.round(w.totalVolume)} kg volumen</p>
+                    <p>🏋️ ${Math.round(w.totalVolume)} Kg volumen</p>
                     ${w.difficulty ? `<p>Dificultad: ${w.difficulty}</p>` : ''}
                 </div>
             `).join('');
@@ -2352,7 +2352,7 @@ if (nutritionEnabled) {
                 <td>${u.username}</td>
                 <td>${u.routines?.length || 0}</td>
                 <td>${u.workouts?.length || 0}</td>
-                <td>${Math.round(totalVolume)} kg / ${totalSets} Se / ${totalReps} Reps</td>
+                <td>${Math.round(totalVolume)} Kg / ${totalSets} Se / ${totalReps} Reps</td>
                 <td>
                     <button onclick="toggleUserNutrition('${u.uid}', ${!nutritionEnabled})" 
                         style="background-color: ${nutritionEnabled ? '#22dd88' : '#666'}; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
@@ -2388,14 +2388,14 @@ if (nutritionEnabled) {
 
             let details = `Usuario: ${user.username}\n`;
             details += `Email: ${user.email}\n\n`;
-            details += `Peso: ${body.weight || 'N/A'} kg\n`;
+            details += `Peso: ${body.weight || 'N/A'} Kg\n`;
             details += `Altura: ${body.height || 'N/A'} cm\n`;
             details += `Estado: ${body.nutritionStatus || 'N/A'}\n`;
             details += `Calorías: ${body.kcal || 'N/A'} kcal\n`;
             details += `Agua: ${body.water || 'N/A'} L\n\n`;
             details += `Historial de peso:\n`;
             weightHistory.forEach(entry => {
-                details += `${new Date(entry.date).toLocaleDateString('es-ES')} - ${entry.weight} kg\n`;
+                details += `${new Date(entry.date).toLocaleDateString('es-ES')} - ${entry.weight} Kg\n`;
             });
 
             alert(details);
