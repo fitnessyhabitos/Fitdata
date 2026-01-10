@@ -1126,7 +1126,10 @@
                     <p><strong>Rutinas:</strong> <span id="profile-routines">0</span></p>
                     <p><strong>Entrenamientos:</strong> <span id="profile-workouts">0</span></p>
                     <p><strong>Volumen Total:</strong> <span id="profile-volume">0</span> kg</p>
+                    <p><strong>Series Totales:</strong> <span id="profile-sets">0</span></p>
+                    <p><strong>Repeticiones Totales:</strong> <span id="profile-reps">0</span></p>
                 </div>
+
 
                 <div class="profile-card">
                     <h3>⏱️ Descanso</h3>
@@ -2148,11 +2151,18 @@
         }
 
         async function renderProfile() {
-            document.getElementById('profile-username').textContent = currentUser.username;
-            document.getElementById('profile-routines').textContent = currentUserData.routines?.length || 0;
-            document.getElementById('profile-workouts').textContent = currentUserData.workouts?.length || 0;
-            const totalVolume = currentUserData.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0;
-            document.getElementById('profile-volume').textContent = Math.round(totalVolume);
+    document.getElementById('profile-username').textContent = currentUser.username;
+    document.getElementById('profile-routines').textContent = currentUserData.routines?.length || 0;
+    document.getElementById('profile-workouts').textContent = currentUserData.workouts?.length || 0;
+    
+    const totalVolume = currentUserData.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0;
+    const totalSets = currentUserData.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0;
+    const totalReps = currentUserData.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0;
+    
+    document.getElementById('profile-volume').textContent = Math.round(totalVolume);
+    document.getElementById('profile-sets').textContent = totalSets;
+    document.getElementById('profile-reps').textContent = totalReps;
+
 
             document.getElementById('rest-time').value = restTime;
 
@@ -2202,25 +2212,34 @@ if (nutritionEnabled) {
         }
 
         function renderVolumeByMuscle() {
-            const volumeByMuscle = {};
-            currentUserData.workouts?.forEach(workout => {
-                workout.exercises.forEach(ex => {
-                    const exercise = exercisesDB.find(e => e.id === ex.id);
-                    if (exercise) {
-                        const volume = ex.series.reduce((sum, s) => sum + (s.weight * s.reps), 0);
-                        volumeByMuscle[exercise.muscle] = (volumeByMuscle[exercise.muscle] || 0) + volume;
-                    }
-                });
-            });
+    const volumeByMuscle = {};
+    const setsByMuscle = {};
+    const repsByMuscle = {};
+    
+    currentUserData.workouts?.forEach(workout => {
+        workout.exercises.forEach(ex => {
+            const exercise = exercisesDB.find(e => e.id === ex.id);
+            if (exercise) {
+                const volume = ex.series.reduce((sum, s) => sum + (s.weight * s.reps), 0);
+                const sets = ex.series.filter(s => s.completed).length;
+                const reps = ex.series.reduce((sum, s) => sum + (s.reps || 0), 0);
+                
+                volumeByMuscle[exercise.muscle] = (volumeByMuscle[exercise.muscle] || 0) + volume;
+                setsByMuscle[exercise.muscle] = (setsByMuscle[exercise.muscle] || 0) + sets;
+                repsByMuscle[exercise.muscle] = (repsByMuscle[exercise.muscle] || 0) + reps;
+            }
+        });
+    });
 
-            const container = document.getElementById('volume-by-muscle');
-            container.innerHTML = Object.entries(volumeByMuscle).map(([muscle, volume]) => `
-                <div class="volume-muscle-item">
-                    <span>${muscle}</span>
-                    <strong>${Math.round(volume)} kg</strong>
-                </div>
-            `).join('');
-        }
+    const container = document.getElementById('volume-by-muscle');
+    container.innerHTML = Object.entries(volumeByMuscle).map(([muscle, volume]) => `
+        <div class="volume-muscle-item">
+            <span>${muscle}</span>
+            <strong>${Math.round(volume)} kg / ${setsByMuscle[muscle] || 0} Se / ${repsByMuscle[muscle] || 0} Reps</strong>
+        </div>
+    `).join('');
+}
+
 
         function renderWorkoutHistory() {
             const container = document.getElementById('workout-history');
