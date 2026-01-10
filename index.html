@@ -2029,45 +2029,34 @@ async function playBeep() {
         }
 
         function startWorkout(index) {
-    // ✅ DESBLOQUEAR AUDIO PARA MÓVILES
+    // 1. Desbloquear AudioContext para móviles
     if (!audioContext) {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Desbloquear audio en iOS/Android
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            gainNode.gain.value = 0.001; // Casi silencioso
+            gainNode.gain.value = 0.001;
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.01);
-            
             console.log('✅ Audio desbloqueado para móvil');
         } catch (e) {
             console.log('⚠️ No se pudo desbloquear audio:', e);
         }
     }
-    // ✅ Activar Wake Lock
-    enableWakeLock();
     
-    currentRoutine = {...currentUserData.routines[index], index, isShared: false};
-    currentWorkout = {
-        routineName: currentRoutine.name,
-        date: new Date().toISOString(),
-        exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
-    };
-    showScreen('workout-screen');
-    renderWorkout();
-}
-    // Resume el contexto si está suspendido
+    // 2. Resume el contexto si está suspendido
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
             console.log('✅ AudioContext resumed');
         });
     }
     
-    // Tu código existente
+    // 3. Activar Wake Lock
+    enableWakeLock();
+    
+    // 4. Tu código existente
     currentRoutine = {...currentUserData.routines[index], index, isShared: false};
     currentWorkout = {
         routineName: currentRoutine.name,
@@ -2078,9 +2067,8 @@ async function playBeep() {
     renderWorkout();
 }
 
-
-        function startSharedWorkout(index) {
-    // ✅ DESBLOQUEAR AUDIO PARA MÓVILES
+function startSharedWorkout(index) {
+    // 1. Desbloquear AudioContext para móviles
     if (!audioContext) {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -2097,11 +2085,15 @@ async function playBeep() {
         }
     }
     
+    // 2. Resume el contexto si está suspendido
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume();
     }
     
-    // Tu código existente
+    // 3. Activar Wake Lock
+    enableWakeLock();
+    
+    // 4. Tu código existente
     currentRoutine = {...currentUserData.sharedRoutines[index], index, isShared: true};
     currentWorkout = {
         routineName: currentRoutine.name,
@@ -2109,8 +2101,8 @@ async function playBeep() {
         exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
     };
     showScreen('workout-screen');
-    renderWorkout();
-}
+    renderWorkout(
+
 
 
         function renderWorkout() {
