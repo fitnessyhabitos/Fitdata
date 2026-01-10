@@ -1462,7 +1462,46 @@
         let selectedExercises = new Set();
         let currentWorkoutDifficulty = null;
         let audioContext = null
-let wakeLock = null  // Wake Lock para mantener pantalla encendida;
+
+// ========== PERSISTENCIA - No perder entrenamiento al refrescar ==========
+function saveWorkoutToStorage() {
+    if (currentWorkout && currentRoutine) {
+        const workoutState = {
+            workout: currentWorkout,
+            routine: currentRoutine,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('fitdata_current_workout', JSON.stringify(workoutState));
+        console.log('💾 Entrenamiento guardado automáticamente');
+    }
+}
+
+function loadWorkoutFromStorage() {
+    try {
+        const saved = localStorage.getItem('fitdata_current_workout');
+        if (saved) {
+            const workoutState = JSON.parse(saved);
+            const hours = (Date.now() - workoutState.timestamp) / (1000 * 60 * 60);
+            if (hours < 12) {
+                currentWorkout = workoutState.workout;
+                currentRoutine = workoutState.routine;
+                console.log('✅ Entrenamiento restaurado desde localStorage');
+                return true;
+            } else {
+                localStorage.removeItem('fitdata_current_workout');
+                console.log('⚠️ Entrenamiento antiguo eliminado (>12h)');
+            }
+        }
+    } catch (e) {
+        console.log('❌ Error cargando workout:', e);
+    }
+    return false;
+}
+
+function clearWorkoutFromStorage() {
+    localStorage.removeItem('fitdata_current_workout');
+    console.log('🗑️ Entrenamiento eliminado del storage');
+};
 
         function t(key) {
             const translations = {
@@ -1596,46 +1635,6 @@ async function playBeep() {
             } catch (error) {
                 console.log('AudioContext no disponible:', error);
             }
-
-        
-// ========== WAKE LOCK API - Mantener pantalla encendida ==========
-async function enableWakeLock() {
-    if (!('wakeLock' in navigator)) {
-        console.log('⚠️ Wake Lock no soportado en este navegador');
-        return;
-    }
-
-    try {
-        wakeLock = await navigator.wakeLock.request('screen');
-        console.log('✅ Wake Lock activado - pantalla permanecerá encendida');
-
-        wakeLock.addEventListener('release', () => {
-            console.log('⚠️ Wake Lock liberado');
-        });
-    } catch (err) {
-        console.log('❌ Error activando Wake Lock:', err);
-    }
-}
-
-async function disableWakeLock() {
-    if (wakeLock !== null) {
-        try {
-            await wakeLock.release();
-            wakeLock = null;
-            console.log('✅ Wake Lock desactivado');
-        } catch (err) {
-            console.log('❌ Error desactivando Wake Lock:', err);
-        }
-    }
-}
-
-// Reactivar Wake Lock si el usuario vuelve a la app
-document.addEventListener('visibilitychange', async () => {
-    if (document.visibilityState === 'visible' && currentWorkout !== null) {
-        await enableWakeLock();
-    }
-});
-
 
         function isAdmin() {
             return currentUser && adminEmails.includes(currentUser.email);
@@ -1796,6 +1795,18 @@ document.addEventListener('visibilitychange', async () => {
         async function goToDashboard() {
             showScreen('dashboard-screen');
             updateNavbar();
+
+            // Verificar si hay un entrenamiento guardado
+            if (loadWorkoutFromStorage()) {
+                if (confirm('¿Quieres continuar con tu entrenamiento anterior?')) {
+                    showScreen('workout-screen');
+                    renderWorkout();
+                    return;
+                } else {
+                    clearWorkoutFromStorage();
+                }
+            }
+
             await renderDashboard();
         }
 
@@ -1814,8 +1825,7 @@ document.addEventListener('visibilitychange', async () => {
             renderAdmin();
         }
 
-        async function backToDashboard() {
-    await disableWakeLock();
+        function backToDashboard() {
             goToDashboard();
         }
 
@@ -2063,9 +2073,6 @@ document.addEventListener('visibilitychange', async () => {
         date: new Date().toISOString(),
         exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
     };
-    // Activar Wake Lock para mantener pantalla encendida
-    enableWakeLock();
-
     showScreen('workout-screen');
     renderWorkout();
 }
@@ -2100,10 +2107,6 @@ document.addEventListener('visibilitychange', async () => {
         date: new Date().toISOString(),
         exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
     };
-
-    // Activar Wake Lock
-    enableWakeLock();
-
     showScreen('workout-screen');
     renderWorkout();
 }
@@ -2157,6 +2160,7 @@ document.addEventListener('visibilitychange', async () => {
                     </div>
                 `;
             }).join('');
+            saveWorkoutToStorage();  // Guardar automáticamente
         }
 
         function renderSerie(exIndex, serieIndex, serie, lastExerciseData) {
@@ -2189,6 +2193,7 @@ document.addEventListener('visibilitychange', async () => {
 
         function updateSerie(exIndex, serieIndex, field, value) {
             currentWorkout.exercises[exIndex].series[serieIndex][field] = parseFloat(value) || 0;
+            saveWorkoutToStorage();
             renderWorkout();
         }
 
@@ -2200,6 +2205,7 @@ document.addEventListener('visibilitychange', async () => {
                 startRestTimer();
             }
             
+            saveWorkoutToStorage();
             renderWorkout();
         }
 
@@ -2258,8 +2264,8 @@ document.addEventListener('visibilitychange', async () => {
         }
 
         async function finishWorkout() {
-    await disableWakeLock();
-                const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
+            clearWorkoutFromStorage();
+            const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
             const completedSeries = currentWorkout.exercises.reduce((sum, ex) => 
                 sum + ex.series.filter(s => s.completed).length, 0);
             
