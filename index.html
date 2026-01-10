@@ -1053,19 +1053,20 @@
             </div>
 
             <div class="dashboard-stats">
-                <div class="stat-card">
-                    <h3 id="stat-routines">0</h3>
-                    <p>Rutinas</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-workouts">0</h3>
-                    <p>Entrenamientos</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-volume">0</h3>
-                    <p>kg Volumen</p>
-                </div>
-            </div>
+    <div class="stat-card">
+        <h3 id="stat-routines">0</h3>
+        <p>Rutinas</p>
+    </div>
+    <div class="stat-card">
+        <h3 id="stat-workouts">0</h3>
+        <p>Entrenamientos</p>
+    </div>
+    <div class="stat-card">
+        <h3 id="stat-combined">0 kg / 0 Se / 0 Reps</h3>
+        <p>Volumen / Series / Reps</p>
+    </div>
+</div>
+
 
             <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
                 <button onclick="showCreateRoutineModal()">+ Nueva Rutina</button>
@@ -1710,11 +1711,14 @@
 
             const totalWorkouts = currentUserData.workouts?.length || 0;
             const totalVolume = currentUserData.workouts?.reduce((sum, w) => sum + (w.totalVolume || 0), 0) || 0;
+            const totalSets = currentUserData.workouts?.reduce((sum, w) => sum + (w.completedSeries || 0), 0) || 0;
+            const totalReps = currentUserData.workouts?.reduce((sum, w) => sum + (w.totalReps || 0), 0) || 0;
             const totalRoutines = currentUserData.routines?.length || 0;
 
             document.getElementById('stat-routines').textContent = totalRoutines;
             document.getElementById('stat-workouts').textContent = totalWorkouts;
-            document.getElementById('stat-volume').textContent = Math.round(totalVolume);
+            document.getElementById('stat-combined').textContent = `${Math.round(totalVolume)} kg / ${totalSets} Se / ${totalReps} Reps`;
+
 
             renderRoutines();
             renderSharedRoutines();
