@@ -1470,48 +1470,6 @@
             };
             return translations[currentLanguage][key] || key;
         }
-// Variable global para el wake lock
-let wakeLock = null;
-
-// Función para activar Wake Lock
-async function enableWakeLock() {
-    if (!('wakeLock' in navigator)) {
-        console.log('⚠️ Wake Lock no soportado en este navegador');
-        return;
-    }
-    
-    try {
-        wakeLock = await navigator.wakeLock.request('screen');
-        console.log('✅ Wake Lock activado - pantalla permanecerá encendida');
-        
-        // Listener para reactivar si se pierde (cambio de pestaña, etc.)
-        wakeLock.addEventListener('release', () => {
-            console.log('⚠️ Wake Lock liberado');
-        });
-    } catch (err) {
-        console.log('❌ Error activando Wake Lock:', err);
-    }
-}
-
-// Función para desactivar Wake Lock
-async function disableWakeLock() {
-    if (wakeLock !== null) {
-        try {
-            await wakeLock.release();
-            wakeLock = null;
-            console.log('✅ Wake Lock desactivado');
-        } catch (err) {
-            console.log('❌ Error desactivando Wake Lock:', err);
-        }
-    }
-}
-
-// Reactivar Wake Lock si el usuario vuelve a la app
-document.addEventListener('visibilitychange', async () => {
-    if (document.visibilityState === 'visible' && currentWorkout !== null) {
-        await enableWakeLock();
-    }
-});
 
         function getExerciseName(exercise) {
             return currentLanguage === 'es' ? exercise.name_es : exercise.name_en;
@@ -2029,34 +1987,34 @@ async function playBeep() {
         }
 
         function startWorkout(index) {
-    // 1. Desbloquear AudioContext para móviles
+    // ✅ DESBLOQUEAR AUDIO PARA MÓVILES
     if (!audioContext) {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Desbloquear audio en iOS/Android
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            gainNode.gain.value = 0.001;
+            gainNode.gain.value = 0.001; // Casi silencioso
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.01);
+            
             console.log('✅ Audio desbloqueado para móvil');
         } catch (e) {
             console.log('⚠️ No se pudo desbloquear audio:', e);
         }
     }
     
-    // 2. Resume el contexto si está suspendido
+    // Resume el contexto si está suspendido
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume().then(() => {
             console.log('✅ AudioContext resumed');
         });
     }
     
-    // 3. Activar Wake Lock
-    enableWakeLock();
-    
-    // 4. Tu código existente
+    // Tu código existente
     currentRoutine = {...currentUserData.routines[index], index, isShared: false};
     currentWorkout = {
         routineName: currentRoutine.name,
@@ -2067,8 +2025,9 @@ async function playBeep() {
     renderWorkout();
 }
 
-function startSharedWorkout(index) {
-    // 1. Desbloquear AudioContext para móviles
+
+        function startSharedWorkout(index) {
+    // ✅ DESBLOQUEAR AUDIO PARA MÓVILES
     if (!audioContext) {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -2085,15 +2044,11 @@ function startSharedWorkout(index) {
         }
     }
     
-    // 2. Resume el contexto si está suspendido
     if (audioContext && audioContext.state === 'suspended') {
         audioContext.resume();
     }
     
-    // 3. Activar Wake Lock
-    enableWakeLock();
-    
-    // 4. Tu código existente
+    // Tu código existente
     currentRoutine = {...currentUserData.sharedRoutines[index], index, isShared: true};
     currentWorkout = {
         routineName: currentRoutine.name,
@@ -2101,45 +2056,45 @@ function startSharedWorkout(index) {
         exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
     };
     showScreen('workout-screen');
-    renderWorkout()
-
+    renderWorkout();
+}
 
 
         function renderWorkout() {
-    document.getElementById('workout-title').textContent = currentWorkout.routineName;
-    
-    const muscles = [...new Set(currentWorkout.exercises.map(ex => {
-        const exercise = exercisesDB.find(e => e.id === ex.id);
-        return exercise ? exercise.muscle : null;
-    }).filter(Boolean))];
+            document.getElementById('workout-title').textContent = currentWorkout.routineName;
+            
+            const muscles = [...new Set(currentWorkout.exercises.map(ex => {
+                const exercise = exercisesDB.find(e => e.id === ex.id);
+                return exercise ? exercise.muscle : null;
+            }).filter(Boolean))];
 
-    document.getElementById('muscle-grid').innerHTML = muscles.map(m => 
-        `<div class="muscle-badge active">${m}</div>`
-    ).join('');
+            document.getElementById('muscle-grid').innerHTML = muscles.map(m => 
+                `<div class="muscle-badge active">${m}</div>`
+            ).join('');
 
-    const container = document.getElementById('exercises-container');
-    container.innerHTML = currentWorkout.exercises.map((ex, exIndex) => {
-        const exercise = exercisesDB.find(e => e.id === ex.id);
-        if (!exercise) return '';
+            const container = document.getElementById('exercises-container');
+            container.innerHTML = currentWorkout.exercises.map((ex, exIndex) => {
+                const exercise = exercisesDB.find(e => e.id === ex.id);
+                if (!exercise) return '';
 
-        const lastWorkout = currentUserData.workouts?.filter(w => 
-            w.exercises.some(e => e.id === ex.id)
-        ).pop();
+                const lastWorkout = currentUserData.workouts?.filter(w => 
+                    w.exercises.some(e => e.id === ex.id)
+                ).pop();
 
-        const lastExerciseData = lastWorkout?.exercises.find(e => e.id === ex.id);
+                const lastExerciseData = lastWorkout?.exercises.find(e => e.id === ex.id);
 
-        return `
-            <div class="exercise-block">
-                <div class="exercise-header">
-                    <div class="exercise-info">
-                        <h3>${getExerciseName(exercise)}</h3>
-                        <p>${exercise.muscle}</p>
-                    </div>
-                    <div class="exercise-image">${exercise.emoji}</div>
-                </div>
-                <div class="series-container">
-                    <h4>Series</h4>
-                    <div class="series-header" style="display: grid; grid-template-columns: 50px 80px 80px 70px 50px 50px; gap: 0.8rem; padding: 0.5rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--text-secondary); margin-bottom: 0.5rem;">
+                return `
+                    <div class="exercise-block">
+                        <div class="exercise-header">
+                            <div class="exercise-info">
+                                <h3>${getExerciseName(exercise)}</h3>
+                                <p>${exercise.muscle}</p>
+                            </div>
+                            <div class="exercise-image">${exercise.emoji}</div>
+                        </div>
+                        <div class="series-container">
+                            <h4>${t('Series')}</h4>
+<div class="series-header" style="display: grid; grid-template-columns: 50px 80px 80px 70px 50px 50px; gap: 0.8rem; padding: 0.5rem 0.8rem; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--text-secondary); margin-bottom: 0.5rem;">
                         <div style="text-align: center;">Serie</div>
                         <div style="text-align: center;">Reps</div>
                         <div style="text-align: center;">Peso (Kg)</div>
@@ -2147,13 +2102,13 @@ function startSharedWorkout(index) {
                         <div style="text-align: center;">✓</div>
                         <div style="text-align: center;"></div>
                     </div>
-                    ${ex.series.map((serie, serieIndex) => renderSerie(exIndex, serieIndex, serie, lastExerciseData)).join('')}
-                    <button onclick="addSerie(${exIndex})" class="secondary" style="width: 100%; margin-top: 1rem;">+ Agregar Serie</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
+                                                ${ex.series.map((serie, serieIndex) => renderSerie(exIndex, serieIndex, serie, lastExerciseData)).join('')}
+                            <button onclick="addSerie(${exIndex})" class="secondary" style="width: 100%; margin-top: 1rem;">+ Agregar Serie</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
         function renderSerie(exIndex, serieIndex, serie, lastExerciseData) {
             const lastSerie = lastExerciseData?.series?.[serieIndex];
@@ -2254,8 +2209,6 @@ function startSharedWorkout(index) {
         }
 
         async function finishWorkout() {
-            // ✅ Desactivar Wake Lock al terminar
-    await disableWakeLock();
             const totalSeries = currentWorkout.exercises.reduce((sum, ex) => sum + ex.series.length, 0);
             const completedSeries = currentWorkout.exercises.reduce((sum, ex) => 
                 sum + ex.series.filter(s => s.completed).length, 0);
@@ -2270,12 +2223,7 @@ function startSharedWorkout(index) {
 
             showSummaryModal();
         }
-async function backToDashboard() {
-    // ✅ Desactivar Wake Lock si cancela
-    await disableWakeLock();
-    
-    goToDashboard();
-}
+
         function showSummaryModal() {
             const modal = document.getElementById('summary-modal');
             const summaryBody = document.getElementById('summary-body');
@@ -2704,5 +2652,6 @@ if (nutritionEnabled) {
 
         console.log('✅ Fit Data by Toni con Firebase cargado');
         console.log('🔥 Recuerda reemplazar firebaseConfig con tu configuración');
+    </script>
 </body>
 </html>
