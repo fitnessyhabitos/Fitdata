@@ -1476,10 +1476,65 @@
         }
 
         function playBeep() {
-            // Vibración prioritaria (más confiable en móvil)
-            if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200, 100, 200]);
-            }
+    console.log('🔔 Intentando reproducir beep...');
+    
+    // 1. Vibración (funciona bien en todos los móviles)
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200, 100, 200]);
+        console.log('📳 Vibración activada');
+    }
+
+    // 2. Intentar sonido Web Audio API
+    try {
+        if (!audioContext) {
+            console.log('⚠️ AudioContext no inicializado');
+            return;
+        }
+
+        // Resume si está suspendido
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+                console.log('✅ AudioContext resumed, reproduciendo...');
+                playBeepSound();
+            });
+        } else {
+            playBeepSound();
+        }
+    } catch (error) {
+        console.log('❌ Error en playBeep:', error);
+    }
+}
+
+// Función auxiliar para reproducir el sonido
+function playBeepSound() {
+    try {
+        // Crear 3 beeps rápidos
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 880; // Nota A5
+                oscillator.type = 'square';
+                
+                // Volumen más alto para móviles
+                gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+                
+                console.log('🔊 Beep ' + (i + 1) + ' reproducido');
+            }, i * 300);
+        }
+    } catch (error) {
+        console.log('❌ Error reproduciendo beep:', error);
+    }
+}
+
 
             // Intentar sonido Web Audio API
             try {
@@ -1906,26 +1961,78 @@
         }
 
         function startWorkout(index) {
-            currentRoutine = { ...currentUserData.routines[index], index, isShared: false };
-            currentWorkout = {
-                routineName: currentRoutine.name,
-                date: new Date().toISOString(),
-                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
-            };
-            showScreen('workout-screen');
-            renderWorkout();
+    // ✅ DESBLOQUEAR AUDIO PARA MÓVILES
+    if (!audioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Desbloquear audio en iOS/Android
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            gainNode.gain.value = 0.001; // Casi silencioso
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.01);
+            
+            console.log('✅ Audio desbloqueado para móvil');
+        } catch (e) {
+            console.log('⚠️ No se pudo desbloquear audio:', e);
         }
+    }
+    
+    // Resume el contexto si está suspendido
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+            console.log('✅ AudioContext resumed');
+        });
+    }
+    
+    // Tu código existente
+    currentRoutine = {...currentUserData.routines[index], index, isShared: false};
+    currentWorkout = {
+        routineName: currentRoutine.name,
+        date: new Date().toISOString(),
+        exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+    };
+    showScreen('workout-screen');
+    renderWorkout();
+}
+
 
         function startSharedWorkout(index) {
-            currentRoutine = { ...currentUserData.sharedRoutines[index], index, isShared: true };
-            currentWorkout = {
-                routineName: currentRoutine.name,
-                date: new Date().toISOString(),
-                exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
-            };
-            showScreen('workout-screen');
-            renderWorkout();
+    // ✅ DESBLOQUEAR AUDIO PARA MÓVILES
+    if (!audioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            gainNode.gain.value = 0.001;
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.01);
+            console.log('✅ Audio desbloqueado');
+        } catch (e) {
+            console.log('⚠️ Error desbloqueando audio:', e);
         }
+    }
+    
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+    
+    // Tu código existente
+    currentRoutine = {...currentUserData.sharedRoutines[index], index, isShared: true};
+    currentWorkout = {
+        routineName: currentRoutine.name,
+        date: new Date().toISOString(),
+        exercises: JSON.parse(JSON.stringify(currentRoutine.exercises))
+    };
+    showScreen('workout-screen');
+    renderWorkout();
+}
+
 
         function renderWorkout() {
             document.getElementById('workout-title').textContent = currentWorkout.routineName;
@@ -2041,28 +2148,30 @@
         }
 
         function startRestTimer() {
+    clearInterval(timerInterval);
+    let timeLeft = restTime;
+    
+    const timerDisplay = document.getElementById('timer-display');
+    const timerText = document.getElementById('timer-text');
+    
+    timerDisplay.classList.add('active');
+    
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        timerText.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            let timeLeft = restTime;
-            const timerDisplay = document.getElementById('timer-display');
-            const timerText = document.getElementById('timer-text');
-            
-            timerDisplay.classList.add('active');
-            
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                const mins = Math.floor(timeLeft / 60);
-                const secs = timeLeft % 60;
-                timerText.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    playBeep();
-                    setTimeout(() => {
-                        timerDisplay.classList.remove('active');
-                    }, 2000);
-                }
-            }, 1000);
+            playBeep(); // ✅ Llamar al beep
+            setTimeout(() => {
+                timerDisplay.classList.remove('active');
+            }, 2000);
         }
+    }, 1000);
+}
+
 
         function skipRestTime() {
             clearInterval(timerInterval);
