@@ -1506,34 +1506,61 @@
 }
 
 // Función auxiliar para reproducir el sonido
-function playBeepSound() {
+async function playBeep() {
+    console.log('🔔 Intentando beep...');
+    
+    // 1. Vibración prioritaria (siempre funciona)
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200, 100, 200]);
+        console.log('📳 Vibración OK');
+    }
+
+    // 2. Sonido
+    if (!audioContext) {
+        console.log('⚠️ No hay AudioContext');
+        return;
+    }
+
     try {
-        // Crear 3 beeps rápidos
+        // ✅ IMPORTANTE: Esperar a que el contexto se reactive
+        if (audioContext.state === 'suspended') {
+            console.log('🔄 Resuming AudioContext...');
+            await audioContext.resume();
+            console.log('✅ AudioContext resumed');
+        }
+        
+        console.log('🔊 Estado AudioContext:', audioContext.state);
+        
+        // Crear los 3 beeps
         for (let i = 0; i < 3; i++) {
             setTimeout(() => {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = 880; // Nota A5
-                oscillator.type = 'square';
-                
-                // Volumen más alto para móviles
-                gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
-                
-                console.log('🔊 Beep ' + (i + 1) + ' reproducido');
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 880;
+                    oscillator.type = 'square';
+                    
+                    gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    
+                    console.log('🔊 Beep', i + 1, 'reproducido');
+                } catch (e) {
+                    console.log('❌ Error en beep', i + 1, ':', e);
+                }
             }, i * 300);
         }
     } catch (error) {
-        console.log('❌ Error reproduciendo beep:', error);
+        console.log('❌ Error general en playBeep:', error);
     }
 }
+
 
 
             // Intentar sonido Web Audio API
@@ -2162,12 +2189,16 @@ function playBeepSound() {
         timerText.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
         
         if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            playBeep(); // ✅ Llamar al beep
-            setTimeout(() => {
-                timerDisplay.classList.remove('active');
-            }, 2000);
-        }
+    clearInterval(timerInterval);
+    
+    // ✅ Llamar playBeep de forma asíncrona
+    playBeep().catch(err => console.log('Error en beep:', err));
+    
+    setTimeout(() => {
+        timerDisplay.classList.remove('active');
+    }, 2000);
+}
+
     }, 1000);
 }
 
