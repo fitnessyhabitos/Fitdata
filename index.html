@@ -1363,64 +1363,32 @@
         const db = firebase.firestore();
 
         // Base de datos de ejercicios
-        // ========== EJERCICIOS DINÁMICOS ==========
-// El array exercisesDB ahora se carga dinámicamente desde ExerciseDB API (1300+ ejercicios)
-// El array anterior de 70 ejercicios ha sido reemplazado por carga dinámica
+        // ========== EJERCICIOS DINÁMICOS DESDE EXERCISEDB ==========
+let exercisesDB = [];
 
-// Array original comentado - ahora se llena dinámicamente
-let exercisesDB = []; // Se llenará con loadExerciseDBListFull()
-
-// ========== MAPEO Y TRANSFORMACIÓN DE EXERCISEDB ==========
+// ========== MAPEO Y CARGA DE EXERCISEDB ==========
 
 const bodyPartToMuscle = {
-    'back': 'Espalda',
-    'cardio': 'Cardio',
-    'chest': 'Pecho',
-    'lower arms': 'Antebrazos',
-    'lower legs': 'Piernas',
-    'neck': 'Cuello',
-    'shoulders': 'Hombros',
-    'upper arms': 'Brazos',
-    'upper legs': 'Piernas',
+    'back': 'Espalda', 'cardio': 'Cardio', 'chest': 'Pecho',
+    'lower arms': 'Antebrazos', 'lower legs': 'Piernas', 'neck': 'Cuello',
+    'shoulders': 'Hombros', 'upper arms': 'Brazos', 'upper legs': 'Piernas',
     'waist': 'Abs'
 };
 
 const targetToMuscle = {
-    'abs': 'Abs',
-    'calves': 'Piernas',
-    'cardiovascular system': 'Cardio',
-    'delts': 'Hombros',
-    'forearms': 'Antebrazos',
-    'glutes': 'Piernas',
-    'hamstrings': 'Piernas',
-    'lats': 'Espalda',
-    'levator scapulae': 'Espalda',
-    'pectorals': 'Pecho',
-    'quads': 'Piernas',
-    'serratus anterior': 'Pecho',
-    'spine': 'Espalda',
-    'traps': 'Espalda',
-    'triceps': 'Triceps',
-    'biceps': 'Biceps',
-    'upper back': 'Espalda',
-    'lower back': 'Espalda',
-    'adductors': 'Piernas',
-    'abductors': 'Piernas'
+    'abs': 'Abs', 'calves': 'Piernas', 'cardiovascular system': 'Cardio',
+    'delts': 'Hombros', 'forearms': 'Antebrazos', 'glutes': 'Piernas',
+    'hamstrings': 'Piernas', 'lats': 'Espalda', 'levator scapulae': 'Espalda',
+    'pectorals': 'Pecho', 'quads': 'Piernas', 'serratus anterior': 'Pecho',
+    'spine': 'Espalda', 'traps': 'Espalda', 'triceps': 'Triceps',
+    'biceps': 'Biceps', 'upper back': 'Espalda', 'lower back': 'Espalda',
+    'adductors': 'Piernas', 'abductors': 'Piernas'
 };
 
 const muscleEmojis = {
-    'Piernas': '🦵',
-    'Espalda': '💪',
-    'Pecho': '💪',
-    'Hombros': '💪',
-    'Biceps': '💪',
-    'Triceps': '💪',
-    'Abs': '💪',
-    'Brazos': '💪',
-    'Antebrazos': '💪',
-    'Cardio': '🏃',
-    'Cuello': '💪',
-    'General': '💪'
+    'Piernas': '🦵', 'Espalda': '💪', 'Pecho': '💪', 'Hombros': '💪',
+    'Biceps': '💪', 'Triceps': '💪', 'Abs': '💪', 'Brazos': '💪',
+    'Antebrazos': '💪', 'Cardio': '🏃', 'Cuello': '💪', 'General': '💪'
 };
 
 function transformExerciseDBToLocal(apiExercises) {
@@ -1447,19 +1415,6 @@ function transformExerciseDBToLocal(apiExercises) {
     });
 }
 
-function getDefaultExercises() {
-    return [
-        {id: '0001', namees: 'Sentadilla con Barra', nameen: 'Barbell Squat', muscle: 'Piernas', emoji: '🦵'},
-        {id: '0002', namees: 'Press de Banca', nameen: 'Bench Press', muscle: 'Pecho', emoji: '💪'},
-        {id: '0003', namees: 'Peso Muerto', nameen: 'Deadlift', muscle: 'Espalda', emoji: '💪'},
-        {id: '0004', namees: 'Press Militar', nameen: 'Military Press', muscle: 'Hombros', emoji: '💪'},
-        {id: '0005', namees: 'Dominadas', nameen: 'Pull-ups', muscle: 'Espalda', emoji: '💪'},
-        {id: '0006', namees: 'Curl de Barra', nameen: 'Barbell Curl', muscle: 'Biceps', emoji: '💪'},
-        {id: '0007', namees: 'Extensión de Tríceps', nameen: 'Triceps Extension', muscle: 'Triceps', emoji: '💪'},
-        {id: '0008', namees: 'Abdominales', nameen: 'Crunches', muscle: 'Abs', emoji: '💪'}
-    ];
-}
-
 async function loadExerciseDBListFull() {
     if (exerciseDBList && exercisesDB.length > 0) {
         console.log('✅ Ejercicios ya cargados:', exercisesDB.length);
@@ -1478,7 +1433,7 @@ async function loadExerciseDBListFull() {
             exerciseDBList = await response.json();
             exercisesDB = transformExerciseDBToLocal(exerciseDBList);
 
-            console.log(`✅ ${exercisesDB.length} ejercicios disponibles`);
+            console.log(`✅ ${exercisesDB.length} ejercicios cargados y listos`);
             console.log('📊 Grupos:', [...new Set(exercisesDB.map(e => e.muscle))].join(', '));
 
             return { list: exerciseDBList, transformed: exercisesDB };
@@ -1487,7 +1442,16 @@ async function loadExerciseDBListFull() {
         console.log('❌ Error cargando ejercicios:', error);
         if (exercisesDB.length === 0) {
             console.log('⚠️ Usando 8 ejercicios básicos como fallback');
-            exercisesDB = getDefaultExercises();
+            exercisesDB = [
+                {id: '0001', namees: 'Sentadilla con Barra', nameen: 'Barbell Squat', muscle: 'Piernas', emoji: '🦵'},
+                {id: '0002', namees: 'Press de Banca', nameen: 'Bench Press', muscle: 'Pecho', emoji: '💪'},
+                {id: '0003', namees: 'Peso Muerto', nameen: 'Deadlift', muscle: 'Espalda', emoji: '💪'},
+                {id: '0004', namees: 'Press Militar', nameen: 'Military Press', muscle: 'Hombros', emoji: '💪'},
+                {id: '0005', namees: 'Dominadas', nameen: 'Pull-ups', muscle: 'Espalda', emoji: '💪'},
+                {id: '0006', namees: 'Curl de Barra', nameen: 'Barbell Curl', muscle: 'Biceps', emoji: '💪'},
+                {id: '0007', namees: 'Extensión de Tríceps', nameen: 'Triceps Extension', muscle: 'Triceps', emoji: '💪'},
+                {id: '0008', namees: 'Abdominales', nameen: 'Crunches', muscle: 'Abs', emoji: '💪'}
+            ];
         }
     }
 
@@ -1961,7 +1925,9 @@ async function playBeep() {
             currentMuscleFilter = 'Todos';
             selectedExercises.clear();
             renderExerciseList();
-        }
+        
+    ensureExercisesLoaded();
+}
 
         function closeRoutineModal() {
             document.getElementById('routine-modal').classList.remove('active');
@@ -1975,24 +1941,76 @@ async function playBeep() {
         }
 
         function renderExerciseList() {
-            const searchTerm = document.getElementById('exercise-search')?.value.toLowerCase() || '';
-            const filtered = exercisesDB.filter(ex => {
-                const matchMuscle = currentMuscleFilter === 'Todos' || ex.muscle === currentMuscleFilter;
-                const matchSearch = getExerciseName(ex).toLowerCase().includes(searchTerm);
-                return matchMuscle && matchSearch;
-            });
-
+            const searchValue = document.getElementById('exercise-search')?.value.toLowerCase() || '';
             const container = document.getElementById('exercises-list');
-            container.innerHTML = filtered.map(ex => `
-                <div class="exercise-item" onclick="toggleExercise(${ex.id})">
-                    <input type="checkbox" ${selectedExercises.has(ex.id) ? 'checked' : ''} onclick="event.stopPropagation(); toggleExercise(${ex.id})">
-                    <div class="exercise-item-text">
-                        <div class="exercise-item-name">${ex.emoji} ${getExerciseName(ex)}</div>
-                        <div class="exercise-item-muscle">${ex.muscle}</div>
+
+            if (!container) return;
+
+            if (!exercisesDB || exercisesDB.length === 0) {
+                container.innerHTML = '<div style="padding: 2rem; text-align: center;"><p>🔄 Cargando ejercicios...</p><p style="font-size: 0.9rem;">1300+ ejercicios disponibles</p></div>';
+                return;
+            }
+
+            let filtered = exercisesDB;
+
+            if (currentMuscleFilter && currentMuscleFilter !== 'Todos') {
+                filtered = filtered.filter(ex => ex.muscle === currentMuscleFilter);
+            }
+
+            if (searchValue) {
+                filtered = filtered.filter(ex => 
+                    ex.namees?.toLowerCase().includes(searchValue) ||
+                    ex.nameen?.toLowerCase().includes(searchValue) ||
+                    ex.equipment?.toLowerCase().includes(searchValue) ||
+                    ex.target?.toLowerCase().includes(searchValue)
+                );
+            }
+
+            const maxResults = 100;
+            const limitedResults = filtered.slice(0, maxResults);
+            const hasMore = filtered.length > maxResults;
+
+            console.log(`📊 Ejercicios: ${filtered.length}, mostrando: ${limitedResults.length}`);
+
+            if (limitedResults.length === 0) {
+                container.innerHTML = '<div style="padding: 2rem; text-align: center;"><p>😕 No se encontraron ejercicios</p></div>';
+                return;
+            }
+
+            container.innerHTML = limitedResults.map(ex => {
+                const isSelected = selectedExercises.has(ex.id);
+                const equipmentText = ex.equipment ? ` • ${ex.equipment}` : '';
+
+                return `
+                    <div class="exercise-item" onclick="toggleExerciseSelection('${ex.id}')">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                        <div class="exercise-item-text">
+                            <div class="exercise-item-name">${ex.namees || ex.nameen}</div>
+                            <div class="exercise-item-muscle">${ex.muscle}${equipmentText}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('') + (hasMore ? `<div style="padding: 1rem; text-align: center; color: var(--text-secondary); font-size: 0.9rem;">📊 ${limitedResults.length} de ${filtered.length} ejercicios</div>` : '');
         }
+
+function toggleExerciseSelection(exerciseId) {
+    if (selectedExercises.has(exerciseId)) {
+        selectedExercises.delete(exerciseId);
+    } else {
+        selectedExercises.add(exerciseId);
+    }
+    renderExerciseList();
+}
+
+function ensureExercisesLoaded() {
+    if (!exercisesDB || exercisesDB.length === 0) {
+        console.log('⚠️ Recargando ejercicios...');
+        loadExerciseDBListFull().then(() => renderExerciseList());
+    } else {
+        console.log(`✅ ${exercisesDB.length} ejercicios disponibles`);
+        renderExerciseList();
+    }
+}
 
         function toggleExercise(id) {
             if (selectedExercises.has(id)) {
