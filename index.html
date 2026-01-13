@@ -113,18 +113,35 @@
         .slider:before { position:absolute; content:""; height:16px; width:16px; left:4px; bottom:4px; background-color:white; transition:.4s; border-radius:50%; }
         input:checked + .slider { background-color:var(--accent); }
         input:checked + .slider:before { transform:translateX(16px); }
+
+        /* LOADING LOGO ANIMATION */
+        .loading-logo {
+            width: 120px; height: 120px;
+            margin-bottom: 20px;
+            border-radius: 25px;
+            animation: pulse-logo 2s infinite ease-in-out;
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.2);
+        }
+        @keyframes pulse-logo {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
     <div id="toast">Notificación</div>
 
-    <div id="loading" class="screen active" style="text-align:center; padding-top:40vh;">
-        <h1 style="color:var(--accent); font-size:3.5rem;">FIT DATA</h1><p class="text-muted">Loading System...</p>
+    <div id="loading" class="screen active" style="text-align:center; padding-top:35vh;">
+        <img src="favicon.png" alt="Logo" class="loading-logo">
+        <h1 style="color:var(--accent); font-size:3rem; margin:0;">FIT DATA</h1>
+        <p class="text-muted" style="margin-top:10px;">Loading System...</p>
     </div>
 
     <div id="login" class="screen">
         <div class="container" style="padding-top:60px; text-align:center;">
+            <img src="favicon.png" style="width:80px; border-radius:15px; margin-bottom:15px;">
             <h1 style="color:var(--accent); font-size:3rem; margin-bottom:10px;">FIT DATA</h1>
             <p class="text-muted" style="margin-bottom:40px;">Coach Intelligence System</p>
             <div class="card" style="border:none; background:transparent;">
@@ -716,5 +733,3 @@
     </script>
 </body>
 </html>
-
-
