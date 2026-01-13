@@ -37,7 +37,7 @@
             background:var(--bg); 
             color:var(--text); 
             min-height:100vh; 
-            /* Ajuste para que el nav no tape contenido al final */
+            /* Espacio para la barra de navegación inferior + área segura */
             padding-bottom: calc(90px + var(--safe-bottom)); 
             overscroll-behavior-y:none; 
         }
@@ -48,23 +48,25 @@
             max-width:600px; 
             margin:0 auto; 
             padding:20px; 
-            padding-top:10px; /* Un poco de aire extra */
+            /* Espacio extra arriba para compensar el header fijo */
+            padding-top: 10px; 
         }
         
-        /* CABECERAS Y NAVEGACIÓN (AJUSTE SAFE AREA) */
+        /* CABECERAS Y NAVEGACIÓN (FIX SAFE AREA) */
         .navbar-top {
             position: sticky;
             top: 0;
-            background: rgba(26, 26, 26, 0.95);
+            background: rgba(26, 26, 26, 0.98);
             backdrop-filter: blur(10px);
             z-index: 100;
             border-bottom: 2px solid var(--accent);
             padding: 15px 20px;
-            /* Aquí está la magia para que no lo tape el reloj/wifi */
-            padding-top: calc(15px + var(--safe-top)); 
+            /* EL TRUCO PARA QUE NO LO TAPE EL RELOJ/WIFI */
+            padding-top: calc(20px + var(--safe-top)); 
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         /* BOTONES E INPUTS */
@@ -81,12 +83,12 @@
         /* CARDS */
         .card { background:var(--card); padding:20px; border-radius:16px; margin-bottom:15px; border:1px solid #222; position:relative; overflow:hidden; border-left:4px solid var(--accent); }
         
-        /* GENERADOR DE IMÁGENES PREMIUM (ESTILO PECHO.JPG) */
+        /* GENERADOR DE IMÁGENES PREMIUM */
         .ex-img { 
             width: 65px; height: 65px; 
             background: white; /* Fondo Blanco */
             border: 3px solid var(--accent); /* Borde Rojo Grueso */
-            border-radius: 12px; /* Bordes redondeados */
+            border-radius: 12px;
             padding: 0; 
             object-fit: contain; 
             flex-shrink: 0;
@@ -108,7 +110,7 @@
             border-top:1px solid #333; 
             display:flex; justify-content:space-around; 
             padding:12px 0; 
-            padding-bottom: calc(12px + var(--safe-bottom)); /* Ajuste iPhone X+ */
+            padding-bottom: calc(12px + var(--safe-bottom)); 
             z-index:100; 
         }
         .nav-item { color:#555; background:none; border:none; font-size:0.65rem; display:flex; flex-direction:column; align-items:center; width:20%; text-transform:uppercase; font-weight:600; letter-spacing:0.5px; transition:0.3s; }
@@ -127,31 +129,43 @@
         /* ADMIN LIST */
         .user-row { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#1f1f1f; border-radius:10px; margin-bottom:10px; border-left:3px solid #444; }
         .badge { padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold; }
-        .badge-pending { background:var(--warning); color:black; }
-        .badge-active { background:var(--success); color:black; }
-
+        
         /* TOAST */
         #toast { visibility:hidden; min-width:250px; background-color:#222; color:#fff; text-align:center; border-radius:50px; padding:12px 20px; position:fixed; z-index:3000; left:50%; bottom:calc(90px + var(--safe-bottom)); transform:translateX(-50%); border:1px solid var(--accent); box-shadow:0 5px 15px rgba(0,0,0,0.5); font-size:0.9rem; }
         #toast.show { visibility:visible; animation:fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from{bottom:60px; opacity:0;} to{bottom:calc(90px + var(--safe-bottom)); opacity:1;} }
         @keyframes fadeout { from{bottom:calc(90px + var(--safe-bottom)); opacity:1;} to{bottom:60px; opacity:0;} }
+
+        /* LOGO ANIMATION (Grande y Latido) */
+        .loading-logo {
+            width: 140px; height: 140px; /* Más grande */
+            margin-bottom: 20px;
+            border-radius: 25px;
+            animation: pulse-logo 2.5s infinite ease-in-out; /* Más lento y suave */
+            box-shadow: 0 0 40px rgba(255, 68, 68, 0.4);
+        }
+        @keyframes pulse-logo {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
     <div id="toast">Notificación</div>
 
-    <div id="loading" class="screen active" style="text-align:center; padding-top:40vh;">
-        <img src="favicon.png" style="width:100px; border-radius:20px; margin-bottom:20px; box-shadow:0 0 30px rgba(255,68,68,0.2);">
-        <h1 style="color:var(--accent); font-size:3rem; margin:0;">FIT DATA</h1>
-        <p style="color:var(--muted); margin-top:10px;">Cargando sistema...</p>
+    <div id="loading" class="screen active" style="text-align:center; padding-top:30vh; background: #000;">
+        <img src="favicon.png" alt="Logo" class="loading-logo">
+        <h1 style="color:var(--accent); font-size:3.5rem; margin:0; letter-spacing: -2px;">FIT DATA</h1>
+        <p style="color:var(--muted); margin-top:10px; font-size: 1.1rem;">Coach Intelligence System</p>
     </div>
 
     <div id="login" class="screen">
         <div class="container" style="padding-top:60px; text-align:center;">
-            <img src="favicon.png" style="width:80px; border-radius:15px; margin-bottom:15px;">
+            <img src="favicon.png" style="width:100px; border-radius:20px; margin-bottom:15px; box-shadow: 0 0 20px rgba(255,68,68,0.2);">
             <h1 style="color:var(--accent); font-size:3rem; margin-bottom:10px;">FIT DATA</h1>
-            <p style="color:var(--muted); margin-bottom:40px;">Coach Intelligence System</p>
+            <p style="color:var(--muted); margin-bottom:40px;">Entrenamiento de Alto Rendimiento</p>
             <div class="card" style="border:none; background:transparent;">
                 <input id="log-email" class="input" type="email" placeholder="Email">
                 <input id="log-pass" class="input" type="password" placeholder="Contraseña">
@@ -399,6 +413,7 @@
                 else if (m.includes('biceps') || m.includes('brazo')) highlight = `<path d="M 28,45 L 38,45 L 36,65 L 30,62 Z M 72,45 L 62,45 L 64,65 L 70,62 Z" fill="#FF0000"/>`;
                 else if (m.includes('espalda')) highlight = `<path d="M 35,35 L 65,35 L 60,65 L 40,65 Z" fill="#FF0000"/>`;
                 else if (m.includes('abs')) highlight = `<path d="M 42,55 L 58,55 L 56,80 L 44,80 Z" fill="#FF0000"/>`;
+                else if (m.includes('triceps') || m.includes('tríceps')) highlight = `<path d="M 28,45 L 35,45 L 33,60 L 28,58 Z M 72,45 L 65,45 L 67,60 L 72,58 Z" fill="#FF0000"/>`;
             }
 
             return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
@@ -426,11 +441,97 @@
             </svg>`;
         }
 
-        const rawList = ["Sentadilla|Piernas", "Prensa 45|Piernas", "Peso Muerto|Espalda", "Dominadas|Espalda", "Remo Barra|Espalda", "Press Banca|Pecho", "Press Inclinado|Pecho", "Aperturas|Pecho", "Press Militar|Hombros", "Elevaciones Lat|Hombros", "Curl Barra|Bíceps", "Press Francés|Tríceps", "Plancha|Abs", "Zancadas|Piernas", "Hip Thrust|Piernas"];
-        const exercisesDB = rawList.map((s,i) => { 
-            const [n,m]=s.split('|'); 
-            return {id:i+1, name:n, muscle:m, image:getMuscleSvg(m)}; 
-        });
+        // BASE DE DATOS COMPLETA (82 EJERCICIOS)
+        const rawExercisesDB = [
+            { id: 1, name: 'Sentadilla con Barra', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 2, name: 'Sentadilla Jaca', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 3, name: 'Sentadilla con Cinturón', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 4, name: 'Prensa de Piernas', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 5, name: 'Extensión de Cuádriceps', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 6, name: 'Estocadas con Mancuernas', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 7, name: 'Curl de Pierna Tumbado', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 8, name: 'Curl de Pierna Sentado', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 9, name: 'Prensa Horizontal', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 10, name: 'Prensa de piernas 45°', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 11, name: 'Elevación de Talones Sentado', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 12, name: 'Elevación de Talones de Pie', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 13, name: 'Elevación de Talones en Máquina', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 14, name: 'Elevación de Cadera', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 15, name: 'Sentadilla Búlgara', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 16, name: 'Patada de Glúteo en Polea', muscle: 'Piernas', emoji: '🔗' },
+            { id: 17, name: 'Abducción de Cadera en Máquina', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 18, name: 'Prensa de Glúteos', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 19, name: 'Peso Muerto', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 20, name: 'Peso Muerto Rumano', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 21, name: 'Peso Muerto Sumo', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 22, name: 'Remo con Barra', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 23, name: 'Remo con Mancuernas', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 24, name: 'Jalón Lateral', muscle: 'Espalda', emoji: '🔗' },
+            { id: 25, name: 'Jalón Lateral Cerrado', muscle: 'Espalda', emoji: '🔗' },
+            { id: 26, name: 'Remo en Máquina', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 27, name: 'Remo en Polea Baja', muscle: 'Espalda', emoji: '🔗' },
+            { id: 28, name: 'Dominadas', muscle: 'Espalda', emoji: '🤸' },
+            { id: 29, name: 'Dominadas Asistidas', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 30, name: 'Remo Invertido', muscle: 'Espalda', emoji: '🤸' },
+            { id: 31, name: 'Remo T', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 32, name: 'Hiperextensión', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 33, name: 'Buenos Días', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 34, name: 'Press de Banca', muscle: 'Pecho', emoji: '🏋️' },
+            { id: 35, name: 'Press Inclinado con Mancuernas', muscle: 'Pecho', emoji: '🏋️' },
+            { id: 36, name: 'Aperturas con Mancuernas', muscle: 'Pecho', emoji: '🦅' },
+            { id: 37, name: 'Cruces en Polea', muscle: 'Pecho', emoji: '🔗' },
+            { id: 38, name: 'Prensa de Pecho en Máquina', muscle: 'Pecho', emoji: '⚙️' },
+            { id: 39, name: 'Prensa de Pecho Declinado', muscle: 'Pecho', emoji: '🏋️' },
+            { id: 40, name: 'Fondos en Paralelas', muscle: 'Pecho', emoji: '🤸' },
+            { id: 41, name: 'Encogimiento de Hombros', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 42, name: 'Encogimiento con Mancuernas', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 43, name: 'Press Militar', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 44, name: 'Press de Hombros con Mancuernas', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 45, name: 'Press de Hombros en Máquina', muscle: 'Hombros', emoji: '⚙️' },
+            { id: 46, name: 'Elevación Lateral', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 47, name: 'Elevación Frontal', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 48, name: 'Pájaros Inversos', muscle: 'Hombros', emoji: '🦅' },
+            { id: 49, name: 'Elevación Lateral en Polea', muscle: 'Hombros', emoji: '🔗' },
+            { id: 50, name: 'Press Arnold', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 51, name: 'Curl de Barra', muscle: 'Biceps', emoji: '💪' },
+            { id: 52, name: 'Curl de Mancuernas', muscle: 'Biceps', emoji: '💪' },
+            { id: 53, name: 'Curl en Polea', muscle: 'Biceps', emoji: '🔗' },
+            { id: 54, name: 'Curl Martillo', muscle: 'Biceps', emoji: '💪' },
+            { id: 55, name: 'Curl Concentrado', muscle: 'Biceps', emoji: '💪' },
+            { id: 56, name: 'Extensión de Tríceps en Polea', muscle: 'Triceps', emoji: '🔗' },
+            { id: 57, name: 'Extensión Francesa', muscle: 'Triceps', emoji: '🏋️' },
+            { id: 58, name: 'Extensiones Acostadas', muscle: 'Triceps', emoji: '🏋️' },
+            { id: 59, name: 'Fondos en Paralelas', muscle: 'Triceps', emoji: '🤸' },
+            { id: 60, name: 'Extensión Unilateral Tríceps', muscle: 'Triceps', emoji: '💪' },
+            { id: 61, name: 'Abdominales con Rueda', muscle: 'Abs', emoji: '⭕' },
+            { id: 62, name: 'Crunch en Polea', muscle: 'Abs', emoji: '🔗' },
+            { id: 63, name: 'Elevaciones de Pierna Colgadas', muscle: 'Abs', emoji: '🤸' },
+            { id: 64, name: 'Abdominales en Banco', muscle: 'Abs', emoji: '🏋️' },
+            { id: 65, name: 'Crunch en Máquina', muscle: 'Abs', emoji: '⚙️' },
+            { id: 66, name: 'Levantamiento de Rodillas Colgado', muscle: 'Abs', emoji: '🤸' },
+            { id: 67, name: 'Aperturas de Pecho', muscle: 'Pecho', emoji: '🦅' },
+            { id: 68, name: 'Press Inclinado', muscle: 'Pecho', emoji: '🏋️' },
+            { id: 69, name: 'Press Plano', muscle: 'Pecho', emoji: '🏋️' },
+            { id: 70, name: 'Prensa Lateral Iso', muscle: 'Pecho', emoji: '⚙️' },
+            { id: 71, name: 'Prensa de Pecho', muscle: 'Pecho', emoji: '⚙️' },
+            { id: 72, name: 'Triceps Polea', muscle: 'Triceps', emoji: '🔗' },
+            { id: 73, name: 'Triceps Barra', muscle: 'Triceps', emoji: '🏋️' },
+            { id: 74, name: 'Remo Hammer', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 75, name: 'Jalón Agarre Cerrado', muscle: 'Espalda', emoji: '🔗' },
+            { id: 76, name: 'Jalón Agarre Abierto', muscle: 'Espalda', emoji: '🔗' },
+            { id: 77, name: 'Remo alto', muscle: 'Espalda', emoji: '⚙️' },
+            { id: 78, name: 'Press de Hombros', muscle: 'Hombros', emoji: '🏋️' },
+            { id: 79, name: 'Face Pull', muscle: 'Hombros', emoji: '🔗' },
+            { id: 80, name: 'Curl Predicador', muscle: 'Biceps', emoji: '💪' },
+            { id: 81, name: 'Curl Concentrado', muscle: 'Biceps', emoji: '💪' },
+            { id: 82, name: 'Prensa 45°', muscle: 'Piernas', emoji: '⚙️' },
+        ];
+
+        // Mapear la base de datos a un formato usable con imágenes
+        const exercisesDB = rawExercisesDB.map(ex => ({
+            ...ex,
+            image: getMuscleSvg(ex.muscle)
+        }));
 
         function showToast(msg) { const t=document.getElementById("toast"); t.innerText=msg; t.className="show"; setTimeout(()=>t.className="",3000); }
 
@@ -441,6 +542,7 @@
                 db.collection('users').doc(u.uid).onSnapshot(doc => {
                     if(doc.exists) {
                         userData = doc.data();
+                        
                         // Si soy Admin, escuchar cambios globales de usuarios
                         if(userData.email.toLowerCase() === ADMIN_EMAIL) {
                             listenToAllUsers(); // Activa el panel en tiempo real
@@ -448,14 +550,21 @@
                         
                         if(userData.approved || userData.email.toLowerCase() === ADMIN_EMAIL) {
                             currentUser = u;
-                            initApp();
+                            // Pequeño retardo artificial para disfrutar el logo
+                            setTimeout(() => {
+                                document.getElementById('loading').classList.remove('active');
+                                initApp();
+                            }, 2500);
                         } else {
+                            document.getElementById('loading').classList.remove('active');
                             showToast("Pendiente de Aprobación"); showScreen('login');
                         }
                     }
                 });
-            } else { showScreen('login'); }
-            document.getElementById('loading').classList.remove('active');
+            } else { 
+                document.getElementById('loading').classList.remove('active');
+                showScreen('login'); 
+            }
         });
 
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
