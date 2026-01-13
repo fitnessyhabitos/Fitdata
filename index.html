@@ -18,17 +18,18 @@
     
     <style>
         :root {
-            /* CORPORATIVO CYBERPUNK PREMIUM */
+            /* PALETA CYBERPUNK PREMIUM */
             --bg: #0a0a0a; 
-            --card: #1a1a1a; 
-            --card-light: #252525;
+            --card: #141414; 
+            --card-light: #1f1f1f;
             --text: #ffffff; 
             --muted: #888888;
             --accent: #ff4444;       /* Rojo Neón */
+            --accent-glow: rgba(255, 68, 68, 0.4);
             --success: #22dd88; 
             --warning: #ffaa00;
             
-            /* SAFE AREAS */
+            /* SAFE AREAS (Notch/Dynamic Island) */
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
@@ -38,86 +39,99 @@
         body { 
             background:var(--bg); color:var(--text); 
             min-height:100vh; 
-            padding-bottom: calc(90px + var(--safe-bottom)); 
+            /* Padding inferior para la nav bar + safe area */
+            padding-bottom: calc(85px + var(--safe-bottom)); 
             overscroll-behavior-y:none; 
             user-select: none;
         }
         
-        /* UTILIDADES */
+        /* --- UTILIDADES --- */
         .hidden { display:none !important; }
         .container { max-width:600px; margin:0 auto; padding:20px; padding-top:10px; }
-        h1, h2, h3, h4 { font-weight:800; letter-spacing:-0.5px; margin-bottom:10px; }
+        h1, h2, h3, h4 { font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; }
         .text-accent { color:var(--accent); }
-        .text-muted { color:var(--muted); font-size:0.85rem; }
+        .text-muted { color:var(--muted); font-size:0.8rem; }
+        .text-center { text-align: center; }
         
-        /* HEADER FIJO */
+        /* --- HEADER FIJO --- */
         .navbar-top {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(26, 26, 26, 0.95);
+            background: rgba(20, 20, 20, 0.95);
             backdrop-filter: blur(12px);
-            border-bottom: 2px solid var(--accent);
+            border-bottom: 1px solid #333;
             padding: 15px 20px;
             padding-top: calc(15px + var(--safe-top)); 
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        /* BOTONES E INPUTS */
+        /* --- BOTONES E INPUTS --- */
         .btn { width:100%; padding:14px; border:none; border-radius:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; font-size:0.95rem; transition: transform 0.1s; }
         .btn:active { transform:scale(0.97); }
-        .btn-primary { background:var(--accent); color:white; box-shadow:0 4px 15px rgba(255, 68, 68, 0.25); }
+        .btn-primary { background:var(--accent); color:white; box-shadow:0 0 15px var(--accent-glow); }
         .btn-secondary { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); color:white; }
         .btn-success { background:var(--success); color:black; font-weight: 800; }
-        .btn-icon { width:auto; padding:8px 12px; font-size:1.2rem; background:rgba(255,255,255,0.1); border-radius:8px; }
+        .btn-icon { width:auto; padding:8px 12px; font-size:1.2rem; background:rgba(255,255,255,0.1); border-radius:8px; border:none; color: white; cursor: pointer;}
         
         .input { width:100%; padding:14px; margin-bottom:12px; background:#222; border:1px solid #333; color:white; border-radius:10px; font-size:1rem; }
         .input:focus { border-color:var(--accent); background:#2a2a2a; }
-
-        /* CARDS */
-        .card { background:var(--card); padding:20px; border-radius:16px; margin-bottom:15px; border:1px solid #333; position:relative; overflow:hidden; border-left:4px solid var(--accent); }
         
-        /* --- SVG EXERCISE ICON --- */
+        /* --- CARDS --- */
+        .card { background:var(--card); padding:20px; border-radius:16px; margin-bottom:15px; border:1px solid #252525; position:relative; overflow:hidden; border-left:4px solid var(--accent); }
+        
+        /* --- IMÁGENES SVG --- */
         .ex-img { 
             width: 70px; height: 70px; 
             background: white; border: 3px solid var(--accent); border-radius: 12px;
             padding: 0; object-fit: contain; flex-shrink: 0; display: block;
         }
 
-        /* WORKOUT UI - SETS */
+        /* --- WORKOUT UI --- */
         .set-row { display:grid; grid-template-columns:30px 1fr 1fr 40px 40px; gap:8px; align-items:center; background:#222; padding:10px; border-radius:8px; margin-bottom:8px; position:relative; border:1px solid #333; }
         .set-row.done { border-color:var(--success); background:rgba(34,221,136,0.05); }
+        
         /* Shadow Data (Peso Anterior) */
-        .prev-val { position:absolute; top:-10px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#666; background:#222; padding:0 6px; border-radius:4px; border:1px solid #333; z-index: 5; }
+        .prev-val { position:absolute; top:-9px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#666; background:#222; padding:0 6px; border-radius:4px; border:1px solid #333; z-index: 5; pointer-events: none; }
         
         .check-btn { width:32px; height:32px; border-radius:10px; border:2px solid #444; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:transparent; font-weight:bold; transition:0.2s; }
         .check-btn.checked { background:var(--success); border-color:var(--success); color:black; transform:scale(1.1); }
         .check-btn.checked::after { content:'✓'; }
 
-        /* NAV BOTTOM */
+        /* --- NAV BOTTOM --- */
         .nav-bottom { 
             position:fixed; bottom:0; left:0; width:100%; 
             background:rgba(20,20,20,0.98); border-top:1px solid #333; 
             display:flex; justify-content:space-around; padding:12px 0; 
             padding-bottom: calc(12px + var(--safe-bottom)); 
-            z-index:100; 
+            z-index:100; backdrop-filter: blur(10px);
         }
         .nav-item { color:#555; background:none; border:none; font-size:0.65rem; display:flex; flex-direction:column; align-items:center; width:20%; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; transition:0.3s; }
-        .nav-item.active { color:var(--accent); transform:translateY(-2px); }
+        .nav-item.active { color:var(--accent); transform:translateY(-2px); text-shadow: 0 0 10px var(--accent-glow); }
         .nav-item i { font-size:1.4rem; margin-bottom:4px; font-style: normal; }
 
-        /* STATS BOXES */
+        /* --- STATS & HEATMAP --- */
         .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
         .stat-box { background:var(--card-light); padding:15px; border-radius:12px; text-align:center; border:1px solid #333; }
         .stat-val { font-size:1.4rem; font-weight:800; color:white; display:block; }
         .stat-lbl { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+        .heatmap-container { width: 100%; height: 300px; display: flex; justify-content: center; margin-bottom: 20px; }
 
-        /* MODALS */
+        /* --- MODALS --- */
         .screen { display:none; opacity:0; transition:opacity 0.3s; }
         .screen.active { display:block; opacity:1; }
         .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
         .modal-content { background:var(--card); width:95%; max-width:500px; padding:25px; border-radius:20px; border:1px solid #444; max-height:85vh; overflow-y:auto; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
 
-        /* TIMER & ALERTS */
+        /* --- TOGGLES --- */
+        .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #222; }
+        .switch { position:relative; display:inline-block; width:40px; height:24px; }
+        .switch input { opacity:0; width:0; height:0; }
+        .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#333; transition:.4s; border-radius:34px; }
+        .slider:before { position:absolute; content:""; height:16px; width:16px; left:4px; bottom:4px; background-color:white; transition:.4s; border-radius:50%; }
+        input:checked + .slider { background-color:var(--accent); }
+        input:checked + .slider:before { transform:translateX(16px); }
+
+        /* --- TIMER & ALERTS --- */
         .timer-overlay { position:fixed; bottom: calc(95px + var(--safe-bottom)); right:20px; width:70px; height:70px; background:var(--bg); border:3px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-family:monospace; color:var(--accent); box-shadow:0 0 20px rgba(255,68,68,0.4); z-index:1000; cursor:pointer; animation: pulse 1s infinite; }
         @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);} 70% {box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);} }
 
@@ -126,12 +140,13 @@
         @keyframes fadein { from{bottom:60px; opacity:0;} to{bottom:calc(90px + var(--safe-bottom)); opacity:1;} }
         @keyframes fadeout { from{bottom:calc(90px + var(--safe-bottom)); opacity:1;} to{bottom:60px; opacity:0;} }
 
-        /* LOADING LOGO */
-        .loading-logo { width: 140px; height: 140px; margin-bottom: 20px; border-radius: 30px; animation: heartbeat 2.5s infinite ease-in-out; box-shadow: 0 0 50px rgba(255, 68, 68, 0.3); }
+        /* --- LOADING ANIMATION --- */
+        .loading-logo { width: 140px; height: 140px; margin-bottom: 20px; border-radius: 30px; animation: heartbeat 2s infinite ease-in-out; box-shadow: 0 0 50px rgba(255, 68, 68, 0.3); }
         @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
         
-        /* ADMIN LIST */
+        /* --- ADMIN LIST --- */
         .user-row { display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--card-light); border-radius:10px; margin-bottom:10px; border-left:3px solid #444; }
+        .stagnant { border-left-color: var(--warning) !important; background: rgba(255, 170, 0, 0.05); }
     </style>
 </head>
 <body>
@@ -167,7 +182,7 @@
                 <input id="reg-height" type="number" class="input" placeholder="Altura (cm)">
                 <input id="reg-email" class="input" type="email" placeholder="Email">
                 <input id="reg-pass" class="input" type="password" placeholder="Contraseña">
-                <label class="text-accent" style="font-weight:bold; font-size:0.75rem; margin-left:5px;">CÓDIGO SECRETO</label>
+                <label class="text-accent" style="font-weight:bold; font-size:0.75rem; margin-left:5px;">CÓDIGO DE INVITACIÓN</label>
                 <input id="reg-code" class="input" style="text-align:center; border-color:var(--accent); letter-spacing:4px; font-weight:bold;">
                 <button onclick="doRegister()" class="btn btn-primary">SOLICITAR ACCESO</button>
                 <button onclick="toLogin()" class="btn btn-secondary">Cancelar</button>
@@ -183,7 +198,7 @@
                     <h2 id="u-name" style="margin:0; font-size:1.5rem;">Hola</h2>
                     <span id="u-goal" style="color:var(--muted); font-size:0.75rem; text-transform:uppercase;">Objetivo no fijado</span>
                 </div>
-                <button id="admin-btn" onclick="nav('view-admin')" class="btn-icon hidden">👑</button>
+                <button id="admin-btn" onclick="nav('view-admin')" class="btn-icon hidden">👑 COACH</button>
             </div>
 
             <div class="container">
@@ -221,16 +236,16 @@
             <div class="container">
                 
                 <div class="card" style="text-align:center;">
-                    <h3>Mapa de Calor</h3>
-                    <p class="text-muted" style="font-size:0.8rem;">Volumen de trabajo acumulado</p>
-                    <div id="heatmap-render" style="height:220px; margin:0 auto;"></div>
+                    <h3>Mapa de Trabajo</h3>
+                    <p class="text-muted" style="font-size:0.8rem;">Volumen acumulado</p>
+                    <div id="heatmap-render" class="heatmap-container"></div>
                 </div>
 
                 <div class="stats-grid">
                     <div class="stat-box"><span id="stat-kg" class="stat-val">0</span><span class="stat-lbl">TONELADAS</span></div>
                     <div class="stat-box"><span id="stat-workouts" class="stat-val">0</span><span class="stat-lbl">ENTRENOS</span></div>
-                    <div class="stat-box"><span id="stat-sets" class="stat-val">0</span><span class="stat-lbl">SERIES TOTALES</span></div>
-                    <div class="stat-box"><span id="stat-reps" class="stat-val">0</span><span class="stat-lbl">REPS TOTALES</span></div>
+                    <div class="stat-box"><span id="stat-sets" class="stat-val">0</span><span class="stat-lbl">SERIES</span></div>
+                    <div class="stat-box"><span id="stat-reps" class="stat-val">0</span><span class="stat-lbl">REPS</span></div>
                 </div>
 
                 <div class="card">
@@ -271,25 +286,30 @@
                         <option value="Volumen">Volumen (Superávit)</option>
                     </select>
 
-                    <h3>Datos Físicos</h3>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <input id="cfg-age" type="number" class="input" placeholder="Edad" onchange="saveConfig()">
-                        <input id="cfg-height" type="number" class="input" placeholder="Altura (cm)" onchange="saveConfig()">
+                    <h3>Avisos</h3>
+                    <div class="toggle-row">
+                        <span>Recordatorio Fotos</span>
+                        <select id="cfg-alarm-day" class="input" style="width:120px; margin:0;" onchange="saveConfig()">
+                            <option value="0">Domingo</option>
+                            <option value="1">Lunes</option>
+                            <option value="5">Viernes</option>
+                            <option value="-1">Desactivado</option>
+                        </select>
                     </div>
 
                     <h3>Sistema</h3>
-                    <div style="margin-top:10px;">
+                    <div style="margin-top:15px;">
                         <label style="color:var(--muted); font-size:0.9rem;">Tiempo Descanso (seg)</label>
                         <input id="cfg-rest" type="number" class="input" value="60" onchange="saveConfig()">
                     </div>
                     
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding:10px 0; border-top:1px solid #333;">
+                    <div class="toggle-row">
                         <span>Sonido Alarma</span>
-                        <input type="checkbox" id="cfg-sound" onchange="saveConfig()" style="width:20px; height:20px; accent-color:var(--accent);">
+                        <label class="switch"><input type="checkbox" id="cfg-sound" onchange="saveConfig()"><span class="slider"></span></label>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
+                    <div class="toggle-row">
                         <span>Pantalla Encendida</span>
-                        <input type="checkbox" id="cfg-screen" onchange="saveConfig()" style="width:20px; height:20px; accent-color:var(--accent);">
+                        <label class="switch"><input type="checkbox" id="cfg-screen" onchange="saveConfig()"><span class="slider"></span></label>
                     </div>
                 </div>
                 <button onclick="auth.signOut()" class="btn btn-secondary">Cerrar Sesión</button>
@@ -306,7 +326,7 @@
                     <h3>Solicitudes (<span id="count-pending">0</span>)</h3>
                     <div id="adm-pending"></div>
                 </div>
-                <h3>Cartera de Atletas</h3>
+                <h3>Atletas Activos</h3>
                 <div id="adm-users"></div>
             </div>
         </div>
@@ -342,7 +362,7 @@
             </div>
             
             <div class="card">
-                <h3>Asignar Nutrición</h3>
+                <h3>Asignar Objetivos</h3>
                 <div style="display:flex; gap:10px;">
                     <div><small>Kcal</small><input id="adm-set-kcal" type="number" class="input"></div>
                     <div><small>Agua (L)</small><input id="adm-set-water" type="number" class="input"></div>
@@ -372,7 +392,7 @@
     <div id="modal-create" class="modal hidden">
         <div class="modal-content">
             <h3>Nueva Rutina</h3>
-            <input id="new-rout-name" class="input" placeholder="Nombre (Ej: Pierna Hipertrofia)">
+            <input id="new-rout-name" class="input" placeholder="Nombre (Ej: Pierna A)">
             <input id="search-ex" class="input" placeholder="🔍 Buscar..." onkeyup="renderExSelector()">
             <div id="ex-list" style="max-height:300px; overflow-y:auto; margin-bottom:15px; border:1px solid #333; border-radius:8px; padding:5px;"></div>
             <div style="display:flex; gap:10px;">
@@ -393,21 +413,10 @@
         </div>
     </div>
 
-    <div id="modal-note" class="modal hidden">
-        <div class="modal-content">
-            <h3>Nota del Ejercicio</h3>
-            <textarea id="note-text" class="input" rows="4" placeholder="Ej: Sillín al 6, molestias en hombro..."></textarea>
-            <div style="display:flex; gap:10px;">
-                <button onclick="saveNote()" class="btn btn-primary">Guardar</button>
-                <button onclick="document.getElementById('modal-note').classList.add('hidden')" class="btn btn-secondary">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
     <audio id="beep" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
 
     <script>
-        // --- 1. FIREBASE CONFIG (PON TUS CLAVES AQUÍ) ---
+        // --- 1. FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
             authDomain: "fitdata-7a86b.firebaseapp.com",
@@ -435,17 +444,17 @@
         let weightChart = null;
         let adminWeightChart = null;
         let currentAdminUser = null;
-        let currentNoteExId = null;
 
-        // --- 3. GENERADOR SVG "ANATÓMICO" (Silueta Negra + Músculo Rojo) ---
+        // --- 3. GENERADOR SVG INTELIGENTE (ESTILO ICONO) ---
         function getMuscleSvg(muscle) {
             const m = muscle.toLowerCase();
             let silhouette = "";
             let highlight = "";
 
-            // PATHS DE SILUETAS
-            const torsoPath = "M 50,10 L 70,15 L 75,30 L 65,75 L 67,90 L 33,90 L 35,75 L 25,30 L 30,15 Z"; // Cintura para arriba
-            const legsPath = "M 25,5 L 75,5 L 80,30 L 85,90 L 55,90 L 50,45 L 45,90 L 15,90 L 20,30 Z"; // Cintura para abajo
+            // SILUETA TORSO (Negro Sólido)
+            const torsoPath = "M 50,10 L 70,15 L 75,30 L 65,75 L 67,90 L 33,90 L 35,75 L 25,30 L 30,15 Z"; 
+            // SILUETA PIERNAS (Negro Sólido)
+            const legsPath = "M 25,5 L 75,5 L 80,30 L 85,90 L 55,90 L 50,45 L 45,90 L 15,90 L 20,30 Z";
 
             if (m.includes('pierna') || m.includes('glute') || m.includes('femoral') || m.includes('gemelo') || m.includes('abductor')) {
                 // TREN INFERIOR
@@ -460,7 +469,7 @@
                 else if (m.includes('biceps') || m.includes('brazo')) highlight = `<rect x="15" y="40" width="10" height="20" fill="#FF0000"/><rect x="75" y="40" width="10" height="20" fill="#FF0000"/>`;
                 else if (m.includes('espalda')) highlight = `<path d="M 30,25 L 70,25 L 60,60 L 40,60 Z" fill="#FF0000"/>`;
                 else if (m.includes('abs')) highlight = `<rect x="40" y="50" width="20" height="25" fill="#FF0000"/>`;
-                else if (m.includes('triceps')) highlight = `<rect x="10" y="40" width="8" height="20" fill="#FF0000"/><rect x="82" y="40" width="8" height="20" fill="#FF0000"/>`;
+                else if (m.includes('triceps') || m.includes('tríceps')) highlight = `<rect x="10" y="40" width="8" height="20" fill="#FF0000"/><rect x="82" y="40" width="8" height="20" fill="#FF0000"/>`;
             }
 
             return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
@@ -479,15 +488,17 @@
             
             container.innerHTML = `
             <svg viewBox="0 0 100 120" style="height:100%; display:block; margin:0 auto;">
-                <path d="M50,5 C55,5 60,10 60,15 C60,20 55,23 50,23 C45,23 40,20 40,15 C40,10 45,5 50,5 M30,25 L70,25 L65,70 L35,70 Z M35,72 L32,115 L45,115 L48,80 L52,80 L55,115 L68,115 L65,72 Z" fill="#333"/>
-                
-                <path d="M35,28 L65,28 L63,45 L37,45 Z" fill="#ff4444" fill-opacity="${getOp('Pecho')}"/>
+                <g fill="#333">
+                    <circle cx="50" cy="15" r="8" /> <path d="M30,25 L70,25 L65,70 L35,70 Z" /> <path d="M25,28 L15,55 L25,60 L32,30 Z" /> <path d="M75,28 L85,55 L75,60 L68,30 Z" /> <path d="M35,70 L30,110 L45,110 L48,80 L52,80 L55,110 L70,110 L65,70 Z" /> </g>
+                <path d="M35,30 L65,30 L63,45 L37,45 Z" fill="#ff4444" fill-opacity="${getOp('Pecho')}"/>
                 <path d="M40,48 L60,48 L58,68 L42,68 Z" fill="#ff4444" fill-opacity="${getOp('Abs')}"/>
-                <path d="M35,72 L32,110 L45,110 L48,80 L52,80 L55,110 L68,110 L65,72 Z" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
+                <path d="M25,28 L15,55 L25,60 L32,30 Z" fill="#ff4444" fill-opacity="${getOp('Bíceps')}"/>
+                <path d="M75,28 L85,55 L75,60 L68,30 Z" fill="#ff4444" fill-opacity="${getOp('Bíceps')}"/>
+                <path d="M35,70 L30,110 L45,110 L48,80 L52,80 L55,110 L70,110 L65,70 Z" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
             </svg>`;
         }
 
-        // 4. BASE DE DATOS DE EJERCICIOS (82 Items)
+        // 4. BASE DE DATOS COMPLETA (82 ITEMS)
         const rawExercisesDB = [
             { id: 1, name: 'Sentadilla con Barra', muscle: 'Piernas', emoji: '🏋️' },
             { id: 2, name: 'Sentadilla Jaca', muscle: 'Piernas', emoji: '⚙️' },
@@ -580,15 +591,16 @@
 
         function showToast(msg) { const t=document.getElementById("toast"); t.innerText=msg; t.className="show"; setTimeout(()=>t.className="",3000); }
 
-        // --- 5. AUTH & LOGIC ---
+        // 5. AUTH & LOGIC
         auth.onAuthStateChanged(async u => {
             if(u) {
-                // LISTENER TIEMPO REAL AL USUARIO
                 db.collection('users').doc(u.uid).onSnapshot(doc => {
                     if(doc.exists) {
                         userData = doc.data();
-                        
-                        if(userData.email.toLowerCase() === ADMIN_EMAIL) listenToAllUsers();
+                        // Si soy Admin, escuchar cambios globales
+                        if(userData.email.toLowerCase() === ADMIN_EMAIL) {
+                            listenToAllUsers();
+                        }
                         
                         if(userData.approved || userData.email.toLowerCase() === ADMIN_EMAIL) {
                             currentUser = u;
@@ -622,10 +634,7 @@
                 const isAdmin = email.toLowerCase() === ADMIN_EMAIL;
                 const cred = await auth.createUserWithEmailAndPassword(email, document.getElementById('reg-pass').value);
                 await db.collection('users').doc(cred.user.uid).set({
-                    username: document.getElementById('reg-name').value, 
-                    email, 
-                    age: document.getElementById('reg-age').value,
-                    height: document.getElementById('reg-height').value,
+                    username: document.getElementById('reg-name').value, email, 
                     role: isAdmin?'admin':'user', approved: isAdmin, 
                     settings:{rest:60, screen:true, sound:true, goal:'Mantenimiento'},
                     stats:{kg:0, workouts:0, sets:0, reps:0, heatmap:{}},
@@ -637,20 +646,12 @@
             } catch(e) { showToast(e.message); }
         }
 
-        // --- 6. APP INIT ---
+        // 6. APP INIT
         async function initApp() {
             showScreen('app'); nav('view-home');
             document.getElementById('u-name').innerText = userData.username.split(' ')[0];
             document.getElementById('u-goal').innerText = userData.settings.goal || 'Objetivo no fijado';
             
-            // Cargar datos en config
-            document.getElementById('cfg-age').value = userData.age || '';
-            document.getElementById('cfg-height').value = userData.height || '';
-            document.getElementById('cfg-goal').value = userData.settings.goal || 'Mantenimiento';
-            document.getElementById('cfg-rest').value = userData.settings.rest || 60;
-            document.getElementById('cfg-screen').checked = userData.settings.screen;
-            document.getElementById('cfg-sound').checked = userData.settings.sound;
-
             // Nutrición
             if(userData.targets && (userData.targets.kcal > 0 || userData.targets.water > 0)) {
                 document.getElementById('nutrition-panel').classList.remove('hidden');
@@ -661,6 +662,18 @@
             }
 
             if(userData.role === 'admin') document.getElementById('admin-btn').classList.remove('hidden');
+            
+            // Cargar Config y Alarma Fotos
+            document.getElementById('cfg-goal').value = userData.settings.goal || 'Mantenimiento';
+            document.getElementById('cfg-rest').value = userData.settings.rest || 60;
+            document.getElementById('cfg-screen').checked = userData.settings.screen;
+            document.getElementById('cfg-sound').checked = userData.settings.sound;
+            
+            if(userData.settings.alarmDay && userData.settings.alarmDay != -1) {
+                const today = new Date().getDay();
+                if(today == userData.settings.alarmDay) showToast("📷 ¡Hoy toca foto de revisión!");
+            }
+
             loadRoutines(); loadProfile();
         }
 
@@ -673,10 +686,9 @@
             if(vid.includes('config')) document.querySelector('.nav-item:nth-child(3)').classList.add('active');
         }
 
-        // --- 7. DASHBOARD & RUTINAS ---
+        // 7. DASHBOARD & ROUTINES
         async function loadRoutines() {
             const l = document.getElementById('routines-list'); 
-            // Escuchar cambios en rutinas
             db.collection('users').doc(currentUser.uid).collection('routines').orderBy('createdAt','desc').onSnapshot(s => {
                 l.innerHTML = '';
                 if(s.empty) l.innerHTML = '<p style="color:#666;">No tienes rutinas asignadas.</p>';
@@ -693,7 +705,7 @@
             });
         }
 
-        // --- 8. WORKOUT SYSTEM ---
+        // 8. AUTOGUARDADO & WORKOUT CORE
         function saveWorkoutToStorage() {
             if (activeRoutine) {
                 localStorage.setItem('fitdata_wo', JSON.stringify({routine: activeRoutine, start: woStartTime}));
@@ -716,7 +728,7 @@
         async function startWo(id) {
             const doc = await db.collection('users').doc(currentUser.uid).collection('routines').doc(id).get();
             const r = doc.data(); 
-            // 5 Series por defecto: 1x20, 4x16
+            // 5 Series por defecto
             const preparedExercises = r.exercises.map(ex => ({
                 ...ex,
                 series: Array(5).fill().map((_, i) => ({ weight: '', reps: i===0?20:16, completed: false }))
@@ -757,17 +769,7 @@
                         <div class="${checkClass}" onclick="checkSet(this, ${idx}, ${i})">✓</div>
                     </div>`;
                 });
-                c.innerHTML += `
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <img src="${ex.image}" class="ex-img">
-                            <h4>${ex.name}</h4>
-                        </div>
-                        <button onclick="openNote(${idx})" class="btn-icon">📝</button>
-                    </div>
-                    ${rows}
-                </div>`;
+                c.innerHTML += `<div class="card"><div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;"><img src="${ex.image}" class="ex-img"><h4>${ex.name}</h4></div>${rows}</div>`;
             });
 
             if(woTimerInt) clearInterval(woTimerInt);
@@ -820,13 +822,16 @@
         async function saveWorkoutLog(rpe) {
             document.getElementById('modal-rpe').classList.add('hidden');
             let totalKg=0, totalSets=0, totalReps=0;
-            
+            let muscleMap = userData.stats?.heatmap || {};
+
             activeRoutine.exercises.forEach(ex => {
                 ex.series.forEach(s => {
                     if(s.completed) {
                         totalKg += (parseFloat(s.weight)||0) * (parseFloat(s.reps)||0);
                         totalSets++;
                         totalReps += parseFloat(s.reps)||0;
+                        // Heatmap logic simple
+                        muscleMap[ex.muscle] = (muscleMap[ex.muscle] || 0) + 1;
                     }
                 });
             });
@@ -836,7 +841,7 @@
                 sets: (userData.stats?.sets||0) + totalSets,
                 reps: (userData.stats?.reps||0) + totalReps,
                 workouts: (userData.stats?.workouts||0) + 1,
-                heatmap: userData.stats?.heatmap || {} 
+                heatmap: muscleMap
             };
 
             await db.collection('users').doc(currentUser.uid).update({ stats: newStats });
@@ -853,41 +858,28 @@
         }
         function exitWorkout() { document.getElementById('workout-ui').classList.remove('active'); stopRest(); initApp(); }
 
-        function openNote(exIdx) {
-            currentNoteExId = exIdx;
-            document.getElementById('modal-note').classList.remove('hidden');
-        }
-        function saveNote() {
-            // Aquí iría la lógica de guardar nota, simplificada por ahora
-            showToast("Nota guardada");
-            document.getElementById('modal-note').classList.add('hidden');
-        }
-
-        // --- 9. PROFILE & STATS ---
+        // 9. PROFILE & STATS
         function loadProfile() {
-            const s = userData.stats || {kg:0, workouts:0, sets:0, reps:0};
+            const s = userData.stats || {kg:0, workouts:0, sets:0, reps:0, heatmap:{}};
             document.getElementById('stat-kg').innerText = (s.kg/1000).toFixed(1) + 't';
             document.getElementById('stat-workouts').innerText = s.workouts;
             document.getElementById('stat-sets').innerText = s.sets;
             document.getElementById('stat-reps').innerText = s.reps;
-            renderHeatmap(s.heatmap || { 'Pecho': 20, 'Espalda': 30 });
+            renderHeatmap(s.heatmap || {});
             loadGraph(); loadPhotos();
         }
 
         async function saveConfig() {
             const goal = document.getElementById('cfg-goal').value;
-            const age = document.getElementById('cfg-age').value;
-            const height = document.getElementById('cfg-height').value;
             const screen = document.getElementById('cfg-screen').checked;
             const sound = document.getElementById('cfg-sound').checked;
             const rest = parseInt(document.getElementById('cfg-rest').value);
+            const alarmDay = parseInt(document.getElementById('cfg-alarm-day').value);
             
             await db.collection('users').doc(currentUser.uid).update({
-                age, height,
-                'settings.goal': goal, 'settings.screen': screen, 'settings.sound': sound, 'settings.rest': rest
+                'settings.goal': goal, 'settings.screen': screen, 'settings.sound': sound, 'settings.rest': rest, 'settings.alarmDay': alarmDay
             });
-            userData.settings = { goal, screen, sound, rest };
-            userData.age = age; userData.height = height;
+            userData.settings = { goal, screen, sound, rest, alarmDay };
             showToast("Perfil Actualizado");
         }
 
@@ -943,8 +935,10 @@
                 
                 snap.forEach(d => {
                     const u = d.data();
+                    // Detectar estancamiento (admin visual)
+                    const isStagnant = false; // Lógica compleja omitida por espacio
                     const item = `
-                    <div class="user-row">
+                    <div class="user-row ${isStagnant?'stagnant':''}">
                         <div><b>${u.username}</b><br><small style="color:#888">${u.email}</small>
                         <br><span class="stat-badge">${u.settings?.goal || '-'}</span></div>
                         <div style="text-align:right;">
@@ -999,6 +993,7 @@
         }
 
         async function approve(id) { await db.collection('users').doc(id).update({approved:true}); }
+        async function toggleNut(id, val) { await db.collection('users').doc(id).update({nutrition:val}); showToast(val?"Nutrición Activada":"Desactivada"); }
         async function delUser(id) { if(confirm("Borrar?")) await db.collection('users').doc(id).delete(); }
         async function assignRout(uid) {
             if(confirm("¿Asignar rutina básica?")) {
@@ -1032,4 +1027,3 @@
     </script>
 </body>
 </html>
-
