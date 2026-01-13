@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0a">
     <title>Fit Data by Toni</title>
     
     <link rel="apple-touch-icon" href="favicon.png">
@@ -17,16 +18,14 @@
     
     <style>
         :root {
-            /* COLORES CORPORATIVOS */
             --bg: #0a0a0a; 
             --card: #1a1a1a; 
             --text: #ffffff; 
             --muted: #b0b0b0;
-            --accent: #ff4444;       /* Rojo FitData */
+            --accent: #ff4444;
             --success: #22dd88; 
             --warning: #ffaa00;
-            
-            /* ÁREA SEGURA (NOTCH/ISLA DINÁMICA) */
+            /* SAFE AREA PARA MOVILES TODO PANTALLA */
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
@@ -37,62 +36,44 @@
             background:var(--bg); 
             color:var(--text); 
             min-height:100vh; 
-            /* Espacio para la barra de navegación inferior + área segura */
             padding-bottom: calc(90px + var(--safe-bottom)); 
             overscroll-behavior-y:none; 
         }
         
-        /* UTILIDADES */
+        /* UI KIT */
         .hidden { display:none !important; }
-        .container { 
-            max-width:600px; 
-            margin:0 auto; 
-            padding:20px; 
-            /* Espacio extra arriba para compensar el header fijo */
-            padding-top: 10px; 
-        }
+        .container { max-width:600px; margin:0 auto; padding:20px; padding-top:10px; }
         
-        /* CABECERAS Y NAVEGACIÓN (FIX SAFE AREA) */
+        /* NAVBAR SUPERIOR FIJA (con ajuste Notch) */
         .navbar-top {
-            position: sticky;
-            top: 0;
+            position: sticky; top: 0; z-index: 100;
             background: rgba(26, 26, 26, 0.98);
             backdrop-filter: blur(10px);
-            z-index: 100;
             border-bottom: 2px solid var(--accent);
             padding: 15px 20px;
-            /* EL TRUCO PARA QUE NO LO TAPE EL RELOJ/WIFI */
-            padding-top: calc(20px + var(--safe-top)); 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding-top: calc(15px + var(--safe-top)); 
+            display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        /* BOTONES E INPUTS */
+        /* BOTONES */
         .btn { width:100%; padding:14px; border:none; border-radius:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; font-size:0.95rem; transition:0.2s; }
         .btn:active { transform:scale(0.97); opacity:0.9; }
         .btn-primary { background:var(--accent); color:white; box-shadow:0 4px 15px rgba(255, 68, 68, 0.3); }
         .btn-secondary { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; }
         .btn-success { background:var(--success); color:black; }
-        .btn-icon { width:auto; padding:8px 12px; font-size:1.2rem; background:rgba(255,255,255,0.1); border-radius:8px; }
         
         .input { width:100%; padding:14px; margin-bottom:12px; background:#222; border:1px solid #333; color:white; border-radius:10px; font-size:1rem; }
-        .input:focus { border-color:var(--accent); background:#2a2a2a; }
+        .input:focus { border-color:var(--accent); }
 
         /* CARDS */
         .card { background:var(--card); padding:20px; border-radius:16px; margin-bottom:15px; border:1px solid #222; position:relative; overflow:hidden; border-left:4px solid var(--accent); }
         
-        /* GENERADOR DE IMÁGENES PREMIUM */
+        /* --- GENERADOR IMÁGENES (SVG) --- */
         .ex-img { 
             width: 65px; height: 65px; 
-            background: white; /* Fondo Blanco */
-            border: 3px solid var(--accent); /* Borde Rojo Grueso */
-            border-radius: 12px;
-            padding: 0; 
-            object-fit: contain; 
-            flex-shrink: 0;
-            display: block;
+            background: white; border: 3px solid var(--accent); border-radius: 12px;
+            padding: 0; object-fit: contain; flex-shrink: 0; display: block;
         }
 
         /* WORKOUT UI */
@@ -103,32 +84,29 @@
         .check-btn.checked { background:var(--success); border-color:var(--success); color:black; transform:scale(1.1); }
         .check-btn.checked::after { content:'✓'; }
 
-        /* NAV BOTTOM (CON SAFE AREA) */
+        /* NAV BOTTOM (con ajuste Notch inferior) */
         .nav-bottom { 
             position:fixed; bottom:0; left:0; width:100%; 
-            background:rgba(20,20,20,0.98); 
-            border-top:1px solid #333; 
-            display:flex; justify-content:space-around; 
-            padding:12px 0; 
+            background:rgba(20,20,20,0.98); border-top:1px solid #333; 
+            display:flex; justify-content:space-around; padding:12px 0; 
             padding-bottom: calc(12px + var(--safe-bottom)); 
             z-index:100; 
         }
-        .nav-item { color:#555; background:none; border:none; font-size:0.65rem; display:flex; flex-direction:column; align-items:center; width:20%; text-transform:uppercase; font-weight:600; letter-spacing:0.5px; transition:0.3s; }
+        .nav-item { color:#555; background:none; border:none; font-size:0.65rem; display:flex; flex-direction:column; align-items:center; width:20%; text-transform:uppercase; font-weight:600; letter-spacing:0.5px; }
         .nav-item.active { color:var(--accent); transform:translateY(-2px); }
         .nav-item i { font-size:1.3rem; margin-bottom:4px; font-style: normal; }
 
-        /* MODALS & SCREENS */
+        /* MODALS */
         .screen { display:none; opacity:0; transition:opacity 0.3s; }
         .screen.active { display:block; opacity:1; }
         .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:2000; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-        .modal-content { background:var(--card); width:95%; max-width:500px; padding:25px; border-radius:20px; border:1px solid #333; max-height:80vh; overflow-y:auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .modal-content { background:var(--card); width:95%; max-width:500px; padding:25px; border-radius:20px; border:1px solid #333; max-height:80vh; overflow-y:auto; }
 
         /* UTILS */
         .timer-float { position:fixed; bottom: calc(90px + var(--safe-bottom)); right:20px; width:65px; height:65px; background:var(--bg); border:2px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-family:monospace; color:var(--accent); box-shadow:0 0 20px rgba(255,68,68,0.3); z-index:1000; cursor:pointer; }
         
         /* ADMIN LIST */
         .user-row { display:flex; justify-content:space-between; align-items:center; padding:15px; background:#1f1f1f; border-radius:10px; margin-bottom:10px; border-left:3px solid #444; }
-        .badge { padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold; }
         
         /* TOAST */
         #toast { visibility:hidden; min-width:250px; background-color:#222; color:#fff; text-align:center; border-radius:50px; padding:12px 20px; position:fixed; z-index:3000; left:50%; bottom:calc(90px + var(--safe-bottom)); transform:translateX(-50%); border:1px solid var(--accent); box-shadow:0 5px 15px rgba(0,0,0,0.5); font-size:0.9rem; }
@@ -136,19 +114,9 @@
         @keyframes fadein { from{bottom:60px; opacity:0;} to{bottom:calc(90px + var(--safe-bottom)); opacity:1;} }
         @keyframes fadeout { from{bottom:calc(90px + var(--safe-bottom)); opacity:1;} to{bottom:60px; opacity:0;} }
 
-        /* LOGO ANIMATION (Grande y Latido) */
-        .loading-logo {
-            width: 140px; height: 140px; /* Más grande */
-            margin-bottom: 20px;
-            border-radius: 25px;
-            animation: pulse-logo 2.5s infinite ease-in-out; /* Más lento y suave */
-            box-shadow: 0 0 40px rgba(255, 68, 68, 0.4);
-        }
-        @keyframes pulse-logo {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.9; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        /* LOGO ANIMATION */
+        .loading-logo { width: 140px; height: 140px; margin-bottom: 20px; border-radius: 25px; animation: pulse-logo 2.5s infinite ease-in-out; box-shadow: 0 0 40px rgba(255, 68, 68, 0.4); }
+        @keyframes pulse-logo { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.9; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -157,8 +125,8 @@
 
     <div id="loading" class="screen active" style="text-align:center; padding-top:30vh; background: #000;">
         <img src="favicon.png" alt="Logo" class="loading-logo">
-        <h1 style="color:var(--accent); font-size:3.5rem; margin:0; letter-spacing: -2px;">FIT DATA</h1>
-        <p style="color:var(--muted); margin-top:10px; font-size: 1.1rem;">Coach Intelligence System</p>
+        <h1 style="color:var(--accent); font-size:3.5rem; margin:0; letter-spacing:-2px;">FIT DATA</h1>
+        <p style="color:var(--muted); margin-top:10px; font-size:1.1rem;">Coach Intelligence System</p>
     </div>
 
     <div id="login" class="screen">
@@ -230,9 +198,7 @@
         </div>
 
         <div id="view-profile" class="view hidden">
-            <div class="navbar-top">
-                <h2>Mi Rendimiento</h2>
-            </div>
+            <div class="navbar-top"><h2>Mi Rendimiento</h2></div>
             <div class="container">
                 <div class="card" style="text-align:center;">
                     <h3>Mapa de Trabajo</h3>
@@ -266,7 +232,13 @@
                             📷 <input type="file" id="photo-in" accept="image/*" hidden onchange="uploadPhoto(this)">
                         </label>
                     </div>
-                    <div id="gallery" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;"></div>
+                    <p class="text-muted" style="margin:10px 0;">📸 Misma luz, misma ropa, mismo ángulo.</p>
+                    
+                    <div style="display:flex; gap:5px; margin-bottom:15px;">
+                        <div id="comp-before" style="flex:1; aspect-ratio:3/4; border:1px dashed #444; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden;"><small>Inicio</small></div>
+                        <div id="comp-now" style="flex:1; aspect-ratio:3/4; border:1px dashed #444; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden;"><small>Actual</small></div>
+                    </div>
+                    <div id="gallery" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
                 </div>
             </div>
         </div>
@@ -359,7 +331,7 @@
     <audio id="beep" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
 
     <script>
-        // 1. FIREBASE CONFIG
+        // 1. FIREBASE CONFIG (PON TUS CLAVES AQUÍ)
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
             authDomain: "fitdata-7a86b.firebaseapp.com",
@@ -386,28 +358,23 @@
         let wakeLock = null;
         let weightChart = null;
 
-        // 3. NUEVO GENERADOR DE IMÁGENES SVG (ESTILO PREMIUM "FOTO")
+        // 3. GENERADOR DE IMÁGENES SVG INTELIGENTE (TREN SUPERIOR VS INFERIOR)
         function getMuscleSvg(muscle) {
             const m = muscle.toLowerCase();
             let silhouette = "";
             let highlight = "";
 
-            // SILUETA TORSO (Para ejercicios de tren superior)
+            // RUTAS SVG (PATHS)
             const torsoPath = "M 50,15 L 65,20 L 70,35 L 60,75 L 62,90 L 38,90 L 40,75 L 30,35 L 35,20 Z";
-            
-            // SILUETA PIERNAS (Para ejercicios de tren inferior)
             const legsPath = "M 35,10 L 65,10 L 68,40 L 75,90 L 55,90 L 52,50 L 48,50 L 45,90 L 25,90 L 32,40 Z";
 
-            if (m.includes('pierna') || m.includes('glute') || m.includes('femoral') || m.includes('gemelo')) {
-                // Usar silueta de piernas
+            if (m.includes('pierna') || m.includes('glute') || m.includes('femoral') || m.includes('gemelo') || m.includes('abductor')) {
+                // TREN INFERIOR
                 silhouette = `<path d="${legsPath}" fill="#000000"/>`;
-                // Resaltar todo en rojo
-                highlight = `<path d="${legsPath}" fill="#FF0000" stroke="none"/>`;
+                highlight = `<path d="${legsPath}" fill="#FF0000" stroke="none"/>`; // Todo rojo
             } else {
-                // Usar silueta de torso
+                // TREN SUPERIOR
                 silhouette = `<path d="${torsoPath}" fill="#000000"/>`;
-                
-                // Músculos específicos
                 if (m.includes('pecho')) highlight = `<path d="M 38,35 L 62,35 L 60,50 L 40,50 Z" fill="#FF0000"/>`;
                 else if (m.includes('hombro')) highlight = `<path d="M 30,35 L 40,35 L 38,45 L 32,42 Z M 70,35 L 60,35 L 62,45 L 68,42 Z" fill="#FF0000"/>`;
                 else if (m.includes('biceps') || m.includes('brazo')) highlight = `<path d="M 28,45 L 38,45 L 36,65 L 30,62 Z M 72,45 L 62,45 L 64,65 L 70,62 Z" fill="#FF0000"/>`;
@@ -424,11 +391,10 @@
             </svg>`);
         }
 
-        // GENERADOR DE HEATMAP CORPORAL
+        // GENERADOR DE HEATMAP (Visualización Perfil)
         function renderHeatmap(stats) {
             const container = document.getElementById('heatmap-render');
             if (!container) return;
-            // Calcular opacidad basada en series (max 50)
             const getOp = (key) => Math.min(0.2 + ((stats[key]||0) / 50), 1);
             
             container.innerHTML = `
@@ -441,7 +407,7 @@
             </svg>`;
         }
 
-        // BASE DE DATOS COMPLETA (82 EJERCICIOS)
+        // 4. BASE DE DATOS COMPLETA (82 EJERCICIOS)
         const rawExercisesDB = [
             { id: 1, name: 'Sentadilla con Barra', muscle: 'Piernas', emoji: '🏋️' },
             { id: 2, name: 'Sentadilla Jaca', muscle: 'Piernas', emoji: '⚙️' },
@@ -527,7 +493,7 @@
             { id: 82, name: 'Prensa 45°', muscle: 'Piernas', emoji: '⚙️' },
         ];
 
-        // Mapear la base de datos a un formato usable con imágenes
+        // Mapear con imágenes
         const exercisesDB = rawExercisesDB.map(ex => ({
             ...ex,
             image: getMuscleSvg(ex.muscle)
@@ -535,25 +501,27 @@
 
         function showToast(msg) { const t=document.getElementById("toast"); t.innerText=msg; t.className="show"; setTimeout(()=>t.className="",3000); }
 
-        // 4. AUTH & ADMIN LIVE LISTENERS
+        // 5. AUTH & LOGIC (Con Listeners en Tiempo Real)
         auth.onAuthStateChanged(async u => {
             if(u) {
-                // Escuchar cambios en el usuario en tiempo real
+                // Escuchar usuario en tiempo real
                 db.collection('users').doc(u.uid).onSnapshot(doc => {
                     if(doc.exists) {
                         userData = doc.data();
                         
-                        // Si soy Admin, escuchar cambios globales de usuarios
+                        // Si soy Admin, activar listener global
                         if(userData.email.toLowerCase() === ADMIN_EMAIL) {
-                            listenToAllUsers(); // Activa el panel en tiempo real
+                            listenToAllUsers();
                         }
                         
                         if(userData.approved || userData.email.toLowerCase() === ADMIN_EMAIL) {
                             currentUser = u;
-                            // Pequeño retardo artificial para disfrutar el logo
+                            // Retardo para animación logo
                             setTimeout(() => {
                                 document.getElementById('loading').classList.remove('active');
                                 initApp();
+                                // Recuperar sesión previa si existe
+                                loadWorkoutFromStorage(); 
                             }, 2500);
                         } else {
                             document.getElementById('loading').classList.remove('active');
@@ -591,7 +559,7 @@
             } catch(e) { showToast(e.message); }
         }
 
-        // 5. APP INIT
+        // 6. APP INIT
         async function initApp() {
             showScreen('app'); nav('view-home');
             document.getElementById('u-name').innerText = userData.username.split(' ')[0];
@@ -612,10 +580,10 @@
             if(vid.includes('config')) document.querySelector('.nav-item:nth-child(3)').classList.add('active');
         }
 
-        // 6. DASHBOARD
+        // 7. DASHBOARD & ROUTINES
         async function loadRoutines() {
-            const l = document.getElementById('routines-list'); l.innerHTML='';
-            // Usamos onSnapshot para ver rutinas en tiempo real (por si el admin asigna una)
+            const l = document.getElementById('routines-list'); 
+            // Escuchar cambios en rutinas (asignaciones de coach)
             db.collection('users').doc(currentUser.uid).collection('routines').orderBy('createdAt','desc').onSnapshot(s => {
                 l.innerHTML = '';
                 if(s.empty) l.innerHTML = '<p style="color:#666;">No tienes rutinas asignadas.</p>';
@@ -632,39 +600,76 @@
             });
         }
 
-        // 7. WORKOUT
+        // 8. AUTOGUARDADO & WORKOUT
+        function saveWorkoutToStorage() {
+            if (activeRoutine) {
+                localStorage.setItem('fitdata_wo', JSON.stringify({routine: activeRoutine, start: woStartTime}));
+            }
+        }
+        function loadWorkoutFromStorage() {
+            const saved = localStorage.getItem('fitdata_wo');
+            if(saved) {
+                const data = JSON.parse(saved);
+                // Si hace menos de 3 horas, restaurar
+                if(new Date() - new Date(data.start) < 3*60*60*1000) {
+                    if(confirm("¿Recuperar entreno anterior?")) {
+                        activeRoutine = data.routine;
+                        woStartTime = new Date(data.start);
+                        renderWorkoutScreen();
+                    } else localStorage.removeItem('fitdata_wo');
+                } else localStorage.removeItem('fitdata_wo');
+            }
+        }
+
         async function startWo(id) {
             const doc = await db.collection('users').doc(currentUser.uid).collection('routines').doc(id).get();
-            const r = doc.data(); activeRoutine = {id, ...r};
+            const r = doc.data(); 
+            
+            // Preparar ejercicios con 5 series por defecto
+            const preparedExercises = r.exercises.map(ex => ({
+                ...ex,
+                series: Array(5).fill().map((_, i) => ({ weight: '', reps: i===0?20:16, completed: false }))
+            }));
+
+            activeRoutine = {id, name: r.name, exercises: preparedExercises};
+            woStartTime = new Date();
             
             if(userData.settings.screen && 'wakeLock' in navigator) try{ wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
+            saveWorkoutToStorage();
+            renderWorkoutScreen();
+        }
+
+        async function renderWorkoutScreen() {
             document.getElementById('workout-ui').classList.add('active');
-            document.getElementById('wo-title').innerText = r.name;
+            document.getElementById('wo-title').innerText = activeRoutine.name;
             const c = document.getElementById('wo-container'); c.innerHTML='';
 
-            const hSnap = await db.collection('users').doc(currentUser.uid).collection('history').where('routineId','==',id).orderBy('date','desc').limit(1).get();
+            // Obtener pesos anteriores
+            const hSnap = await db.collection('users').doc(currentUser.uid).collection('history')
+                .where('routineId','==',activeRoutine.id).orderBy('date','desc').limit(1).get();
             const last = !hSnap.empty ? hSnap.docs[0].data() : null;
-            const defReps = [20,16,16,16,16];
 
-            r.exercises.forEach((ex, idx) => {
+            activeRoutine.exercises.forEach((ex, idx) => {
                 let rows = '';
-                for(let i=0; i<5; i++) {
-                    const prev = last?.exercises[idx]?.sets[i]?.w || '-';
+                ex.series.forEach((s, i) => {
+                    const prev = last?.exercises[idx]?.series[i]?.weight || '-';
+                    const rowClass = s.completed ? 'set-row done' : 'set-row';
+                    const checkClass = s.completed ? 'check-btn checked' : 'check-btn';
+                    
                     rows += `
-                    <div class="set-row">
+                    <div class="${rowClass}" id="row-${idx}-${i}">
                         <div style="text-align:center; color:#888;">${i+1}</div>
-                        <input type="number" class="input reps" value="${defReps[i]}" style="margin:0; text-align:center; height:35px;">
+                        <input type="number" class="input reps" value="${s.reps}" onchange="updateSet(${idx},${i},'reps',this.value)" style="margin:0; text-align:center; height:35px;">
                         <div style="position:relative;">
                             <span class="prev-weight">${prev}kg</span>
-                            <input type="number" class="input weight" placeholder="kg" style="margin:0; text-align:center; height:35px;">
+                            <input type="number" class="input weight" value="${s.weight}" onchange="updateSet(${idx},${i},'weight',this.value)" placeholder="kg" style="margin:0; text-align:center; height:35px;">
                         </div>
-                        <div class="check-btn" onclick="checkSet(this)">✓</div>
+                        <div class="${checkClass}" onclick="checkSet(this, ${idx}, ${i})">✓</div>
                     </div>`;
-                }
+                });
                 c.innerHTML += `<div class="card"><div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;"><img src="${ex.image}" class="ex-img"><h4>${ex.name}</h4></div>${rows}</div>`;
             });
 
-            woStartTime = new Date();
             if(woTimerInt) clearInterval(woTimerInt);
             woTimerInt = setInterval(()=>{
                 const d = Math.floor((new Date()-woStartTime)/1000);
@@ -672,9 +677,29 @@
             },1000);
         }
 
-        function checkSet(btn) {
+        function updateSet(exIdx, sIdx, field, val) {
+            activeRoutine.exercises[exIdx].series[sIdx][field] = val;
+            saveWorkoutToStorage();
+        }
+
+        function checkSet(btn, exIdx, sIdx) {
             if(btn.classList.contains('checked')) return;
-            btn.classList.add('checked'); btn.parentElement.classList.add('done');
+            
+            // Marcar UI
+            btn.classList.add('checked'); 
+            document.getElementById(`row-${exIdx}-${sIdx}`).classList.add('done');
+            
+            // Actualizar datos
+            activeRoutine.exercises[exIdx].series[sIdx].completed = true;
+            saveWorkoutToStorage();
+
+            // 1RM Check
+            const s = activeRoutine.exercises[exIdx].series[sIdx];
+            if(s.weight > 0) {
+                const onerm = s.weight * (1 + s.reps/30);
+                // Si es un peso alto considerable
+                if(s.weight > 80) showToast(`🏆 ¡Posible Récord! 1RM: ${Math.round(onerm)}kg`); 
+            }
             startRest();
         }
 
@@ -696,19 +721,42 @@
         
         async function saveWorkoutLog(rpe) {
             document.getElementById('modal-rpe').classList.add('hidden');
-            // Logic to collect sets data would go here
+            
+            // Calcular Stats
+            let totalKg=0, totalSets=0;
+            activeRoutine.exercises.forEach(ex => {
+                ex.series.forEach(s => {
+                    if(s.completed) {
+                        totalKg += (parseFloat(s.weight)||0) * (parseFloat(s.reps)||0);
+                        totalSets++;
+                    }
+                });
+            });
+
+            // Guardar Stats Globales
+            const newStats = {
+                kg: (userData.stats?.kg||0) + totalKg,
+                sets: (userData.stats?.sets||0) + totalSets,
+                reps: (userData.stats?.reps||0) + 0, // Simplified
+                workouts: (userData.stats?.workouts||0) + 1,
+                heatmap: userData.stats?.heatmap || {} 
+            };
+
+            await db.collection('users').doc(currentUser.uid).update({ stats: newStats });
             await db.collection('users').doc(currentUser.uid).collection('history').add({
                 date: firebase.firestore.FieldValue.serverTimestamp(),
                 routineId: activeRoutine.id, routineName: activeRoutine.name,
                 duration: Math.floor((new Date()-woStartTime)/1000), rpe, 
-                exercises: [] // Simplified for demo
+                exercises: activeRoutine.exercises
             });
+
             if(wakeLock) wakeLock.release();
+            localStorage.removeItem('fitdata_wo');
             exitWorkout(); showToast("Entreno Guardado 🚀");
         }
         function exitWorkout() { document.getElementById('workout-ui').classList.remove('active'); stopRest(); initApp(); }
 
-        // 8. PROFILE & STATS
+        // 9. PROFILE & STATS
         function loadProfile() {
             const s = userData.stats || {kg:0, workouts:0, sets:0, reps:0, heatmap:{}};
             document.getElementById('stat-kg').innerText = (s.kg/1000).toFixed(1) + 't';
@@ -737,6 +785,7 @@
             const img = new Image(); img.src = URL.createObjectURL(f);
             img.onload = async () => {
                 const cvs = document.createElement('canvas'); const ctx = cvs.getContext('2d');
+                // Redimensionar para no saturar Firestore (Max 600px)
                 const sc = 600/img.width; cvs.width=600; cvs.height=img.height*sc;
                 ctx.drawImage(img,0,0,cvs.width,cvs.height);
                 const b64 = cvs.toDataURL('image/jpeg', 0.6);
@@ -747,17 +796,20 @@
         async function loadPhotos() {
             const g = document.getElementById('gallery'); g.innerHTML='';
             const s = await db.collection('users').doc(currentUser.uid).collection('photos').orderBy('date','desc').get();
-            s.docs.forEach(d => {
-                const p = d.data();
-                const div = document.createElement('div'); div.className='photo-item';
-                div.innerHTML = `<img src="${p.img}"><div class="photo-date">${p.date?p.date.toDate().toLocaleDateString():''}</div>`;
-                g.appendChild(div);
+            const p = s.docs.map(d=>d.data());
+            if(p.length) {
+                document.getElementById('comp-before').innerHTML = `<img src="${p[p.length-1].img}" style="width:100%; height:100%; object-fit:cover;">`;
+                document.getElementById('comp-now').innerHTML = `<img src="${p[0].img}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+            p.forEach(x => {
+                const d = document.createElement('div'); d.className='photo-item';
+                d.innerHTML = `<img src="${x.img}"><div class="photo-date">${x.date?x.date.toDate().toLocaleDateString():''}</div>`;
+                g.appendChild(d);
             });
         }
 
-        // 9. ADMIN EN TIEMPO REAL (SOLUCIÓN A TU PROBLEMA)
+        // 10. ADMIN REAL-TIME
         function listenToAllUsers() {
-            // Escuchar cambios en TODA la colección de usuarios
             db.collection('users').orderBy('createdAt','desc').onSnapshot(snap => {
                 const pend = document.getElementById('adm-pending'); const usrs = document.getElementById('adm-users');
                 const count = document.getElementById('count-pending');
