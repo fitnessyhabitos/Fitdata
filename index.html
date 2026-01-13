@@ -259,7 +259,7 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN FIREBASE (Tus claves reales) ---
+        // --- CONFIGURACIÓN FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
             authDomain: "fitdata-7a86b.firebaseapp.com",
@@ -272,7 +272,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- GENERADOR DE IMÁGENES SVG (ESTILO "PECHO.JPG") ---
+        // --- 1. GENERADOR DE IMÁGENES SVG (ESTILO "PECHO.JPG") ---
         function getMuscleSvg(muscleName) {
             const safeId = muscleName.toLowerCase().replace(/[^a-z0-9]/g, '');
             // SVG: Fondo Blanco, Borde Rojo Grueso (#FF0000), Silueta Negra, Músculo Rojo
@@ -297,7 +297,7 @@
             return p ? `<path d="${p}" fill="#FF0000" stroke="none"/>` : '';
         }
 
-        // --- BASE DE DATOS COMPLETA (82 EJERCICIOS) CON IMÁGENES GENERADAS ---
+        // --- 2. BASE DE DATOS COMPLETA (82 EJERCICIOS) ---
         const rawExercises = [
             { id: 1, name: 'Sentadilla con Barra', muscle: 'Piernas' },
             { id: 2, name: 'Sentadilla Jaca', muscle: 'Piernas' },
@@ -389,7 +389,7 @@
             image: getMuscleSvg(ex.muscle)
         }));
 
-        // --- 4. LÓGICA DE LA APLICACIÓN ---
+        // --- 3. LÓGICA DE LA APLICACIÓN ---
         const ACCESS_CODE = "fityhab";
         let currentUser = null;
         let userData = null;
@@ -413,7 +413,6 @@
                         showScreen('login-screen');
                     }
                 } else {
-                    // Caso raro: usuario auth pero no db
                     auth.signOut();
                     showScreen('login-screen');
                 }
@@ -453,16 +452,28 @@
 
             if (code !== ACCESS_CODE) return alert("⛔ Código de acceso incorrecto");
 
+            // --- ¡¡¡AQUÍ ESTÁ TU PUERTA TRASERA DE ADMIN!!! ---
+            // SUSTITUYE "tu_email_real@gmail.com" POR TU EMAIL REAL
+            const MY_EMAIL = "toni@fitdata.com"; 
+            const isMe = email.toLowerCase() === MY_EMAIL.toLowerCase();
+
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, pass);
                 await db.collection('users').doc(cred.user.uid).set({
                     username: name,
                     email: email,
-                    role: 'user',
-                    approved: false,
+                    // Si eres tú, te hace admin y te aprueba automáticamente
+                    role: isMe ? 'admin' : 'user',
+                    approved: isMe ? true : false,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                alert("✅ Solicitud enviada correctamente. Espera aprobación.");
+                
+                if(isMe) {
+                    alert("✅ Bienvenido Jefe. Cuenta de Admin creada.");
+                } else {
+                    alert("✅ Solicitud enviada correctamente. Espera aprobación.");
+                }
+                
                 showLogin();
             } catch(err) { alert(err.message); }
         }
