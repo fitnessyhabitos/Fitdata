@@ -22,7 +22,7 @@
             --input-bg: #1f1f1f;
             --text-color: #ffffff;
             --text-dim: #888888;
-            --accent-color: #ff3333; /* Rojo Neón */
+            --accent-color: #ff3333;
             --accent-dim: rgba(255, 51, 51, 0.2);
             --accent-glow: 0 0 12px rgba(255, 51, 51, 0.5);
             --success-color: #00ff88;
@@ -53,35 +53,29 @@
             border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.85rem;
         }
         .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; }
+        .btn-danger { background: #600; color: #fcc; border: 1px solid #f00; margin-top: 10px; }
         
-        /* ESTADO COMPLETADO */
         .btn-done {
             background-color: rgba(255, 51, 51, 0.3) !important;
             border: 1px solid var(--accent-color) !important;
             color: white !important;
-            box-shadow: 0 0 8px rgba(255, 51, 51, 0.4);
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.4);
         }
 
-        /* LOADING REDONDEADO */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         #loading-logo { 
-            width: 140px; 
-            border-radius: 25px; /* Redondea las esquinas negras si existen */
-            box-shadow: 0 0 40px rgba(255, 51, 51, 0.4); /* Glow externo */
-            animation: breathe 3s infinite;
-            /* Truco para eliminar fondo negro si la imagen no es transparente */
-            clip-path: inset(0 round 25px); 
+            width: 140px; border-radius: 25px; box-shadow: 0 0 30px rgba(255, 51, 51, 0.3);
+            animation: breathe 3s infinite; clip-path: inset(0 round 25px); 
         }
         .loading-text {
             margin-top: 30px; color: var(--accent-color); font-family: monospace;
             font-size: 1.1rem; letter-spacing: 4px; font-weight: bold;
-            text-shadow: 0 0 10px var(--accent-color);
-            animation: blink 0.8s infinite;
+            text-shadow: 0 0 10px var(--accent-color); animation: blink 0.8s infinite;
         }
-        @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 40px rgba(255,51,51,0.6); } 50% { transform: scale(1.05); opacity: 0.8; box-shadow: 0 0 20px rgba(255,51,51,0.2); } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
         header {
@@ -159,7 +153,11 @@
 
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
         .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background: #1a1a1a; width: 90%; max-width: 360px; padding: 25px; border-radius: 15px; border: 1px solid var(--accent-color); text-align: center; }
+        .modal-content { 
+            background: #1a1a1a; width: 90%; max-width: 380px; padding: 25px; 
+            border-radius: 15px; border: 1px solid var(--accent-color); text-align: center;
+            max-height: 85vh; overflow-y: auto; /* Para el coach panel largo */
+        }
 
         .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -173,6 +171,12 @@
         .img-overlay { clip-path: inset(0 50% 0 0); border-right: 2px solid white; }
         .slider-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; cursor: ew-resize; z-index: 10; }
         .slider-btn { position: absolute; top: 50%; left: -15px; width: 30px; height: 30px; background: white; border-radius: 50%; display: grid; place-items: center; color: black; box-shadow: 0 0 10px black; }
+
+        /* RPE BUTTONS */
+        .rpe-btn { width: 100%; margin-bottom: 10px; border: none; padding: 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+        .rpe-easy { background: #2e7d32; }
+        .rpe-hard { background: #f57f17; color: black; }
+        .rpe-max { background: #c62828; }
 
     </style>
 </head>
@@ -260,7 +264,7 @@
             </div>
 
             <div class="card">
-                <h3>MAPA MUSCULAR</h3>
+                <h3>MAPA MUSCULAR (SERIES)</h3>
                 <div id="heatmap-container"></div>
             </div>
 
@@ -328,7 +332,7 @@
                     <span style="font-size:0.6rem; color:#666;">TIEMPO</span><br>
                     <span id="mini-timer" style="color:var(--accent-color); font-weight:bold;">00:00</span>
                 </div>
-                <button class="btn-small btn" onclick="finishWorkoutPrompt()">TERMINAR</button>
+                <button class="btn-small btn" onclick="promptRPE()">TERMINAR</button>
             </div>
             <h2 id="workout-title" style="margin-bottom:20px;">Entreno</h2>
             <div id="workout-exercises"></div>
@@ -365,20 +369,51 @@
         </div>
     </div>
 
-    <div id="modal-coach" class="modal">
+    <div id="modal-rpe" class="modal">
         <div class="modal-content">
-            <h3 id="coach-user-name">Usuario</h3>
-            <p id="coach-user-email" style="color:#666; font-size:0.8rem; margin-bottom:15px;"></p>
-            <select id="coach-routine-select"></select>
-            <button class="btn" style="margin-top:10px;" onclick="assignRoutine()">ASIGNAR RUTINA</button>
-            <button class="btn-outline" onclick="document.getElementById('modal-coach').classList.remove('active')">CERRAR</button>
+            <h3>FINALIZAR ENTRENO</h3>
+            <p style="color:#888; margin-bottom:20px;">¿Qué tal ha ido?</p>
+            <button class="rpe-btn rpe-easy" onclick="finishWorkout('Suave')">🟢 Suave / Moderado</button>
+            <button class="rpe-btn rpe-hard" onclick="finishWorkout('Duro')">🟠 Duro / Intenso</button>
+            <button class="rpe-btn rpe-max" onclick="finishWorkout('Fallo')">🔴 Fallo / Extremo</button>
+            <button class="btn-outline" onclick="document.getElementById('modal-rpe').classList.remove('active')">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modal-coach" class="modal">
+        <div class="modal-content" style="max-height:90vh; overflow-y:auto; text-align:left;">
+            <div style="text-align:center; margin-bottom:15px;">
+                <h3 id="coach-user-name" style="border:none; margin:0;">Usuario</h3>
+                <p id="coach-user-email" style="color:#666; font-size:0.8rem;"></p>
+            </div>
+            
+            <div style="background:#222; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.8rem;">
+                <strong>STATS:</strong> <span id="coach-stats-text">Cargando...</span>
+            </div>
+
+            <h4>Gráfica Peso</h4>
+            <div style="height:150px; margin-bottom:15px;"><canvas id="coachWeightChart"></canvas></div>
+
+            <h4>Historial Entrenos</h4>
+            <div id="coach-history-list" style="max-height:150px; overflow-y:auto; font-size:0.75rem; color:#aaa; margin-bottom:15px; border:1px solid #333; padding:5px;"></div>
+
+            <hr style="border-color:#333; margin:15px 0;">
+            
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.8rem;">Asignar Rutina:</label>
+                <select id="coach-routine-select" style="margin-top:5px;"></select>
+                <button class="btn-small btn" style="width:100%;" onclick="assignRoutine()">ASIGNAR</button>
+            </div>
+
+            <button class="btn-danger btn-small" style="width:100%;" onclick="deleteUser()">🗑️ ELIMINAR ATLETA</button>
+            <button class="btn-outline" style="margin-top:10px;" onclick="document.getElementById('modal-coach').classList.remove('active')">CERRAR</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, query, where, addDoc, deleteDoc, getDocs, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, query, where, addDoc, deleteDoc, getDocs, serverTimestamp, increment, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
@@ -406,13 +441,11 @@
             if(audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-            // Trigger 1 micro silent sound
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.001);
+            const buffer = audioCtx.createBuffer(1, 1, 22050);
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(0);
         }
         document.addEventListener('touchstart', unlockAudio, {once:true});
         document.addEventListener('click', unlockAudio, {once:true});
@@ -421,30 +454,24 @@
             if(!audioCtx) unlockAudio();
             if(audioCtx) {
                 const now = audioCtx.currentTime;
-                // Sequence of 5 beeps
                 for(let i=0; i<5; i++) {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.type = 'square'; // Aggressive tone
+                    osc.type = 'square';
                     osc.frequency.value = 880; 
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    
-                    const start = now + (i * 0.6); // Spaced out
+                    const start = now + (i * 0.6);
                     const end = start + 0.15;
-                    
                     osc.start(start);
                     osc.stop(end);
-                    
                     gain.gain.setValueAtTime(0.5, start);
                     gain.gain.exponentialRampToValueAtTime(0.01, end);
                 }
             }
         }
 
-        window.testSound = () => {
-            play5Beeps();
-        };
+        window.testSound = () => { play5Beeps(); };
 
         // BASE DE DATOS
         const EXERCISES = [
@@ -491,7 +518,7 @@
             {n:"Crunch Máquina", img:"abs.png", m:"Abs"}, {n:"Rodillas al Pecho", img:"abs.png", m:"Abs"}
         ];
 
-        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, editingRoutineId=null;
+        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, editingRoutineId=null, coachChart=null;
 
         function getExerciseData(name) {
             let match = EXERCISES.find(e => e.n === name);
@@ -648,10 +675,14 @@
 
             const muscles = ["Pecho","Espalda","Cuádriceps","Isquios","Glúteos","Hombros","Bíceps","Tríceps"];
             const hC = document.getElementById('heatmap-container'); hC.innerHTML = '';
+            // REAL MUSCLE DATA
+            const muscleStats = userData.muscleStats || {};
+            
             muscles.forEach(m=>{
-                const pct = Math.floor(Math.random()*90)+10; 
+                const count = muscleStats[m] || 0;
+                const pct = Math.min((count / 20) * 100, 100); 
                 const d = document.createElement('div'); d.className = 'muscle-bar-group';
-                d.innerHTML = `<div class="muscle-label"><span>${m}</span><span>${pct}%</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+                d.innerHTML = `<div class="muscle-label"><span>${m}</span><span>${count} series</span></div><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>`;
                 hC.appendChild(d);
             });
             const ctx = document.getElementById('weightChart'); if(chartInstance) chartInstance.destroy();
@@ -743,14 +774,49 @@
         
         function startTimerMini() { const d=document.getElementById('mini-timer'); const s=Date.now(); setInterval(()=>{const df=Math.floor((Date.now()-s)/1000); d.innerText=`${Math.floor(df/60)}:${(df%60).toString().padStart(2,'0')}`;},1000); }
         
-        window.finishWorkoutPrompt = async () => {
-            if(confirm("¿Guardar entreno?")) {
-                let s=0, r=0, k=0;
-                activeWorkout.exs.forEach(e => e.sets.forEach(st => { if(st.d) { s++; r+=parseInt(st.r)||0; k+=(parseInt(st.w)||0)*(parseInt(st.r)||0); }}));
-                await addDoc(collection(db,"workouts"), {uid:currentUser.uid, date:serverTimestamp(), routine:activeWorkout.name});
-                await updateDoc(doc(db,"users",currentUser.uid), { "stats.workouts": increment(1), "stats.totalSets": increment(s), "stats.totalReps": increment(r), "stats.totalKg": increment(k) });
-                if(wakeLock) wakeLock.release(); switchTab('routines-view');
+        window.promptRPE = () => {
+            document.getElementById('modal-rpe').classList.add('active');
+        };
+
+        window.finishWorkout = async (rpeVal) => {
+            document.getElementById('modal-rpe').classList.remove('active');
+            
+            let s=0, r=0, k=0;
+            let muscleCounts = {};
+            
+            activeWorkout.exs.forEach(e => {
+                e.sets.forEach(st => { 
+                    if(st.d) { 
+                        s++; 
+                        r+=parseInt(st.r)||0; 
+                        k+=(parseInt(st.w)||0)*(parseInt(st.r)||0); 
+                        const mName = e.mInfo.main;
+                        muscleCounts[mName] = (muscleCounts[mName] || 0) + 1;
+                    }
+                });
+            });
+
+            await addDoc(collection(db,"workouts"), {
+                uid:currentUser.uid, 
+                date:serverTimestamp(), 
+                routine:activeWorkout.name,
+                rpe: rpeVal
+            });
+            
+            const updates = { 
+                "stats.workouts": increment(1), 
+                "stats.totalSets": increment(s), 
+                "stats.totalReps": increment(r), 
+                "stats.totalKg": increment(k) 
+            };
+            
+            for (const [muscle, count] of Object.entries(muscleCounts)) {
+                updates[`muscleStats.${muscle}`] = increment(count);
             }
+
+            await updateDoc(doc(db,"users",currentUser.uid), updates);
+            if(wakeLock) wakeLock.release(); 
+            switchTab('routines-view');
         };
 
         async function loadAdminUsers() {
@@ -763,16 +829,44 @@
                 div.onclick=()=>openCoachModal(d.id,u); l.appendChild(div);
             });
         }
+
         async function openCoachModal(uid,u) {
             selectedUserCoach=uid;
             const m=document.getElementById('modal-coach');
             document.getElementById('coach-user-name').innerText=u.name;
             document.getElementById('coach-user-email').innerText=u.email;
+            
+            // Stats Summary
+            const st = u.stats || {};
+            document.getElementById('coach-stats-text').innerText = `${st.workouts||0} Entrenos | ${(st.totalKg/1000||0).toFixed(1)}t Carga | ${u.age} Años`;
+
+            // Chart
+            if(coachChart) coachChart.destroy();
+            const ctx = document.getElementById('coachWeightChart');
+            const wData = u.weightHistory || [];
+            coachChart = new Chart(ctx, { type:'line', data:{ labels:wData.map((_,i)=>i+1), datasets:[{label:'Kg', data:wData, borderColor:'#ff3333', fill:false}] }, options:{plugins:{legend:{display:false}}, scales:{x:{display:false},y:{grid:{color:'#333'}}}}});
+
+            // History List
+            const hList = document.getElementById('coach-history-list');
+            hList.innerHTML = 'Cargando...';
+            const q = query(collection(db,"workouts"), where("uid","==",uid), orderBy("date","desc"), limit(5));
+            const wSnap = await getDocs(q);
+            hList.innerHTML = '';
+            if(wSnap.empty) hList.innerHTML='Sin datos.';
+            wSnap.forEach(w=>{
+                const d = w.data();
+                const date = d.date ? new Date(d.date.seconds*1000).toLocaleDateString() : '-';
+                hList.innerHTML += `<div style="border-bottom:1px solid #333; padding:5px;">${date} - ${d.routine} <span style="float:right; color:${d.rpe==='Fallo'?'#d32f2f':'#388e3c'}">${d.rpe||'?'}</span></div>`;
+            });
+
             if(!u.approved && confirm("¿Aprobar?")) { await updateDoc(doc(db,"users",uid),{approved:true}); loadAdminUsers(); }
+            
             const sel=document.getElementById('coach-routine-select'); sel.innerHTML='';
-            const rS=await getDocs(collection(db,"routines")); rS.forEach(r=>{ const o=document.createElement('option'); o.value=r.id; o.innerText=r.data().name; sel.appendChild(o); });
+            const rS=await getDocs(collection(db,"routines")); 
+            rS.forEach(r=>{ const o=document.createElement('option'); o.value=r.id; o.innerText=r.data().name; sel.appendChild(o); });
             m.classList.add('active');
         }
+
         window.assignRoutine = async () => {
             const rid=document.getElementById('coach-routine-select').value; if(!rid||!selectedUserCoach)return;
             const rRef=doc(db,"routines",rid); const rSnap=await getDoc(rRef);
@@ -780,10 +874,20 @@
             document.getElementById('modal-coach').classList.remove('active');
         };
 
+        window.deleteUser = async () => {
+            if(confirm("¿ELIMINAR ATLETA DEFINITIVAMENTE? Esta acción no se puede deshacer.")) {
+                await deleteDoc(doc(db, "users", selectedUserCoach));
+                // Opcional: Borrar sus workouts (requiere cloud functions para batch delete real, aqui solo borramos perfil)
+                alert("Atleta eliminado.");
+                document.getElementById('modal-coach').classList.remove('active');
+                loadAdminUsers();
+            }
+        };
+
         document.getElementById('btn-login').onclick=()=>signInWithEmailAndPassword(auth,document.getElementById('login-email').value,document.getElementById('login-pass').value).catch(e=>alert(e.message));
         document.getElementById('btn-register').onclick=async()=>{
             if(document.getElementById('reg-code').value!==CODE)return alert("Código mal");
-            try{ const c=await createUserWithEmailAndPassword(auth,document.getElementById('reg-email').value,document.getElementById('reg-pass').value); await setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('reg-name').value,email:document.getElementById('reg-email').value,approved:document.getElementById('reg-email').value===ADMIN}); }catch(e){alert(e.message);}
+            try{ const c=await createUserWithEmailAndPassword(auth,document.getElementById('reg-email').value,document.getElementById('reg-pass').value); await setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('reg-name').value,email:document.getElementById('reg-email').value,approved:document.getElementById('reg-email').value===ADMIN, age:document.getElementById('reg-age').value, height:document.getElementById('reg-height').value}); }catch(e){alert(e.message);}
         };
     </script>
 </body>
