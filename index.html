@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        /* --- VARIABLES CSS (DISEÑO CYBERPUNK) --- */
         :root {
             --bg: #0a0a0a;
             --card: #141414;
@@ -28,6 +29,7 @@
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
+        /* --- RESET GLOBAL --- */
         * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
@@ -35,160 +37,231 @@
             color: var(--text);
             font-family: var(--font-main);
             height: 100vh;
-            overflow: hidden;
+            overflow: hidden; /* Evita scroll elástico en iOS */
             display: flex;
             flex-direction: column;
         }
 
-        /* --- UTILIDADES --- */
+        /* --- CLASES DE UTILIDAD --- */
         .hidden { display: none !important; }
         .text-primary { color: var(--primary); }
         .flex-center { display: flex; justify-content: center; align-items: center; }
+        
+        /* BOTONES ESTILO NEÓN */
         .btn {
-            background: var(--primary); color: white; border: none; padding: 14px 20px;
-            border-radius: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-            cursor: pointer; transition: 0.2s; width: 100%; font-size: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
         }
-        .btn:active { transform: scale(0.98); opacity: 0.8; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn-small { padding: 6px 12px; font-size: 12px; width: auto; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+        }
 
-        /* --- LOGO & TYPO --- */
+        .btn-small { padding: 6px 12px; font-size: 11px; width: auto; }
+
+        /* --- IDENTIDAD VISUAL (LOGO & TEXTO) --- */
         .logo-circle {
-            width: 80px; height: 80px; background: var(--primary); border-radius: 50%;
+            width: 80px; height: 80px; 
+            background: var(--primary); 
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-weight: 900; font-size: 24px; color: black;
-            box-shadow: 0 0 20px var(--primary-dim);
+            box-shadow: 0 0 25px var(--primary-dim);
+            margin-bottom: 10px;
         }
+        
         .brand-text {
-            font-family: var(--font-display); font-size: 2rem; letter-spacing: -1px;
-            text-transform: uppercase; margin-top: 15px;
-            background: linear-gradient(to right, #fff, #888);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-family: var(--font-display); 
+            font-size: 2.2rem; 
+            letter-spacing: -2px;
+            text-transform: uppercase; 
+            margin-top: 5px;
+            background: linear-gradient(to right, #fff, #999);
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent;
         }
         .brand-text span { color: var(--primary); -webkit-text-fill-color: var(--primary); }
 
-        /* --- PANTALLA DE CARGA --- */
+        /* --- ANIMACIÓN PANTALLA DE CARGA --- */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .pulse-anim { animation: pulse-red 2.5s infinite; }
+        
+        .pulse-anim { animation: pulse-red 2.5s infinite ease-in-out; }
+        
         @keyframes pulse-red {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
-            50% { transform: scale(1.05); box-shadow: 0 0 0 25px rgba(255, 68, 68, 0); }
+            50% { transform: scale(1.1); box-shadow: 0 0 0 30px rgba(255, 68, 68, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
         }
 
-        /* --- LAYOUT PRINCIPAL --- */
+        /* --- CABECERA Y NAVEGACIÓN --- */
         header {
-            padding-top: max(10px, var(--safe-top)); padding-bottom: 10px;
+            padding-top: max(10px, var(--safe-top)); 
+            padding-bottom: 10px;
             padding-left: 20px; padding-right: 20px;
-            background: rgba(10,10,10,0.95); backdrop-filter: blur(10px);
+            background: rgba(10,10,10,0.95); 
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--card-border);
             display: flex; justify-content: space-between; align-items: center;
             position: fixed; top: 0; width: 100%; z-index: 100;
         }
-        .header-brand { font-weight: 900; font-size: 1.2rem; letter-spacing: -1px; }
+        .header-brand { font-weight: 900; font-size: 1.2rem; letter-spacing: -1px; color: white; }
         .header-brand span { color: var(--primary); }
 
+        /* CONTENEDOR PRINCIPAL SCROLLEABLE */
         #main-container {
-            flex: 1; overflow-y: auto;
+            flex: 1; 
+            overflow-y: auto;
             padding: calc(60px + var(--safe-top)) 20px calc(80px + var(--safe-bottom)) 20px;
             scroll-behavior: smooth;
         }
 
         nav {
             position: fixed; bottom: 0; width: 100%;
-            background: rgba(20,20,20,0.95); backdrop-filter: blur(10px);
+            background: rgba(20,20,20,0.98); 
+            backdrop-filter: blur(12px);
             border-top: 1px solid var(--card-border);
             padding-bottom: var(--safe-bottom);
-            display: flex; justify-content: space-around; z-index: 100;
+            display: flex; justify-content: space-around; 
+            z-index: 100;
         }
         .nav-item {
             padding: 15px; color: var(--text-dim); text-align: center; font-size: 10px; flex: 1;
             cursor: pointer; transition: 0.3s;
         }
-        .nav-item.active { color: var(--primary); border-top: 2px solid var(--primary); }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); border-top: 2px solid var(--primary); background: linear-gradient(to bottom, rgba(255,68,68,0.05), transparent); }
+        .nav-icon { font-size: 22px; display: block; margin-bottom: 4px; }
 
-        /* --- LOGIN / REGISTRO --- */
+        /* --- FORMULARIOS (LOGIN) --- */
         .auth-container {
-            min-height: 80vh; display: flex; flex-direction: column; 
+            min-height: 85vh; 
+            display: flex; flex-direction: column; 
             justify-content: center; align-items: center;
             padding: 20px; max-width: 400px; margin: 0 auto;
         }
-        .auth-box { width: 100%; margin-top: 30px; display: flex; flex-direction: column; gap: 15px; }
+        .auth-box { width: 100%; margin-top: 40px; display: flex; flex-direction: column; gap: 15px; }
+        
         input, select {
             background: var(--card); border: 1px solid var(--card-border);
-            color: white; padding: 15px; border-radius: 8px; width: 100%; font-size: 16px;
-            transition: border 0.3s;
+            color: white; padding: 16px; border-radius: 8px; width: 100%; font-size: 16px;
+            transition: border 0.3s, box-shadow 0.3s;
         }
-        input:focus { border-color: var(--primary); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(255,68,68,0.1); }
 
-        /* --- UI COMPONENTS --- */
+        /* --- TARJETAS UI --- */
         .card {
             background: var(--card); border: 1px solid var(--card-border);
             border-radius: 12px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden;
         }
-        .card h3 { margin-bottom: 15px; font-size: 1.1rem; color: var(--text); border-left: 3px solid var(--primary); padding-left: 10px; }
+        /* Decoración Cyberpunk en tarjetas */
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary); opacity: 0.8;
+        }
+        .card h3 { 
+            margin-bottom: 15px; font-size: 1.1rem; color: var(--text); 
+            padding-left: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
         
-        /* --- EXERCISES --- */
+        /* --- ESTILOS DE EJERCICIOS --- */
         .exercise-item {
             background: #000; border: 1px solid #333; border-radius: 8px;
             margin-bottom: 15px; overflow: hidden;
         }
         .exercise-header {
             padding: 15px; display: flex; align-items: center; justify-content: space-between;
-            background: #1a1a1a;
+            background: #1a1a1a; border-bottom: 1px solid #333;
         }
+        
+        /* Grid de Series */
         .set-row {
             display: grid; grid-template-columns: 0.6fr 1fr 1fr 0.6fr; gap: 10px;
             padding: 12px; align-items: center; border-bottom: 1px solid #222;
         }
-        .set-num { color: var(--text-dim); font-size: 12px; font-weight: bold; }
-        .shadow-data { font-size: 9px; color: #555; position: absolute; top: -6px; left: 2px; }
-        .input-group { position: relative; }
-        .set-check {
-            width: 28px; height: 28px; border-radius: 50%; border: 2px solid #444;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            transition: 0.2s;
-        }
-        .set-check.completed { background: var(--success); border-color: var(--success); color: black; font-weight: bold; transform: scale(1.1); }
+        .set-num { color: var(--text-dim); font-size: 12px; font-weight: bold; text-align: center; }
         
-        /* --- SVG --- */
+        .shadow-data { 
+            font-size: 9px; color: #666; position: absolute; top: -18px; left: 0; 
+            font-style: italic; display: flex; align-items: center; gap: 3px;
+        }
+        .input-group { position: relative; margin-top: 10px; }
+        
+        /* Checkbox Personalizado */
+        .set-check {
+            width: 30px; height: 30px; border-radius: 50%; border: 2px solid #444;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #111;
+        }
+        .set-check.completed { 
+            background: var(--success); border-color: var(--success); 
+            color: black; font-weight: 900; transform: scale(1.1); 
+        }
+        
+        /* --- VISUALIZADOR SVG --- */
         .exercise-visual {
             width: 100%; height: 140px; background: white; 
             display: flex; justify-content: center; align-items: center;
             border-bottom: 4px solid var(--primary); position: relative;
         }
         
-        /* --- ADMIN --- */
+        /* --- PANEL ADMIN --- */
         .user-list-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px; border-bottom: 1px solid #333;
+            padding: 15px; border-bottom: 1px solid #333;
         }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; display: inline-block; }
-        .status-pending { background: var(--alert); }
-        .status-approved { background: var(--success); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 10px; display: inline-block; }
+        .status-pending { background: var(--alert); box-shadow: 0 0 5px var(--alert); }
+        .status-approved { background: var(--success); box-shadow: 0 0 5px var(--success); }
 
-        /* --- REST TIMER --- */
+        /* --- TEMPORIZADOR MODAL --- */
         #rest-modal {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 200;
+            background: rgba(0,0,0,0.96); z-index: 200;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px);
         }
         .timer-circle {
-            width: 220px; height: 220px; border: 4px solid var(--primary); border-radius: 50%;
+            width: 240px; height: 240px; 
+            border: 6px solid var(--primary); border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
-            font-size: 5rem; font-weight: 900; color: white;
-            box-shadow: 0 0 40px var(--primary-dim); text-shadow: 0 0 10px var(--primary);
+            font-size: 5.5rem; font-weight: 900; color: white;
+            box-shadow: 0 0 50px var(--primary-dim), inset 0 0 20px var(--primary-dim); 
+            text-shadow: 0 0 15px var(--primary);
         }
 
-        .stagnation-alert { background: rgba(255, 170, 0, 0.1); border: 1px solid var(--alert); color: var(--alert); padding: 12px; border-radius: 6px; font-size: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-weight: bold; }
+        /* --- ALERTAS --- */
+        .stagnation-alert { 
+            background: rgba(255, 170, 0, 0.1); border: 1px solid var(--alert); 
+            color: var(--alert); padding: 15px; border-radius: 6px; 
+            font-size: 13px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-weight: bold; 
+        }
+
+        /* SVG Heatmap Styles */
+        .heatmap-path { transition: fill 0.5s ease; fill: #222; stroke: #444; }
     </style>
 </head>
 <body>
@@ -196,26 +269,28 @@
     <div id="loading-screen">
         <div class="logo-circle pulse-anim">FIT</div>
         <div class="brand-text">FIT <span>DATA</span></div>
-        <p style="margin-top:20px; color:#555; font-size:10px; letter-spacing: 3px; text-transform:uppercase;">System Initializing</p>
+        <p style="margin-top:25px; color:#555; font-size:11px; letter-spacing: 4px; text-transform:uppercase;">Initializing System...</p>
     </div>
 
     <header id="app-header" class="hidden">
         <div class="header-brand">FIT <span>DATA</span></div>
-        <div id="header-controls"></div>
+        <div id="header-controls">
+            </div>
     </header>
 
     <div id="main-container">
         
         <div id="view-auth" class="auth-container hidden">
-            <div class="logo-circle" style="width: 60px; height: 60px; font-size: 18px; margin-bottom: 10px;">FIT</div>
-            <div class="brand-text" style="font-size: 1.5rem; margin-top: 5px;">FIT <span>DATA</span></div>
+            <div class="logo-circle" style="width: 70px; height: 70px; font-size: 20px; margin-bottom: 15px;">FIT</div>
+            <div class="brand-text" style="font-size: 1.8rem;">FIT <span>DATA</span></div>
+            <p style="color:#666; margin-top:5px; font-size:12px; letter-spacing:1px;">HIGH PERFORMANCE TRACKING</p>
             
             <div id="login-form" class="auth-box">
-                <input type="email" id="login-email" placeholder="Email">
+                <input type="email" id="login-email" placeholder="Email del Atleta">
                 <input type="password" id="login-pass" placeholder="Contraseña">
-                <button class="btn" onclick="app.login()">ENTRAR</button>
-                <p style="text-align: center; color: #666; font-size: 13px; margin-top: 10px;">
-                    ¿Nuevo aquí? <span style="color:white; cursor:pointer; text-decoration:underline;" onclick="ui.toggleAuth('register')">Crear Cuenta</span>
+                <button class="btn" onclick="app.login()">ACCEDER</button>
+                <p style="text-align: center; color: #666; font-size: 13px; margin-top: 15px;">
+                    ¿Nuevo Atleta? <span style="color:var(--text); cursor:pointer; text-decoration:underline; font-weight:bold;" onclick="ui.toggleAuth('register')">Solicitar Acceso</span>
                 </p>
             </div>
 
@@ -225,82 +300,97 @@
                 <input type="password" id="reg-pass" placeholder="Contraseña">
                 <div style="display:flex; gap:10px;">
                     <input type="number" id="reg-age" placeholder="Edad">
-                    <input type="number" id="reg-height" placeholder="Alt(cm)">
+                    <input type="number" id="reg-height" placeholder="Altura (cm)">
                 </div>
-                <input type="text" id="reg-code" placeholder="CÓDIGO SECRETO" style="border-color: var(--primary);">
-                <button class="btn" onclick="app.register()">REGISTRARME</button>
-                <p style="text-align: center; color: #666; font-size: 13px; margin-top: 10px;">
-                    <span style="color:white; cursor:pointer; text-decoration:underline;" onclick="ui.toggleAuth('login')">Volver al Login</span>
+                <input type="text" id="reg-code" placeholder="CÓDIGO SECRETO (fityhab)" style="border-color: var(--primary); color: var(--primary);">
+                <button class="btn" onclick="app.register()">ENVIAR SOLICITUD</button>
+                <p style="text-align: center; color: #666; font-size: 13px; margin-top: 15px;">
+                    <span style="color:var(--text); cursor:pointer; text-decoration:underline;" onclick="ui.toggleAuth('login')">Volver al Login</span>
                 </p>
             </div>
         </div>
 
         <div id="view-pending" class="hidden flex-center" style="height: 80vh; flex-direction: column; text-align: center;">
-            <div style="font-size: 50px;">🔒</div>
-            <h2 style="margin: 20px 0;">CUENTA EN REVISIÓN</h2>
-            <p style="color: #888; max-width: 300px; line-height: 1.5;">Tu perfil está siendo analizado por el Coach. Recibirás acceso una vez aprobado.</p>
-            <button class="btn-outline" style="margin-top: 30px;" onclick="app.logout()">Cerrar Sesión</button>
+            <div style="font-size: 60px; margin-bottom:20px;">🔒</div>
+            <h2 style="margin-bottom: 10px;">ACCESO RESTRINGIDO</h2>
+            <p style="color: #888; max-width: 300px; line-height: 1.6;">
+                Tu perfil está en cola de aprobación por el Head Coach.<br>Recibirás acceso una vez verificado.
+            </p>
+            <button class="btn-outline" style="margin-top: 40px; width:auto;" onclick="app.logout()">SALIR</button>
         </div>
 
         <div id="view-dashboard" class="hidden">
-            <h2 style="margin-bottom: 20px;">MIS <span class="text-primary">RUTINAS</span></h2>
-            <div id="routines-list">
-                <div class="card" style="text-align:center; padding: 40px 20px;">
-                    <p style="color:#666; margin-bottom: 15px;">No tienes rutinas asignadas hoy.</p>
-                    <button class="btn" onclick="workoutManager.startEmptyWorkout()">+ ENTRENAMIENTO LIBRE</button>
+            <h2 style="margin-bottom: 25px;">PANEL <span class="text-primary">PRINCIPAL</span></h2>
+            
+            <div id="resume-workout-banner" class="hidden card" style="border-color: var(--alert); background: rgba(255,170,0,0.05);">
+                <h3 style="color:var(--alert); border-left-color: var(--alert); font-size:12px;">⚠️ SESIÓN NO FINALIZADA</h3>
+                <p style="color:#bbb; font-size:12px; margin-bottom:15px;">La app se cerró inesperadamente. ¿Recuperar?</p>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-small" style="background:var(--alert); color:black;" onclick="workoutManager.restoreSession()">RECUPERAR</button>
+                    <button class="btn-small btn-outline" style="border-color:#555; color:#555;" onclick="workoutManager.discardSession()">DESCARTAR</button>
                 </div>
             </div>
-            <div id="resume-workout-banner" class="hidden card" style="border-color: var(--alert);">
-                <h3 style="color:var(--alert); border-left-color: var(--alert);">ENTRENO RECUPERADO</h3>
-                <p style="color:#bbb; font-size:12px; margin-bottom:10px;">Se detectó un cierre inesperado.</p>
-                <button class="btn" style="background:var(--alert); color:black;" onclick="workoutManager.restoreSession()">CONTINUAR ENTRENO</button>
+
+            <div id="routines-list">
+                <div class="card" style="text-align:center; padding: 40px 20px; border-style: dashed; border-color: #333;">
+                    <p style="color:#666; margin-bottom: 20px; font-size:14px;">No tienes rutinas asignadas hoy.</p>
+                    <button class="btn" onclick="workoutManager.startEmptyWorkout()">+ ENTRENAMIENTO LIBRE</button>
+                </div>
             </div>
         </div>
 
         <div id="view-workout" class="hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>EN CURSO <span class="text-primary">●</span></h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position:sticky; top:0; background:var(--bg); z-index:10; padding:10px 0;">
+                <h3>EN CURSO <span class="text-primary pulse-anim" style="display:inline-block; width:10px; height:10px; border-radius:50%; background:red;"></span></h3>
                 <button class="btn-small btn-outline" onclick="workoutManager.finishWorkout()">FINALIZAR</button>
             </div>
-            <div id="workout-exercises"></div>
-            <button class="btn" onclick="ui.showAddExerciseModal()" style="margin-top: 20px; background: #333;">+ AÑADIR EJERCICIO</button>
+            
+            <div id="workout-exercises">
+                </div>
+            
+            <button class="btn" onclick="ui.showAddExerciseModal()" style="margin-top: 30px; background: #222; border: 1px solid #444;">+ AÑADIR EJERCICIO</button>
         </div>
 
         <div id="view-profile" class="hidden">
             <div id="stagnation-warning" class="hidden"></div>
             
             <div class="card">
-                <h3>HEATMAP CORPORAL</h3>
-                <div id="body-heatmap" class="flex-center" style="height: 250px;"></div>
+                <h3>MAPA DE FATIGA</h3>
+                <p style="font-size:10px; color:#666; margin-bottom:10px;">Intensidad basada en volumen histórico.</p>
+                <div id="body-heatmap" class="flex-center" style="height: 300px;">
+                    </div>
             </div>
 
             <div class="card">
                 <h3>BIG DATA</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: center;">
-                    <div>
-                        <div style="font-size: 24px; font-weight: 900; color: white;" id="stat-tonnage">0</div>
-                        <div style="font-size: 10px; color: #666;">TONELADAS (KG)</div>
+                    <div style="background:#111; padding:15px; border-radius:8px;">
+                        <div style="font-size: 20px; font-weight: 900; color: white;" id="stat-tonnage">0</div>
+                        <div style="font-size: 9px; color: #666; letter-spacing:1px; margin-top:5px;">TONELADAS (KG)</div>
                     </div>
-                    <div>
-                        <div style="font-size: 24px; font-weight: 900; color: white;" id="stat-workouts">0</div>
-                        <div style="font-size: 10px; color: #666;">ENTRENOS</div>
+                    <div style="background:#111; padding:15px; border-radius:8px;">
+                        <div style="font-size: 20px; font-weight: 900; color: white;" id="stat-workouts">0</div>
+                        <div style="font-size: 9px; color: #666; letter-spacing:1px; margin-top:5px;">ENTRENOS</div>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>EVOLUCIÓN PESO</h3>
-                <canvas id="weightChart" style="max-height: 200px;"></canvas>
+                <h3>PROGRESO PESO CORPORAL</h3>
+                <div style="height: 200px; width: 100%;">
+                    <canvas id="weightChart"></canvas>
+                </div>
             </div>
             
-            <button class="btn-outline" onclick="app.logout()">CERRAR SESIÓN</button>
+            <button class="btn-outline" style="margin-bottom:30px;" onclick="app.logout()">CERRAR SESIÓN</button>
         </div>
 
         <div id="view-admin" class="hidden">
             <h2 style="margin-bottom: 20px;">PANEL <span class="text-primary">COACH</span></h2>
             <div class="card">
                 <h3>ATLETAS REGISTRADOS</h3>
-                <div id="admin-user-list"></div>
+                <div id="admin-user-list">
+                    </div>
             </div>
         </div>
     </div>
@@ -316,25 +406,29 @@
 
     <div id="rest-modal" class="hidden">
         <div class="timer-circle" id="timer-display">60</div>
-        <div style="margin-top: 40px; display: flex; gap: 20px;">
+        <div style="margin-top: 50px; display: flex; gap: 20px; width: 80%;">
             <button class="btn-outline" onclick="timer.addTime(20)">+20s</button>
-            <button class="btn" style="background:white; color:black;" onclick="timer.stop()">OMITIR</button>
+            <button class="btn" style="background:white; color:black; border:none;" onclick="timer.stop()">OMITIR</button>
         </div>
     </div>
 
-    <div id="exercise-selector-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index: 150; padding: 20px; padding-top: var(--safe-top);">
-        <h3>SELECCIONAR EJERCICIO</h3>
-        <input type="text" id="search-exercise" placeholder="Buscar..." onkeyup="workoutManager.filterExercises()" style="margin: 15px 0;">
-        <div id="exercise-list-container" style="height: 75%; overflow-y: auto; border: 1px solid #333; border-radius: 8px;"></div>
-        <button class="btn-outline" style="position: absolute; bottom: 30px; left: 20px; width: calc(100% - 40px);" onclick="document.getElementById('exercise-selector-modal').classList.add('hidden')">CANCELAR</button>
+    <div id="exercise-selector-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index: 150; padding: 20px; padding-top: var(--safe-top); display:flex; flex-direction:column;">
+        <h3 style="margin-bottom:15px;">SELECCIONAR EJERCICIO</h3>
+        <input type="text" id="search-exercise" placeholder="Buscar ejercicio..." onkeyup="workoutManager.filterExercises()" style="margin-bottom: 15px; padding:15px; background:#222; border:none; color:white;">
+        
+        <div id="exercise-list-container" style="flex:1; overflow-y: auto; border: 1px solid #333; border-radius: 8px;">
+            </div>
+        
+        <button class="btn-outline" style="margin-top:15px;" onclick="document.getElementById('exercise-selector-modal').classList.add('hidden')">CANCELAR</button>
     </div>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, onSnapshot, addDoc, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- 1. FIREBASE CONFIG ---
+        // --- A. CONFIGURACIÓN FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
             authDomain: "fitdata-7a86b.firebaseapp.com",
@@ -348,8 +442,9 @@
         const auth = getAuth(appInstance);
         const db = getFirestore(appInstance);
 
-        // --- 2. BASE DE DATOS DE EJERCICIOS (82 COMPLETOS) ---
-        // g: Group (Upper/Lower), m: Target Muscle for SVG (quads, hamstrings, calves, glutes, back, chest, shoulders, biceps, triceps, abs)
+        // --- B. BASE DE DATOS DE EJERCICIOS (82 COMPLETOS) ---
+        // g: Grupo Visual (Upper/Lower), m: Músculo Objetivo (para Heatmap y SVG)
+        // Values for 'm': quads, hamstrings, calves, glutes, back, chest, shoulders, biceps, triceps, abs
         const EXERCISE_DB = [
             // PIERNAS (Lower)
             {n:"Sentadilla con Barra",g:"Lower",m:"quads"}, {n:"Sentadilla Jaca",g:"Lower",m:"quads"}, {n:"Sentadilla con Cinturón",g:"Lower",m:"quads"},
@@ -387,9 +482,14 @@
             {n:"Abdominales en Banco",g:"Upper",m:"abs"}, {n:"Crunch en Máquina",g:"Upper",m:"abs"}, {n:"Levantamiento Rodillas",g:"Upper",m:"abs"}
         ];
 
-        const state = { user: null, userData: null };
+        // Estado Global
+        const state = { 
+            user: null, 
+            userData: null,
+            muscleVolume: {} // Para el heatmap
+        };
 
-        // --- 3. APP LOGIC ---
+        // --- C. CONTROLADOR DE LA APLICACIÓN (CORE) ---
         window.app = {
             init: () => {
                 onAuthStateChanged(auth, async (user) => {
@@ -400,37 +500,44 @@
                     } else {
                         ui.showLogin();
                     }
-                    setTimeout(() => loader.classList.add('hidden'), 2500); // 2.5s Pulse
+                    // Mantener loading 2.5s para efecto
+                    setTimeout(() => loader.classList.add('hidden'), 2500);
                 });
             },
 
             login: async () => {
                 const email = document.getElementById('login-email').value;
                 const pass = document.getElementById('login-pass').value;
-                try { await signInWithEmailAndPassword(auth, email, pass); } catch(e) { alert(e.message); }
+                try { await signInWithEmailAndPassword(auth, email, pass); } catch(e) { alert("Error: " + e.message); }
             },
 
             register: async () => {
                 const code = document.getElementById('reg-code').value;
-                if (code !== "fityhab") return alert("CÓDIGO SECRETO INCORRECTO");
+                if (code !== "fityhab") return alert("CÓDIGO SECRETO INCORRECTO. ACCESO DENEGADO.");
+                
                 const email = document.getElementById('reg-email').value;
                 const pass = document.getElementById('reg-pass').value;
                 const name = document.getElementById('reg-name').value;
                 const age = document.getElementById('reg-age').value;
                 const height = document.getElementById('reg-height').value;
-                const isAdmin = email === "toni@fitdatapro.es";
+                const isAdmin = email === "toni@fitdatapro.es"; // Auto Admin
 
                 try {
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                    // Crear documento de usuario
                     await setDoc(doc(db, "users", cred.user.uid), {
-                        name, email, age, height, role: isAdmin ? 'admin' : 'user', approved: isAdmin,
-                        joined: new Date().toISOString(), stats: { tonnage: 0, workouts: 0 }
+                        name, email, age, height, 
+                        role: isAdmin ? 'admin' : 'user', 
+                        approved: isAdmin,
+                        joined: new Date().toISOString(), 
+                        stats: { tonnage: 0, workouts: 0 },
+                        muscleVolume: {} // Para guardar heatmap histórico
                     });
                 } catch (e) { alert(e.message); }
             },
 
             logout: () => {
-                localStorage.removeItem('fitdata_temp_workout');
+                workoutManager.discardSession(); // Limpia temporales
                 signOut(auth);
             },
 
@@ -442,13 +549,15 @@
                     
                     if (!state.userData.approved) { ui.showView('view-pending'); return; }
 
+                    // Habilitar UI
                     document.getElementById('app-header').classList.remove('hidden');
                     document.getElementById('app-nav').classList.remove('hidden');
                     
+                    // Admin Button Check
                     if (state.userData.role === 'admin') {
                         const btn = document.createElement('button');
                         btn.className = "btn-small btn-outline";
-                        btn.innerText = "COACH";
+                        btn.innerText = "MODO COACH";
                         btn.onclick = () => ui.navigate('admin');
                         document.getElementById('header-controls').appendChild(btn);
                         adminManager.init();
@@ -456,13 +565,12 @@
 
                     app.checkStagnation();
                     
-                    // CHECK LOCAL STORAGE FOR CRASH RECOVERY
+                    // Chequear si hay entreno guardado en local (CRASH RECOVERY)
                     if (localStorage.getItem('fitdata_temp_workout')) {
                         document.getElementById('resume-workout-banner').classList.remove('hidden');
                     }
 
                     ui.navigate('dashboard');
-                    ui.renderHeatmap();
                     ui.updateStats();
                 }
             },
@@ -472,17 +580,18 @@
                 const q = query(workoutsRef, where("userId", "==", state.user.uid), orderBy("date", "desc"), limit(1));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
-                    const days = Math.ceil(Math.abs(new Date() - new Date(snap.docs[0].data().date)) / (86400000));
+                    const lastDate = new Date(snap.docs[0].data().date);
+                    const days = Math.ceil(Math.abs(new Date() - lastDate) / (1000 * 60 * 60 * 24));
                     if (days > 14) {
                         const w = document.getElementById('stagnation-warning');
                         w.classList.remove('hidden'); w.classList.add('stagnation-alert');
-                        w.innerHTML = `⚠️ ALERTA: ${days} días sin registrar actividad.`;
+                        w.innerHTML = `⚠️ ALERTA: Estancamiento. ${days} días sin entrenar.`;
                     }
                 }
             }
         };
 
-        // --- 4. UI MANAGER ---
+        // --- D. GESTOR DE UI Y GRÁFICAS ---
         window.ui = {
             toggleAuth: (mode) => {
                 document.getElementById('login-form').classList.toggle('hidden', mode === 'register');
@@ -498,16 +607,24 @@
                 document.querySelectorAll('#main-container > div').forEach(d => d.classList.add('hidden'));
                 document.getElementById(viewId).classList.remove('hidden');
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                
                 if(viewId==='view-dashboard') document.querySelectorAll('.nav-item')[0].classList.add('active');
-                if(viewId==='view-profile') document.querySelectorAll('.nav-item')[1].classList.add('active');
+                if(viewId==='view-profile') {
+                    document.querySelectorAll('.nav-item')[1].classList.add('active');
+                    ui.renderHeatmap(); // Renderizar al entrar
+                    ui.renderWeightChart(); // Renderizar Chart.js
+                }
             },
             navigate: (page) => ui.showView('view-' + page),
+            
             showAddExerciseModal: () => {
                 const list = document.getElementById('exercise-list-container');
                 list.innerHTML = '';
                 EXERCISE_DB.forEach(ex => {
                     const item = document.createElement('div');
-                    item.style.padding = "15px"; item.style.borderBottom = "1px solid #333"; item.innerText = ex.n;
+                    item.style.padding = "15px"; 
+                    item.style.borderBottom = "1px solid #333"; 
+                    item.innerHTML = `<strong style="color:white">${ex.n}</strong><br><span style="font-size:10px; color:#666">${ex.m.toUpperCase()}</span>`;
                     item.onclick = () => {
                         workoutManager.addExercise(ex);
                         document.getElementById('exercise-selector-modal').classList.add('hidden');
@@ -516,14 +633,76 @@
                 });
                 document.getElementById('exercise-selector-modal').classList.remove('hidden');
             },
+
+            // --- LÓGICA HEATMAP COMPLEX ---
             renderHeatmap: () => {
-                // SVG Simplificado
-                document.getElementById('body-heatmap').innerHTML = `
-                <svg viewBox="0 0 100 200" style="height:100%; filter: drop-shadow(0 0 5px var(--primary));">
-                    <circle cx="50" cy="20" r="8" fill="#222" stroke="#444" stroke-width="2"/>
-                    <path d="M50 30 L50 90 M30 40 L10 70 M70 40 L90 70 M45 90 L35 160 M55 90 L65 160" stroke="#444" stroke-width="12" fill="none" stroke-linecap="round"/>
+                const container = document.getElementById('body-heatmap');
+                // Stats simuladas si no existen
+                const stats = state.userData.muscleVolume || { chest: 0, back: 0, legs: 0 };
+                
+                // Función para calcular opacidad rojo (0.2 a 1.0) según volumen
+                const getOp = (val) => {
+                    if(!val) return 0.1;
+                    return Math.min(0.2 + (val / 50), 1); // Max rojo a las 50 series
+                };
+
+                // SVG DE CUERPO HUMANO (Simplificado en trazos para el heatmap)
+                // IDs: hm-head, hm-chest, hm-abs, hm-arms, hm-quads, hm-calves
+                container.innerHTML = `
+                <svg viewBox="0 0 200 400" style="height:100%; filter: drop-shadow(0 0 5px var(--primary));">
+                    <g transform="translate(100,20)">
+                        <circle cx="0" cy="0" r="15" fill="#222" stroke="#444" stroke-width="2"/>
+                        <path d="M-25 20 L25 20 L15 80 L-15 80 Z" fill="rgba(255,68,68,${getOp(stats.chest || stats.back)})" stroke="#444" stroke-width="2" />
+                        <line x1="-25" y1="20" x2="-50" y2="70" stroke="rgba(255,68,68,${getOp(stats.shoulders || stats.biceps)})" stroke-width="12" stroke-linecap="round"/>
+                        <line x1="25" y1="20" x2="50" y2="70" stroke="rgba(255,68,68,${getOp(stats.shoulders || stats.biceps)})" stroke-width="12" stroke-linecap="round"/>
+                        <rect x="-15" y="80" width="30" height="40" fill="rgba(255,68,68,${getOp(stats.abs)})" stroke="#444"/>
+                        <path d="M-15 120 L-20 200" stroke="rgba(255,68,68,${getOp(stats.quads || stats.glutes)})" stroke-width="14" stroke-linecap="round"/>
+                        <path d="M15 120 L20 200" stroke="rgba(255,68,68,${getOp(stats.quads || stats.glutes)})" stroke-width="14" stroke-linecap="round"/>
+                        <path d="M-20 200 L-20 260" stroke="rgba(255,68,68,${getOp(stats.calves)})" stroke-width="10" stroke-linecap="round"/>
+                        <path d="M20 200 L20 260" stroke="rgba(255,68,68,${getOp(stats.calves)})" stroke-width="10" stroke-linecap="round"/>
+                    </g>
                 </svg>`;
             },
+
+            // --- LÓGICA CHART.JS ---
+            renderWeightChart: () => {
+                const ctx = document.getElementById('weightChart');
+                if(!ctx) return;
+                
+                // Destruir gráfica anterior si existe para evitar solapamiento
+                if(window.myWeightChart) window.myWeightChart.destroy();
+
+                // Datos simulados (En producción leerías de subcolección 'measurements')
+                const labels = ["Ene", "Feb", "Mar", "Abr", "May"];
+                const dataPoints = [70, 71, 70.5, 72, 73]; 
+
+                window.myWeightChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Peso Corporal (kg)',
+                            data: dataPoints,
+                            borderColor: '#ff4444',
+                            backgroundColor: 'rgba(255,68,68,0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: '#333' }, ticks: { color: '#888' } },
+                            x: { grid: { display: false }, ticks: { color: '#888' } }
+                        }
+                    }
+                });
+            },
+
             updateStats: () => {
                 if(state.userData && state.userData.stats) {
                     document.getElementById('stat-tonnage').innerText = (state.userData.stats.tonnage / 1000).toFixed(1) + "t";
@@ -532,15 +711,16 @@
             }
         };
 
-        // --- 5. WORKOUT MANAGER & LOCAL STORAGE AUTO-SAVE ---
+        // --- E. GESTOR DE ENTRENAMIENTO ---
         window.workoutManager = {
             currentData: [],
             
             startEmptyWorkout: () => {
                 workoutManager.currentData = [];
-                localStorage.removeItem('fitdata_temp_workout');
+                workoutManager.discardSession(); // Limpiar previos
                 ui.navigate('workout');
-                if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(()=>{});
+                // Wake Lock API (Mantener pantalla encendida)
+                if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(console.error);
             },
 
             restoreSession: () => {
@@ -551,6 +731,11 @@
                     ui.navigate('workout');
                     workoutManager.renderActiveWorkout();
                 }
+            },
+            
+            discardSession: () => {
+                localStorage.removeItem('fitdata_temp_workout');
+                document.getElementById('resume-workout-banner').classList.add('hidden');
             },
 
             saveLocal: () => {
@@ -566,10 +751,18 @@
 
             addExercise: (exercise) => {
                 const exId = Date.now();
-                workoutManager.currentData.push({ ...exercise, id: exId, sets: [
-                    {r:20, w:0, done:false}, {r:16, w:0, done:false}, {r:16, w:0, done:false}, 
-                    {r:16, w:0, done:false}, {r:16, w:0, done:false}
-                ]});
+                // Estructura de Series por defecto
+                workoutManager.currentData.push({ 
+                    ...exercise, 
+                    id: exId, 
+                    sets: [
+                        {r:20, w:0, done:false}, // Serie 1
+                        {r:16, w:0, done:false}, // Serie 2
+                        {r:16, w:0, done:false}, 
+                        {r:16, w:0, done:false}, 
+                        {r:16, w:0, done:false}  // Serie 5
+                    ]
+                });
                 workoutManager.saveLocal();
                 workoutManager.renderActiveWorkout();
             },
@@ -577,89 +770,145 @@
             renderActiveWorkout: () => {
                 const container = document.getElementById('workout-exercises');
                 container.innerHTML = '';
+                
                 workoutManager.currentData.forEach((ex, exIndex) => {
-                    // GENERADOR SVG INTELIGENTE
+                    // GENERACIÓN DE IMAGEN SVG POR CÓDIGO (Sin imágenes externas)
                     let svgContent = '';
                     const color = "var(--primary)";
+                    
                     if (ex.g === "Lower") {
-                        // Cintura para abajo
-                        svgContent = `<path d="M45 10 L35 90 M55 10 L65 90" stroke="${color}" stroke-width="15" fill="none" stroke-linecap="round"/>`;
+                        // Silueta Piernas
+                        svgContent = `<path d="M45 20 L35 90 M55 20 L65 90" stroke="${color}" stroke-width="16" fill="none" stroke-linecap="round"/>`;
                     } else {
-                        // Cintura para arriba
-                        svgContent = `<path d="M50 10 L50 60 M30 20 L10 50 M70 20 L90 50" stroke="${color}" stroke-width="12" fill="none" stroke-linecap="round"/>`;
+                        // Silueta Torso
+                        svgContent = `<path d="M50 10 L50 60 M25 25 L10 50 M75 25 L90 50" stroke="${color}" stroke-width="14" fill="none" stroke-linecap="round"/>`;
                     }
 
-                    const visualSVG = `<svg viewBox="0 0 100 100" style="height:80%; opacity:0.8;">
+                    // Renderizado del HTML del ejercicio
+                    const visualSVG = `<svg viewBox="0 0 100 100" style="height:80%; opacity:0.9; filter:drop-shadow(0 0 4px ${color});">
                         ${svgContent}
-                        <text x="50" y="95" font-size="10" text-anchor="middle" fill="#fff">${ex.m.toUpperCase()}</text>
+                        <text x="50" y="95" font-size="10" text-anchor="middle" fill="#fff" font-weight="bold">${ex.m.toUpperCase()}</text>
                     </svg>`;
 
                     const el = document.createElement('div');
                     el.className = 'exercise-item';
+                    
                     let setsHtml = '';
                     ex.sets.forEach((set, sIndex) => {
                         setsHtml += `
                         <div class="set-row">
-                            <span class="set-num">${sIndex + 1}</span>
-                            <div class="input-group"><input type="number" value="${set.w > 0 ? set.w : ''}" placeholder="KG" onchange="workoutManager.updateSet(${exIndex}, ${sIndex}, 'w', this.value)"></div>
-                            <div class="input-group"><input type="number" value="${set.r}" placeholder="REPS" onchange="workoutManager.updateSet(${exIndex}, ${sIndex}, 'r', this.value)"></div>
-                            <div class="set-check ${set.done ? 'completed' : ''}" onclick="workoutManager.completeSet(${exIndex}, ${sIndex})">${set.done ? '✓' : ''}</div>
+                            <span class="set-num">SET ${sIndex + 1}</span>
+                            <div class="input-group">
+                                <span class="shadow-data">${sIndex > 0 ? 'Prev: --' : ''}</span>
+                                <input type="number" value="${set.w > 0 ? set.w : ''}" placeholder="KG" onchange="workoutManager.updateSet(${exIndex}, ${sIndex}, 'w', this.value)">
+                            </div>
+                            <div class="input-group">
+                                <input type="number" value="${set.r}" placeholder="REPS" onchange="workoutManager.updateSet(${exIndex}, ${sIndex}, 'r', this.value)">
+                            </div>
+                            <div class="set-check ${set.done ? 'completed' : ''}" onclick="workoutManager.completeSet(${exIndex}, ${sIndex})">
+                                ${set.done ? '✓' : ''}
+                            </div>
                         </div>`;
                     });
 
-                    el.innerHTML = `<div class="exercise-visual">${visualSVG}</div>
-                        <div class="exercise-header"><span style="font-weight:bold; color:white;">${ex.n}</span></div>
-                        ${setsHtml}`;
+                    el.innerHTML = `
+                        <div class="exercise-visual">${visualSVG}</div>
+                        <div class="exercise-header">
+                            <span style="font-weight:bold; color:white; font-size:1.1rem;">${ex.n}</span>
+                            <button class="btn-small" style="background:#333;" onclick="workoutManager.removeExercise(${exIndex})">X</button>
+                        </div>
+                        ${setsHtml}
+                    `;
                     container.appendChild(el);
                 });
             },
 
+            removeExercise: (index) => {
+                if(confirm("¿Eliminar ejercicio?")) {
+                    workoutManager.currentData.splice(index, 1);
+                    workoutManager.saveLocal();
+                    workoutManager.renderActiveWorkout();
+                }
+            },
+
             updateSet: (exIdx, sIdx, field, val) => {
                 workoutManager.currentData[exIdx].sets[sIdx][field] = Number(val);
-                workoutManager.saveLocal(); // Autoguardado
+                workoutManager.saveLocal(); 
             },
 
             completeSet: (exIdx, sIdx) => {
                 const set = workoutManager.currentData[exIdx].sets[sIdx];
                 set.done = !set.done;
+                
                 if (set.done) {
                     timer.start();
-                    // Aquí iría lógica 1RM si la hubiera
+                    // Aquí podríamos calcular 1RM y mostrar alerta si es Récord
                 }
                 workoutManager.saveLocal();
                 workoutManager.renderActiveWorkout();
             },
 
             finishWorkout: async () => {
-                if (!confirm("¿Finalizar y guardar?")) return;
+                if (!confirm("¿Finalizar entrenamiento y guardar datos?")) return;
                 
                 let totalTonnage = 0;
+                let muscleCount = {};
+
+                // Procesar datos para estadísticas
                 workoutManager.currentData.forEach(ex => {
-                    ex.sets.forEach(s => { if(s.done) totalTonnage += (s.w * s.r); });
+                    let exSets = 0;
+                    ex.sets.forEach(s => { 
+                        if(s.done) {
+                            totalTonnage += (s.w * s.r);
+                            exSets++;
+                        }
+                    });
+                    // Sumar al volumen muscular (heatmap)
+                    if(exSets > 0) {
+                        muscleCount[ex.m] = (muscleCount[ex.m] || 0) + exSets;
+                    }
                 });
 
                 try {
+                    // 1. Guardar Entreno
                     await addDoc(collection(db, "workouts"), {
                         userId: state.user.uid,
                         date: new Date().toISOString(),
                         exercises: workoutManager.currentData,
-                        totalTonnage: totalTonnage
+                        totalTonnage: totalTonnage,
+                        muscleVolume: muscleCount
                     });
+
+                    // 2. Actualizar User Stats (Acumulado)
+                    // Nota: En una app real haríamos esto con Cloud Functions para seguridad atómica
+                    const currentVol = state.userData.muscleVolume || {};
+                    for (let m in muscleCount) {
+                        currentVol[m] = (currentVol[m] || 0) + muscleCount[m];
+                    }
 
                     const newStats = {
                         tonnage: (state.userData.stats.tonnage || 0) + totalTonnage,
                         workouts: (state.userData.stats.workouts || 0) + 1
                     };
-                    await updateDoc(doc(db, "users", state.user.uid), { stats: newStats });
+
+                    await updateDoc(doc(db, "users", state.user.uid), { 
+                        stats: newStats,
+                        muscleVolume: currentVol
+                    });
                     
+                    // Actualizar estado local
                     state.userData.stats = newStats;
-                    localStorage.removeItem('fitdata_temp_workout'); // Limpiar storage
+                    state.userData.muscleVolume = currentVol;
+
+                    workoutManager.discardSession(); // Borrar backup local
                     ui.navigate('dashboard');
+                    alert("¡Entrenamiento Guardado con Éxito!");
+
                 } catch (e) { alert("Error al guardar: " + e.message); }
             }
         };
 
-        // --- 6. TIMER ---
+        // --- F. TEMPORIZADOR ---
         window.timer = {
             interval: null, timeLeft: 60,
             start: () => {
@@ -667,16 +916,20 @@
                 document.getElementById('rest-modal').classList.remove('hidden');
                 document.getElementById('timer-display').innerText = timer.timeLeft;
                 clearInterval(timer.interval);
+                
                 timer.interval = setInterval(() => {
                     timer.timeLeft--;
                     document.getElementById('timer-display').innerText = timer.timeLeft;
                     if (timer.timeLeft <= 0) {
                         timer.stop();
+                        // Vibración y sonido
                         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                         const audio = new AudioContext();
                         const osc = audio.createOscillator();
                         osc.connect(audio.destination);
-                        osc.start(); osc.stop(audio.currentTime + 0.5);
+                        osc.frequency.value = 600;
+                        osc.start(); 
+                        osc.stop(audio.currentTime + 0.3);
                     }
                 }, 1000);
             },
@@ -684,9 +937,10 @@
             stop: () => { clearInterval(timer.interval); document.getElementById('rest-modal').classList.add('hidden'); }
         };
 
-        // --- 7. ADMIN ---
+        // --- G. ADMIN MANAGER ---
         window.adminManager = {
             init: () => {
+                // Escuchar cambios en usuarios en tiempo real
                 onSnapshot(query(collection(db, "users")), (snapshot) => {
                     const list = document.getElementById('admin-user-list');
                     list.innerHTML = '';
@@ -694,16 +948,31 @@
                         const u = docSnap.data();
                         const div = document.createElement('div');
                         div.className = 'user-list-item';
-                        div.innerHTML = `<div><span class="status-dot ${u.approved?'status-approved':'status-pending'}"></span><span style="color:white;font-weight:bold;">${u.name}</span><div style="font-size:10px;color:#666;">${u.email}</div></div><div>${!u.approved?`<button class="btn-small" onclick="adminManager.approve('${docSnap.id}')">APROBAR</button>`:''}</div>`;
+                        
+                        // Botón aprobar solo si approved es false
+                        const actionBtn = !u.approved 
+                            ? `<button class="btn-small" onclick="adminManager.approve('${docSnap.id}')">APROBAR</button>` 
+                            : `<span style="color:var(--success); font-size:10px;">ACTIVO</span>`;
+
+                        div.innerHTML = `
+                            <div>
+                                <span class="status-dot ${u.approved?'status-approved':'status-pending'}"></span>
+                                <span style="color:white;font-weight:bold;">${u.name}</span>
+                                <div style="font-size:10px;color:#666;">${u.email}</div>
+                            </div>
+                            <div>${actionBtn}</div>
+                        `;
                         list.appendChild(div);
                     });
                 });
             },
-            approve: async (uid) => { await updateDoc(doc(db, "users", uid), { approved: true }); }
+            approve: async (uid) => { 
+                await updateDoc(doc(db, "users", uid), { approved: true }); 
+            }
         };
 
+        // INICIAR APLICACIÓN
         app.init();
     </script>
 </body>
 </html>
-
