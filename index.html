@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Fit Data | FitHyab</title>
+    <title>Fit Data | High Performance</title>
     <link rel="icon" href="favicon.ico">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
             --bg-color: #050505;
-            --card-color: #161616;
+            --card-color: #111111;
+            --input-bg: #1a1a1a;
             --text-color: #ffffff;
             --text-dim: #888888;
             --accent-color: #ff3333; /* Rojo Neón */
-            --accent-glow: 0 0 15px rgba(255, 51, 51, 0.4);
+            --accent-dim: rgba(255, 51, 51, 0.15);
             --success-color: #00ff88;
             --warning-color: #ffaa00;
-            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
             --nav-height: 65px;
@@ -35,69 +36,54 @@
             flex-direction: column;
         }
 
-        /* --- UTILIDADES --- */
+        /* --- UI KIT --- */
         .hidden { display: none !important; }
         
         .btn {
             background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            box-shadow: var(--accent-glow);
-            transition: transform 0.1s;
+            color: white; border: none; padding: 14px;
+            border-radius: 8px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; width: 100%;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+            display: flex; justify-content: center; align-items: center; gap:8px;
         }
-        .btn:active { transform: scale(0.97); }
+        .btn:active { transform: scale(0.98); }
         
         .btn-outline { 
-            background: transparent; 
-            border: 1px solid #444; 
-            color: #ccc; 
-            padding: 12px;
-            width: 100%;
-            border-radius: 8px;
-            font-weight: 600;
-            margin-top: 10px;
+            background: transparent; border: 1px solid #444; color: #ccc; 
+            padding: 12px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;
+        }
+        
+        .btn-float {
+            position: fixed; bottom: calc(var(--nav-height) + 20px); right: 20px;
+            width: 55px; height: 55px; border-radius: 50%;
+            background: var(--accent-color); color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 5px 20px rgba(255,51,51,0.5);
+            z-index: 90; border: none;
         }
 
-        .btn-danger { background: #331111; border: 1px solid var(--accent-color); color: var(--accent-color); }
+        .btn-icon-small {
+            background: rgba(255,255,255,0.1); border: none; color: white;
+            width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+        }
 
         input, select {
-            background: #222;
-            border: 1px solid #333;
-            color: white;
-            padding: 14px;
-            border-radius: 8px;
-            width: 100%;
-            margin-bottom: 12px;
-            font-size: 16px; /* Evita zoom en iOS */
+            background: var(--input-bg); border: 1px solid #333; color: white;
+            padding: 14px; border-radius: 8px; width: 100%; margin-bottom: 12px; font-size: 16px;
         }
-        input:focus { outline: 1px solid var(--accent-color); border-color: var(--accent-color); }
+        input:focus { outline: 1px solid var(--accent-color); }
 
-        /* --- PANTALLA DE CARGA --- */
+        /* --- LAYOUT & HEADER --- */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 9999;
         }
-        /* Ajuste Logo: max-width evita pixelación si la imagen es pequeña */
-        #loading-logo { 
-            width: 80px; 
-            height: auto; 
-            object-fit: contain;
-            animation: pulse 2s infinite; 
-            filter: drop-shadow(0 0 10px var(--accent-color));
-        }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+        #loading-logo { width: 120px; height: auto; object-fit: contain; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* --- HEADER & NAV --- */
         header {
             position: fixed; top: 0; width: 100%;
             padding-top: var(--safe-top);
@@ -109,269 +95,230 @@
             height: calc(60px + var(--safe-top));
             padding-left: 20px; padding-right: 20px;
         }
-        .brand { font-weight: 900; font-size: 1.1rem; color: white; letter-spacing: -0.5px; }
+        .brand { font-weight: 900; font-size: 1.2rem; color: white; letter-spacing: -0.5px; }
         .brand span { color: var(--accent-color); }
-        
-        nav.bottom-nav {
-            position: fixed; bottom: 0; width: 100%;
-            padding-bottom: var(--safe-bottom);
-            background: #111;
-            border-top: 1px solid #222;
-            display: flex; justify-content: space-around;
-            height: calc(var(--nav-height) + var(--safe-bottom));
-            z-index: 100;
-        }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #555; font-size: 0.75rem; cursor: pointer;
-            transition: color 0.2s;
-        }
-        .nav-item.active { color: var(--accent-color); }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 4px; }
 
-        /* --- CONTENEDORES --- */
+        /* --- VISTAS --- */
         .view-container {
-            padding: calc(70px + var(--safe-top)) 15px calc(80px + var(--safe-bottom));
+            padding: calc(70px + var(--safe-top)) 15px calc(90px + var(--safe-bottom));
             min-height: 100vh;
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
+            display: none; animation: fadeIn 0.3s forwards;
         }
-        @keyframes fadeIn { to { opacity: 1; } }
+        .view-container.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TARJETAS --- */
         .card {
-            background: var(--card-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #222;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background: var(--card-color); border-radius: 12px; padding: 18px;
+            margin-bottom: 15px; border: 1px solid #222; position: relative;
         }
-        h2 { font-size: 1.5rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        h3 { font-size: 1.1rem; color: #eee; margin-bottom: 15px; font-weight: 600; }
 
-        /* --- PERFIL --- */
-        .profile-header {
-            display: flex; align-items: center; gap: 15px; margin-bottom: 20px;
+        /* --- ENTRENAMIENTO & IMAGENES --- */
+        .exercise-visual {
+            width: 100%; height: 180px;
+            background: #000; border-radius: 8px; margin-bottom: 10px;
+            overflow: hidden; border: 2px solid #333; position: relative;
         }
-        .avatar-circle {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #333; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: var(--accent-color); border: 2px solid var(--accent-color);
+        .exercise-visual img {
+            width: 100%; height: 100%; object-fit: contain; /* Ajusta la imagen completa */
+            padding: 10px;
         }
-        .stats-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        
+        .muscle-stats {
+            display: flex; gap: 5px; margin-bottom: 15px; flex-wrap: wrap;
         }
-        .stat-box {
-            background: #0a0a0a; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #222;
+        .muscle-tag {
+            background: #222; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem;
+            display: flex; align-items: center; gap: 5px; color: #aaa; border: 1px solid #333;
         }
-        .stat-num { font-size: 1.4rem; font-weight: 800; color: white; display: block; }
-        .stat-label { font-size: 0.7rem; color: #777; text-transform: uppercase; }
-
-        /* --- EJERCICIOS --- */
+        .muscle-tag.primary { border-color: var(--accent-color); color: white; background: var(--accent-dim); }
+        
         .set-row {
             display: grid; grid-template-columns: 30px 1fr 1fr 50px; gap: 10px;
-            align-items: center; margin-bottom: 10px;
+            align-items: center; margin-bottom: 8px;
         }
-        .shadow-text { font-size: 0.7rem; color: #555; text-align: right; margin-bottom: 2px; display: block; }
-        
-        .ex-svg-container {
-            width: 100%; height: 160px;
-            background: #fff; /* Fondo blanco pedido */
-            border-radius: 8px; margin-bottom: 15px;
-            display: flex; align-items: center; justify-content: center;
-            border: 3px solid var(--accent-color); /* Borde rojo grueso pedido */
-            position: relative;
+        .shadow-text { font-size: 0.65rem; color: #555; text-align: right; display: block; margin-bottom: 2px; }
+
+        /* --- PERFIL: BARRAS & FOTOS --- */
+        .muscle-bar-container { margin-bottom: 12px; }
+        .muscle-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #ccc; margin-bottom: 4px; }
+        .progress-track { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-color), #ff6666); border-radius: 4px; width: 0%; transition: width 1s ease; }
+
+        /* Comparador Fotos */
+        .compare-container {
+            position: relative; width: 100%; height: 300px;
+            background: #000; border-radius: 8px; overflow: hidden; margin-top: 10px;
+        }
+        .compare-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+        }
+        .img-after { clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%); } /* JS controlará esto */
+        .slider-handle {
+            position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white;
+            cursor: ew-resize; z-index: 10;
+        }
+        .slider-button {
+            position: absolute; top: 50%; left: -15px; width: 30px; height: 30px;
+            background: white; border-radius: 50%; display: grid; place-items: center; color: black;
+            box-shadow: 0 0 10px black;
         }
 
-        /* --- TOGGLES --- */
-        .setting-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 0; border-bottom: 1px solid #222;
+        /* --- EDITOR RUTINAS --- */
+        .exercise-item-select {
+            padding: 10px; background: #1a1a1a; margin-bottom: 5px; border-radius: 6px;
+            display: flex; justify-content: space-between; cursor: pointer; border: 1px solid transparent;
         }
-        .switch {
-            position: relative; display: inline-block; width: 50px; height: 26px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #333; transition: .4s; border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
-            background-color: white; transition: .4s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--accent-color); }
-        input:checked + .slider:before { transform: translateX(24px); }
+        .exercise-item-select.selected { border-color: var(--accent-color); background: var(--accent-dim); }
 
-        /* --- MODAL --- */
+        /* --- NAV BOTTOM --- */
+        nav.bottom-nav {
+            position: fixed; bottom: 0; width: 100%; padding-bottom: var(--safe-bottom);
+            background: #0f0f0f; border-top: 1px solid #222;
+            display: flex; justify-content: space-around; height: calc(65px + var(--safe-bottom)); z-index: 100;
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.7rem; }
+        .nav-item.active { color: var(--accent-color); }
+        .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
+
+        /* --- MODALES --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 2000;
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            opacity: 0; pointer-events: none; transition: 0.3s;
         }
         .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-box {
-            width: 85%; max-width: 350px; background: #1a1a1a;
-            padding: 25px; border-radius: 15px; border: 1px solid var(--accent-color);
-            text-align: center;
-        }
+        .modal-content { width: 90%; max-width: 350px; background: #161616; padding: 20px; border-radius: 12px; border: 1px solid var(--accent-color); text-align: center; }
 
     </style>
 </head>
 <body>
 
     <div id="loading-screen">
-        <img src="favicon.png" id="loading-logo" alt="Fit Data">
-        <p style="margin-top:20px; color:#666; font-size:0.9rem; letter-spacing:2px;">CARGANDO SISTEMA...</p>
+        <img src="logo.png" id="loading-logo" alt="Logo">
+        <p style="margin-top:20px; color:#666; font-size:0.8rem; letter-spacing:2px;">CARGANDO SISTEMA...</p>
     </div>
 
     <header id="main-header" class="hidden">
         <div class="brand">FIT DATA <span>PRO</span></div>
-        <button id="coach-btn" class="hidden" style="background:transparent; border:1px solid var(--accent-color); color:var(--accent-color); padding:5px 10px; border-radius:4px; font-size:0.75rem;">ADMIN</button>
+        <button id="coach-btn" class="hidden btn-outline" style="width:auto; padding:5px 12px; margin:0; font-size:0.75rem;">COACH</button>
     </header>
 
-    <section id="auth-view" class="view-container hidden" style="justify-content:center; display:flex; flex-direction:column;">
-        <div style="text-align:center; margin-bottom:40px;">
-            <img src="favicon.png" style="width:80px; margin-bottom:10px;">
-            <h1 style="font-size:2rem;">BIENVENIDO</h1>
-            <p style="color:#666;">High Performance Tracking</p>
+    <section id="auth-view" class="view-container">
+        <div style="text-align:center; margin-bottom:40px; margin-top:50px;">
+            <img src="logo.png" style="width:100px;">
+            <h1 style="font-size:2rem; margin-top:10px;">ACCESO</h1>
         </div>
-
-        <div id="form-container">
-            <div id="login-form">
-                <input type="email" id="login-email" placeholder="Correo Electrónico">
-                <input type="password" id="login-pass" placeholder="Contraseña">
-                <button class="btn" id="btn-login">INICIAR SESIÓN</button>
-                <button class="btn-outline" id="to-register">CREAR CUENTA</button>
+        <div id="login-form">
+            <input type="email" id="login-email" placeholder="Email">
+            <input type="password" id="login-pass" placeholder="Contraseña">
+            <button class="btn" id="btn-login">ENTRAR</button>
+            <button class="btn-outline" onclick="toggleAuth('register')">CREAR CUENTA</button>
+        </div>
+        <div id="register-form" class="hidden">
+            <input type="text" id="reg-name" placeholder="Nombre">
+            <input type="email" id="reg-email" placeholder="Email">
+            <input type="password" id="reg-pass" placeholder="Contraseña">
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="reg-age" placeholder="Edad">
+                <input type="number" id="reg-height" placeholder="Altura (cm)">
             </div>
-
-            <div id="register-form" class="hidden">
-                <input type="text" id="reg-name" placeholder="Nombre Completo">
-                <input type="email" id="reg-email" placeholder="Correo Electrónico">
-                <input type="password" id="reg-pass" placeholder="Contraseña">
-                <div style="display:flex; gap:10px;">
-                    <input type="number" id="reg-age" placeholder="Edad">
-                    <input type="number" id="reg-height" placeholder="Altura (cm)">
-                </div>
-                <input type="text" id="reg-code" placeholder="CÓDIGO DE ACCESO (fityhab)" style="border-color:#444;">
-                <button class="btn" id="btn-register">SOLICITAR ACCESO</button>
-                <button class="btn-outline" id="to-login">VOLVER</button>
-            </div>
+            <input type="text" id="reg-code" placeholder="CÓDIGO SECRETO (fityhab)">
+            <button class="btn" id="btn-register">REGISTRARSE</button>
+            <button class="btn-outline" onclick="toggleAuth('login')">VOLVER</button>
         </div>
     </section>
 
-    <section id="pending-view" class="view-container hidden" style="text-align:center; padding-top:40vh;">
-        <h2 style="color:var(--warning-color);">⏳ EN REVISIÓN</h2>
-        <p style="color:#999; margin:20px 0;">Tu perfil ha sido creado. Espera a que el Coach apruebe tu acceso.</p>
-        <button class="btn-outline" onclick="logoutApp()">Cerrar Sesión</button>
+    <section id="routines-view" class="view-container">
+        <h2>MIS RUTINAS</h2>
+        <div id="routines-list"></div>
+        <button class="btn-float" onclick="openRoutineEditor()">+</button>
     </section>
 
-    <section id="routines-view" class="view-container hidden">
-        <h2>Mis Rutinas</h2>
-        <div id="routines-list">
-            </div>
-        <button class="btn-outline" style="border-style:dashed; margin-top:20px;">+ Solicitar Nueva Rutina</button>
-    </section>
-
-    <section id="profile-view" class="view-container hidden">
+    <section id="editor-view" class="view-container">
+        <h2>EDITOR DE RUTINA</h2>
+        <input type="text" id="editor-name" placeholder="Nombre de la Rutina (ej: Pierna Hipertrofia)">
         
-        <div class="profile-header">
-            <div class="avatar-circle" id="profile-initial">U</div>
+        <div class="card" style="max-height: 400px; overflow-y: scroll;">
+            <h3 style="position:sticky; top:0; background:var(--card-color); padding-bottom:10px; border-bottom:1px solid #333;">Selecciona Ejercicios</h3>
+            <div id="exercise-selector-list"></div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn" onclick="saveRoutine()">GUARDAR</button>
+            <button class="btn-outline" style="margin:0; border-color:#666;" onclick="switchTab('routines-view')">CANCELAR</button>
+        </div>
+    </section>
+
+    <section id="profile-view" class="view-container">
+        <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+            <div style="width:60px; height:60px; background:#222; border-radius:50%; display:grid; place-items:center; border:2px solid var(--accent-color); font-size:1.5rem;" id="profile-initial">U</div>
             <div>
-                <h3 id="profile-name-display" style="margin:0; color:white;">Cargando...</h3>
-                <span id="profile-sub-display" style="font-size:0.8rem; color:var(--accent-color);">Atleta</span>
+                <h3 id="profile-name" style="margin:0;">Usuario</h3>
+                <span id="profile-stats" style="color:#666; font-size:0.8rem;">Stats</span>
             </div>
         </div>
 
         <div class="card">
-            <h3 style="border-bottom:1px solid #333; padding-bottom:10px;">BIG DATA</h3>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-num" id="stat-kgs">0</span>
-                    <span class="stat-label">KG Totales</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-num" id="stat-workouts">0</span>
-                    <span class="stat-label">Entrenos</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-num" id="stat-sets">0</span>
-                    <span class="stat-label">Series</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-num" id="stat-rm">--</span>
-                    <span class="stat-label">Mejor RM</span>
-                </div>
-            </div>
+            <h3>MAPA MUSCULAR (VOLUMEN)</h3>
+            <div id="heatmap-list"></div>
         </div>
 
         <div class="card">
-            <h3>Evolución Peso</h3>
-            <div style="position: relative; height:200px; width:100%">
-                <canvas id="weightChart"></canvas>
+            <h3>EVOLUCIÓN FÍSICA</h3>
+            <p style="font-size:0.8rem; color:#666;">Sube fotos y arrastra el slider.</p>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-outline" onclick="document.getElementById('file-before').click()" style="margin:0; font-size:0.8rem;">📷 ANTES</button>
+                <input type="file" id="file-before" accept="image/*" class="hidden" onchange="loadPhoto(this, 'img-before')">
+                
+                <button class="btn-outline" onclick="document.getElementById('file-after').click()" style="margin:0; font-size:0.8rem;">📷 DESPUÉS</button>
+                <input type="file" id="file-after" accept="image/*" class="hidden" onchange="loadPhoto(this, 'img-after')">
             </div>
-            <button class="btn-outline" onclick="addWeightEntry()">+ Registrar Peso Hoy</button>
+
+            <div class="compare-container" id="compare-box">
+                <img src="" class="compare-img" id="img-before" style="background:#111;">
+                <img src="" class="compare-img img-after" id="img-after" style="background:#111; clip-path: inset(0 50% 0 0);">
+                <div class="slider-handle" id="slider-handle" style="left:50%;">
+                    <div class="slider-button">↔</div>
+                </div>
+            </div>
+            <input type="range" min="0" max="100" value="50" style="width:100%; margin-top:10px;" oninput="updateSlider(this.value)">
         </div>
 
-        <div class="card">
-            <h3 style="color:#aaa;">CONFIGURACIÓN</h3>
-            
-            <div class="setting-row">
-                <span>Sonido (Beep)</span>
-                <label class="switch">
-                    <input type="checkbox" id="toggle-sound" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <div class="setting-row">
-                <span>Pantalla Encendida (Wake Lock)</span>
-                <label class="switch">
-                    <input type="checkbox" id="toggle-wake" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <button class="btn-danger" style="margin-top:20px;" onclick="logoutApp()">CERRAR SESIÓN</button>
-        </div>
+        <button class="btn-outline" style="border-color:#500; color:#f55;" onclick="logout()">CERRAR SESIÓN</button>
     </section>
 
-    <section id="workout-view" class="view-container hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <button onclick="cancelWorkout()" style="background:none; border:none; color:#666;">✕ Cancelar</button>
-            <span style="font-weight:bold; color:var(--accent-color);" id="timer-mini">00:00</span>
-            <button class="btn" style="width:auto; padding:8px 15px; font-size:0.8rem;" onclick="finishWorkoutPrompt()">TERMINAR</button>
+    <section id="workout-view" class="view-container">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+            <button onclick="switchTab('routines-view')" style="background:none; border:none; color:#666;">✕ Cancelar</button>
+            <button class="btn" style="width:auto; padding:5px 15px; font-size:0.8rem;" onclick="finishWorkoutPrompt()">TERMINAR</button>
         </div>
-        <h2 id="workout-title-display">Entreno</h2>
-        
-        <div id="workout-container"></div>
+        <h2 id="workout-title">Entreno</h2>
+        <div id="workout-exercises"></div>
     </section>
 
-    <section id="admin-view" class="view-container hidden">
+    <section id="admin-view" class="view-container">
         <h2>PANEL COACH</h2>
         <div class="card">
             <h3>Usuarios Pendientes</h3>
-            <div id="admin-pending-list"></div>
+            <div id="admin-list"></div>
         </div>
-        <button class="btn-outline" onclick="switchTab('routines-view')">Volver</button>
+        <button class="btn-outline" onclick="switchTab('routines-view')">VOLVER</button>
     </section>
 
     <nav class="bottom-nav hidden" id="bottom-nav">
         <div class="nav-item active" onclick="switchTab('routines-view')">
-            <span class="nav-icon">⚡</span>
-            <span>Rutinas</span>
+            <span class="nav-icon">🏋️</span><span>Rutinas</span>
         </div>
         <div class="nav-item" onclick="switchTab('profile-view')">
-            <span class="nav-icon">⚙️</span> <span>Perfil</span>
+            <span class="nav-icon">📊</span><span>Perfil</span>
         </div>
     </nav>
 
     <div id="modal-timer" class="modal">
-        <div class="modal-box">
+        <div class="modal-content">
             <h3 style="color:var(--success-color);">DESCANSO</h3>
-            <div id="timer-countdown" style="font-size:4rem; font-weight:900; color:white;">60</div>
+            <div id="timer-display" style="font-size:4rem; font-weight:bold; color:white;">60</div>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
                 <button class="btn-outline" onclick="addTime(20)">+20s</button>
                 <button class="btn" onclick="closeTimer()">OMITIR</button>
@@ -379,23 +326,12 @@
         </div>
     </div>
 
-    <div id="modal-rpe" class="modal">
-        <div class="modal-box">
-            <h3>VALORA ESFUERZO</h3>
-            <p style="color:#888; margin-bottom:15px;">¿Qué tan duro fue?</p>
-            <button class="btn" style="background:#22dd88; margin-bottom:10px;" onclick="saveWorkout(1)">1 - Fácil</button>
-            <button class="btn" style="background:#ffaa00; margin-bottom:10px; color:black;" onclick="saveWorkout(2)">2 - Duro</button>
-            <button class="btn" style="background:#ff3333; margin-bottom:10px;" onclick="saveWorkout(3)">3 - Fallo / Extremo</button>
-            <button class="btn-outline" onclick="document.getElementById('modal-rpe').classList.remove('active')">Volver</button>
-        </div>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, query, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, query, where, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        /* --- FIREBASE INIT --- */
+        // FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
             authDomain: "fitdata-7a86b.firebaseapp.com",
@@ -408,485 +344,364 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        /* --- CONSTANTS --- */
-        const ADMIN_EMAIL = "toni@fitdatapro.es";
-        const SECRET_CODE = "fityhab";
+        // CONSTANTES
+        const ADMIN = "toni@fitdatapro.es";
+        const CODE = "fityhab";
+        
+        // --- BASE DE DATOS EJERCICIOS CON IMAGENES Y % ---
+        // Imagenes mapeadas: pecho.png, espalda.png, abs.png, hombros.png, biceps.png, triceps.png, gluteos.png, cuadriceps.png, isquiotibiales.png, gemelos.png
+        
+        const DB_EXERCISES = [
+            // PIERNA
+            {n:"Sentadilla con Barra", img:"cuadriceps.png", main:"Cuádriceps", sec:{Glúteos:40, Isquios:20}},
+            {n:"Prensa de Piernas", img:"cuadriceps.png", main:"Cuádriceps", sec:{Glúteos:30}},
+            {n:"Extensión de Cuádriceps", img:"cuadriceps.png", main:"Cuádriceps", sec:{}},
+            {n:"Peso Muerto Rumano", img:"isquiotibiales.png", main:"Isquios", sec:{Glúteos:50, Espalda:20}},
+            {n:"Curl Femoral Tumbado", img:"isquiotibiales.png", main:"Isquios", sec:{Gemelos:10}},
+            {n:"Hip Thrust", img:"gluteos.png", main:"Glúteos", sec:{Isquios:30, Cuádriceps:10}},
+            {n:"Elevación de Talones", img:"gemelos.png", main:"Gemelos", sec:{}},
+            {n:"Sentadilla Búlgara", img:"gluteos.png", main:"Glúteos", sec:{Cuádriceps:40, Isquios:20}},
+            {n:"Zancadas", img:"cuadriceps.png", main:"Cuádriceps", sec:{Glúteos:40}},
 
-        // BASE DE DATOS COMPLETA DE EJERCICIOS (82)
-        const EXERCISE_DB = [
-            // PIERNAS
-            {n:"Sentadilla con Barra", m:"cuadriceps", t:"lower"}, {n:"Sentadilla Jaca", m:"cuadriceps", t:"lower"}, {n:"Sentadilla con Cinturón", m:"cuadriceps", t:"lower"},
-            {n:"Prensa de Piernas", m:"cuadriceps", t:"lower"}, {n:"Extensión de Cuádriceps", m:"cuadriceps", t:"lower"}, {n:"Estocadas con Mancuernas", m:"cuadriceps", t:"lower"},
-            {n:"Curl de Pierna Tumbado", m:"isquios", t:"lower"}, {n:"Curl de Pierna Sentado", m:"isquios", t:"lower"}, {n:"Prensa Horizontal", m:"cuadriceps", t:"lower"},
-            {n:"Prensa de piernas 45°", m:"cuadriceps", t:"lower"}, {n:"Elevación de Talones Sentado", m:"gemelos", t:"lower"}, {n:"Elevación de Talones de Pie", m:"gemelos", t:"lower"},
-            {n:"Elevación de Talones en Máquina", m:"gemelos", t:"lower"}, {n:"Elevación de Cadera", m:"gluteos", t:"lower"}, {n:"Sentadilla Búlgara", m:"cuadriceps", t:"lower"},
-            {n:"Patada de Glúteo en Polea", m:"gluteos", t:"lower"}, {n:"Abducción de Cadera en Máquina", m:"gluteos", t:"lower"}, {n:"Prensa de Glúteos", m:"gluteos", t:"lower"},
-            {n:"Peso Muerto Rumano", m:"isquios", t:"lower"},
             // ESPALDA
-            {n:"Peso Muerto", m:"espalda", t:"upper"}, {n:"Peso Muerto Sumo", m:"espalda", t:"upper"}, {n:"Remo con Barra", m:"espalda", t:"upper"},
-            {n:"Remo con Mancuernas", m:"espalda", t:"upper"}, {n:"Jalón Lateral", m:"espalda", t:"upper"}, {n:"Jalón Lateral Cerrado", m:"espalda", t:"upper"},
-            {n:"Remo en Máquina", m:"espalda", t:"upper"}, {n:"Remo en Polea Baja", m:"espalda", t:"upper"}, {n:"Dominadas", m:"espalda", t:"upper"},
-            {n:"Dominadas Asistidas", m:"espalda", t:"upper"}, {n:"Remo Invertido", m:"espalda", t:"upper"}, {n:"Remo T", m:"espalda", t:"upper"},
-            {n:"Hiperextensión", m:"espalda", t:"lower"}, {n:"Buenos Días", m:"isquios", t:"lower"}, {n:"Remo Hammer", m:"espalda", t:"upper"},
-            {n:"Jalón Agarre Cerrado", m:"espalda", t:"upper"}, {n:"Jalón Agarre Abierto", m:"espalda", t:"upper"}, {n:"Remo alto", m:"trapecio", t:"upper"},
+            {n:"Dominadas", img:"espalda.png", main:"Espalda", sec:{Bíceps:30, Hombros:10}},
+            {n:"Jalón al Pecho", img:"espalda.png", main:"Espalda", sec:{Bíceps:30}},
+            {n:"Remo con Barra", img:"espalda.png", main:"Espalda", sec:{Bíceps:20, Hombros:20}},
+            {n:"Remo Gironda", img:"espalda.png", main:"Espalda", sec:{Bíceps:20}},
+            {n:"Peso Muerto", img:"espalda.png", main:"Espalda", sec:{Isquios:30, Glúteos:30, Trapecio:20}},
+            {n:"Pull Over Polea", img:"espalda.png", main:"Espalda", sec:{Tríceps:10}},
+
             // PECHO
-            {n:"Press de Banca", m:"pecho", t:"upper"}, {n:"Press Inclinado con Mancuernas", m:"pecho", t:"upper"}, {n:"Aperturas con Mancuernas", m:"pecho", t:"upper"},
-            {n:"Cruces en Polea", m:"pecho", t:"upper"}, {n:"Prensa de Pecho en Máquina", m:"pecho", t:"upper"}, {n:"Prensa de Pecho Declinado", m:"pecho", t:"upper"},
-            {n:"Fondos en Paralelas", m:"triceps", t:"upper"}, {n:"Aperturas de Pecho", m:"pecho", t:"upper"}, {n:"Press Inclinado", m:"pecho", t:"upper"},
-            {n:"Press Plano", m:"pecho", t:"upper"}, {n:"Prensa Lateral Iso", m:"pecho", t:"upper"}, {n:"Prensa de Pecho", m:"pecho", t:"upper"},
-            // HOMBROS
-            {n:"Encogimiento de Hombros", m:"trapecio", t:"upper"}, {n:"Encogimiento con Mancuernas", m:"trapecio", t:"upper"}, {n:"Press Militar", m:"hombros", t:"upper"},
-            {n:"Press de Hombros con Mancuernas", m:"hombros", t:"upper"}, {n:"Press de Hombros en Máquina", m:"hombros", t:"upper"}, {n:"Elevación Lateral", m:"hombros", t:"upper"},
-            {n:"Elevación Frontal", m:"hombros", t:"upper"}, {n:"Pájaros Inversos", m:"hombros", t:"upper"}, {n:"Elevación Lateral en Polea", m:"hombros", t:"upper"},
-            {n:"Press Arnold", m:"hombros", t:"upper"}, {n:"Press de Hombros", m:"hombros", t:"upper"}, {n:"Face Pull", m:"hombros", t:"upper"},
+            {n:"Press de Banca", img:"pecho.png", main:"Pecho", sec:{Tríceps:30, Hombros:20}},
+            {n:"Press Inclinado", img:"pecho.png", main:"Pecho", sec:{Hombros:30, Tríceps:30}},
+            {n:"Aperturas", img:"pecho.png", main:"Pecho", sec:{Hombros:10}},
+            {n:"Fondos", img:"pecho.png", main:"Pecho", sec:{Tríceps:50, Hombros:20}},
+            {n:"Cruce de Poleas", img:"pecho.png", main:"Pecho", sec:{}},
+
+            // HOMBRO
+            {n:"Press Militar", img:"hombros.png", main:"Hombros", sec:{Tríceps:30}},
+            {n:"Elevaciones Laterales", img:"hombros.png", main:"Hombros", sec:{Trapecio:10}},
+            {n:"Pájaros", img:"hombros.png", main:"Hombros", sec:{Espalda:10}},
+            {n:"Face Pull", img:"hombros.png", main:"Hombros", sec:{Espalda:20, Bíceps:10}},
+
             // BRAZOS
-            {n:"Curl de Barra", m:"biceps", t:"upper"}, {n:"Curl de Mancuernas", m:"biceps", t:"upper"}, {n:"Curl en Polea", m:"biceps", t:"upper"},
-            {n:"Curl Martillo", m:"biceps", t:"upper"}, {n:"Curl Concentrado", m:"biceps", t:"upper"}, {n:"Curl Predicador", m:"biceps", t:"upper"},
-            {n:"Extensión de Tríceps en Polea", m:"triceps", t:"upper"}, {n:"Extensión Francesa", m:"triceps", t:"upper"}, {n:"Extensiones Acostadas", m:"triceps", t:"upper"},
-            {n:"Fondos en Paralelas", m:"triceps", t:"upper"}, {n:"Extensión Unilateral Tríceps", m:"triceps", t:"upper"}, {n:"Triceps Polea", m:"triceps", t:"upper"},
-            {n:"Triceps Barra", m:"triceps", t:"upper"},
+            {n:"Curl de Bíceps Barra", img:"biceps.png", main:"Bíceps", sec:{Antebrazo:20}},
+            {n:"Curl Martillo", img:"biceps.png", main:"Bíceps", sec:{Antebrazo:40}},
+            {n:"Extensiones Polea", img:"triceps.png", main:"Tríceps", sec:{}},
+            {n:"Press Francés", img:"triceps.png", main:"Tríceps", sec:{}},
+            
             // ABS
-            {n:"Abdominales con Rueda", m:"abs", t:"upper"}, {n:"Crunch en Polea", m:"abs", t:"upper"}, {n:"Elevaciones de Pierna Colgadas", m:"abs", t:"upper"},
-            {n:"Abdominales en Banco", m:"abs", t:"upper"}, {n:"Crunch en Máquina", m:"abs", t:"upper"}, {n:"Levantamiento de Rodillas Colgado", m:"abs", t:"upper"}
+            {n:"Plancha Abdominal", img:"abs.png", main:"Abs", sec:{Hombros:20}},
+            {n:"Crunch", img:"abs.png", main:"Abs", sec:{}},
+            {n:"Elevación de Piernas", img:"abs.png", main:"Abs", sec:{Cuádriceps:10}}
         ];
 
-        /* --- STATE --- */
+        // VARIABLES ESTADO
         let currentUser = null;
         let userData = null;
         let activeWorkout = null;
-        let timerInterval = null;
-        let wakeLock = null;
-        let weightChart = null;
+        let currentEditingRoutineId = null;
+        let timerInt = null;
 
-        /* --- GLOBAL FUNCTIONS (WINDOW) --- */
-        // Funciones accesibles desde HTML onclick
-        
-        window.switchTab = async (tabName) => {
-            // Ocultar todo
-            document.querySelectorAll('.view-container').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            // Mostrar target
-            const target = document.getElementById(tabName);
-            if(target) target.classList.remove('hidden');
-
-            // Bottom Nav Active State
-            if(tabName === 'routines-view') document.querySelectorAll('.nav-item')[0].classList.add('active');
-            if(tabName === 'profile-view') {
-                document.querySelectorAll('.nav-item')[1].classList.add('active');
-                await renderProfile(); // RE-RENDERIZAR PERFIL AL ENTRAR
-            }
-        };
-
-        window.logoutApp = () => {
-            signOut(auth).then(() => {
-                location.reload();
-            });
-        };
-
-        window.toRegister = () => {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('register-form').classList.remove('hidden');
-        };
-
-        window.toLogin = () => {
-            document.getElementById('register-form').classList.add('hidden');
-            document.getElementById('login-form').classList.remove('hidden');
-        };
-
-        // Event Listeners Auth
-        document.getElementById('to-register').onclick = window.toRegister;
-        document.getElementById('to-login').onclick = window.toLogin;
-
-        document.getElementById('btn-login').onclick = () => {
-            const e = document.getElementById('login-email').value;
-            const p = document.getElementById('login-pass').value;
-            if(!e || !p) return alert("Rellena todo");
-            signInWithEmailAndPassword(auth, e, p).catch(err => alert("Error: " + err.message));
-        };
-
-        document.getElementById('btn-register').onclick = async () => {
-            const code = document.getElementById('reg-code').value;
-            if(code !== SECRET_CODE) return alert("CÓDIGO SECRETO INVÁLIDO");
-            
-            const e = document.getElementById('reg-email').value;
-            const p = document.getElementById('reg-pass').value;
-            const n = document.getElementById('reg-name').value;
-            const age = document.getElementById('reg-age').value;
-            const h = document.getElementById('reg-height').value;
-
-            try {
-                const cred = await createUserWithEmailAndPassword(auth, e, p);
-                // Crear Doc
-                await setDoc(doc(db, "users", cred.user.uid), {
-                    name: n, email: e, age: age, height: h,
-                    approved: (e === ADMIN_EMAIL),
-                    stats: { kgs:0, workouts:0, sets:0 },
-                    createdAt: serverTimestamp()
-                });
-            } catch(err) {
-                alert(err.message);
-            }
-        };
-
-        /* --- APP LOGIC --- */
-
+        // AUTH
         onAuthStateChanged(auth, async (user) => {
             const loader = document.getElementById('loading-screen');
-            if (user) {
+            if(user) {
                 currentUser = user;
-                // Fetch User Data
-                try {
-                    const snap = await getDoc(doc(db, "users", user.uid));
-                    if(snap.exists()) {
-                        userData = snap.data();
-                        
-                        // Check Admin
-                        if(userData.email === ADMIN_EMAIL) {
-                            document.getElementById('coach-btn').classList.remove('hidden');
-                            document.getElementById('coach-btn').onclick = () => window.switchTab('admin-view');
-                            loadAdminPanel();
-                        }
-
-                        if(userData.approved) {
-                            loader.classList.add('hidden');
-                            document.getElementById('main-header').classList.remove('hidden');
-                            document.getElementById('bottom-nav').classList.remove('hidden');
-                            document.getElementById('auth-view').classList.add('hidden');
-                            
-                            loadRoutines();
-                            window.switchTab('routines-view');
-                        } else {
-                            loader.classList.add('hidden');
-                            document.getElementById('auth-view').classList.add('hidden');
-                            document.getElementById('pending-view').classList.remove('hidden');
-                        }
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if(snap.exists()) {
+                    userData = snap.data();
+                    if(userData.email === ADMIN) document.getElementById('coach-btn').classList.remove('hidden');
+                    
+                    if(userData.approved) {
+                        document.getElementById('main-header').classList.remove('hidden');
+                        document.getElementById('bottom-nav').classList.remove('hidden');
+                        loadRoutines();
+                        switchTab('routines-view');
                     } else {
-                        // User created but no doc?
-                        alert("Error crítico: Usuario sin perfil.");
-                        signOut(auth);
+                        alert("Cuenta pendiente de aprobación por el Coach.");
+                        await signOut(auth);
                     }
-                } catch(e) {
-                    console.error(e);
                 }
             } else {
-                loader.classList.add('hidden');
+                document.getElementById('auth-view').classList.add('active');
                 document.getElementById('main-header').classList.add('hidden');
                 document.getElementById('bottom-nav').classList.add('hidden');
-                // Hide all views, show auth
-                document.querySelectorAll('.view-container').forEach(el => el.classList.add('hidden'));
-                document.getElementById('auth-view').classList.remove('hidden');
             }
+            setTimeout(() => loader.classList.add('hidden'), 1500);
         });
 
-        /* --- ROUTINES & WORKOUTS --- */
+        // FUNCIONES GLOBALES
+        window.toggleAuth = (mode) => {
+            document.getElementById('login-form').classList.toggle('hidden', mode !== 'login');
+            document.getElementById('register-form').classList.toggle('hidden', mode !== 'register');
+        };
+
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            
+            // Nav update
+            const navs = document.querySelectorAll('.nav-item');
+            navs.forEach(n => n.classList.remove('active'));
+            if(tab === 'routines-view') navs[0].classList.add('active');
+            if(tab === 'profile-view') {
+                navs[1].classList.add('active');
+                renderProfileHeatmap();
+            }
+        };
+
+        window.logout = () => signOut(auth).then(() => location.reload());
+
+        // --- RUTINAS ---
         async function loadRoutines() {
             const list = document.getElementById('routines-list');
-            list.innerHTML = '';
+            list.innerHTML = '<p style="color:#666">Cargando rutinas...</p>';
             
-            // Demo Routine
-            const routines = [
-                {id:'r1', name:'Full Body A', exs:['Sentadilla con Barra','Press de Banca','Remo con Barra','Press Militar']},
-                {id:'r2', name:'Torso Hipertrofia', exs:['Press Inclinado con Mancuernas','Jalón Lateral','Elevación Lateral','Curl de Barra', 'Extensiones Acostadas']},
-                {id:'r3', name:'Pierna Fuerza', exs:['Sentadilla Jaca','Peso Muerto Rumano','Prensa de Piernas','Elevación de Talones Sentado']}
-            ];
+            // Rutinas del usuario OR asignadas (Demo simplificada: query by uid)
+            const q = query(collection(db, "routines"), where("uid", "==", currentUser.uid));
+            const snap = await onSnapshot(q, (snapshot) => {
+                list.innerHTML = '';
+                if(snapshot.empty) list.innerHTML = '<p>No tienes rutinas. ¡Crea una!</p>';
+                
+                snapshot.forEach(doc => {
+                    const r = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="margin:0; color:white;">${r.name}</h3>
+                            <div>
+                                <button class="btn-icon-small" onclick="editRoutine('${doc.id}')">✏️</button>
+                                <button class="btn-icon-small" style="color:#ff3333;" onclick="deleteRoutine('${doc.id}')">🗑️</button>
+                            </div>
+                        </div>
+                        <p style="color:#666; font-size:0.8rem; margin:10px 0;">${r.exercises.length} Ejercicios</p>
+                        <button class="btn" onclick="initWorkout('${doc.id}')">ENTRENAR</button>
+                    `;
+                    list.appendChild(card);
+                });
+            });
+        }
 
-            routines.forEach(r => {
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 style="margin:0; color:white;">${r.name}</h3>
-                        <span style="background:#222; padding:4px 8px; border-radius:4px; font-size:0.7rem; color:#888;">${r.exs.length} Ejercicios</span>
+        // --- EDITOR RUTINAS (CRUD) ---
+        window.openRoutineEditor = (id = null) => {
+            currentEditingRoutineId = id;
+            document.getElementById('editor-name').value = '';
+            renderExerciseSelector();
+            window.switchTab('editor-view');
+        };
+
+        function renderExerciseSelector() {
+            const container = document.getElementById('exercise-selector-list');
+            container.innerHTML = '';
+            DB_EXERCISES.forEach(ex => {
+                const item = document.createElement('div');
+                item.className = 'exercise-item-select';
+                item.innerText = ex.n;
+                item.dataset.name = ex.n;
+                item.onclick = () => item.classList.toggle('selected');
+                container.appendChild(item);
+            });
+        }
+
+        window.saveRoutine = async () => {
+            const name = document.getElementById('editor-name').value;
+            if(!name) return alert("Pon nombre a la rutina");
+            
+            const selected = Array.from(document.querySelectorAll('.exercise-item-select.selected')).map(el => el.dataset.name);
+            if(selected.length === 0) return alert("Selecciona ejercicios");
+
+            const routineData = {
+                uid: currentUser.uid,
+                name: name,
+                exercises: selected,
+                createdAt: serverTimestamp()
+            };
+
+            try {
+                if(currentEditingRoutineId) {
+                    // Update logic (omitted for brevity, simply creating new one for demo)
+                    alert("Modo edición no implementado en esta demo, se creará nueva.");
+                }
+                await addDoc(collection(db, "routines"), routineData);
+                window.switchTab('routines-view');
+            } catch(e) { alert(e.message); }
+        };
+
+        window.deleteRoutine = async (id) => {
+            if(confirm("¿Borrar rutina?")) await deleteDoc(doc(db, "routines", id));
+        };
+
+        // --- WORKOUT LOGIC ---
+        window.initWorkout = async (rId) => {
+            // Fetch routine details from list (or db) - simplified
+            // Demo: find in DOM or simple logic. Let's assume we re-fetch or pass data.
+            // Para la demo, recuperamos la info básica desde Firestore de nuevo para asegurar
+            const d = await getDoc(doc(db, "routines", rId));
+            const r = d.data();
+            
+            activeWorkout = {
+                id: rId,
+                name: r.name,
+                exercises: r.exercises.map(n => {
+                    const info = DB_EXERCISES.find(e => e.n === n) || {n, img:'pecho.png', main:'?', sec:{}};
+                    return {
+                        info: info,
+                        sets: Array(5).fill().map((_, i) => ({reps: i===0?20:16, weight:'', done:false}))
+                    };
+                })
+            };
+            
+            renderWorkout();
+            window.switchTab('workout-view');
+        };
+
+        function renderWorkout() {
+            const c = document.getElementById('workout-exercises');
+            c.innerHTML = '';
+            document.getElementById('workout-title').innerText = activeWorkout.name;
+
+            activeWorkout.exercises.forEach((ex, i) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.borderLeft = "3px solid var(--accent-color)";
+
+                // Generar etiquetas de % muscular
+                let tags = `<span class="muscle-tag primary">${ex.info.main} 100%</span>`;
+                for (const [m, p] of Object.entries(ex.info.sec)) {
+                    tags += `<span class="muscle-tag">${m} ${p}%</span>`;
+                }
+
+                let setsHtml = '';
+                ex.sets.forEach((s, j) => {
+                    setsHtml += `
+                        <div class="set-row">
+                            <b style="color:#666">${j+1}</b>
+                            <div><span class="shadow-text">Prev: -</span><input type="number" value="${s.weight}" placeholder="kg" onchange="updSet(${i},${j},'weight',this.value)"></div>
+                            <div><span class="shadow-text">&nbsp;</span><input type="number" value="${s.reps}" placeholder="reps" onchange="updSet(${i},${j},'reps',this.value)"></div>
+                            <button class="${s.done?'btn':'btn-outline'}" style="margin:0; padding:0; height:40px; background:${s.done?'var(--success-color)':'transparent'}; color:${s.done?'black':'#666'}; border-color:${s.done?'transparent':'#444'}" onclick="toggleSet(${i},${j})">${s.done?'✓':'OK'}</button>
+                        </div>`;
+                });
+
+                card.innerHTML = `
+                    <div class="exercise-visual">
+                        <img src="${ex.info.img}" alt="${ex.info.main}">
+                        <div style="position:absolute; bottom:5px; right:5px; background:black; color:white; padding:2px 5px; font-size:0.7rem; border-radius:4px;">${ex.info.main}</div>
                     </div>
-                    <p style="color:#666; font-size:0.8rem; margin:10px 0;">${r.exs.join(', ')}</p>
-                    <button class="btn">INICIAR</button>
+                    <h3>${ex.info.n}</h3>
+                    <div class="muscle-stats">${tags}</div>
+                    ${setsHtml}
                 `;
-                div.querySelector('button').onclick = () => startWorkout(r);
+                c.appendChild(card);
+            });
+        }
+
+        window.updSet = (exI, sI, k, v) => activeWorkout.exercises[exI].sets[sI][k] = v;
+        window.toggleSet = (exI, sI) => {
+            const s = activeWorkout.exercises[exI].sets[sI];
+            if(!s.weight) return alert("Indica el peso");
+            s.done = !s.done;
+            renderWorkout();
+            if(s.done) startTimer();
+        };
+
+        function startTimer() {
+            const m = document.getElementById('modal-timer');
+            m.classList.add('active');
+            let t = 60;
+            const d = document.getElementById('timer-display');
+            d.innerText = t;
+            if(timerInt) clearInterval(timerInt);
+            timerInt = setInterval(() => {
+                t--; d.innerText = t;
+                if(t<=0) { clearInterval(timerInt); m.classList.remove('active'); navigator.vibrate([200,100,200]); }
+            }, 1000);
+        }
+
+        window.addTime = (s) => document.getElementById('timer-display').innerText = parseInt(document.getElementById('timer-display').innerText) + s;
+        window.closeTimer = () => { clearInterval(timerInt); document.getElementById('modal-timer').classList.remove('active'); };
+
+        window.finishWorkoutPrompt = async () => {
+            if(confirm("¿Guardar entrenamiento?")) {
+                // Save logic (simplified)
+                await addDoc(collection(db, "workouts"), {
+                    uid: currentUser.uid,
+                    date: serverTimestamp(),
+                    routine: activeWorkout.name,
+                    exercises: activeWorkout.exercises // Saving full log
+                });
+                
+                // Update basic stats
+                userData.stats = userData.stats || {};
+                userData.stats.workouts = (userData.stats.workouts || 0) + 1;
+                // Here we would ideally calculate volume per muscle for heatmap
+                await updateDoc(doc(db, "users", currentUser.uid), { stats: userData.stats });
+
+                alert("Entreno guardado");
+                window.switchTab('routines-view');
+            }
+        };
+
+        // --- PROFILE: HEATMAP & PHOTOS ---
+        function renderProfileHeatmap() {
+            const list = document.getElementById('heatmap-list');
+            list.innerHTML = '';
+            document.getElementById('profile-name').innerText = userData.name;
+            document.getElementById('profile-initial').innerText = userData.name[0];
+
+            // Simulation of data (Since we don't calculate real history in this MVP)
+            const muscles = ["Pecho", "Espalda", "Cuádriceps", "Isquios", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Gemelos"];
+            
+            muscles.forEach(m => {
+                // Random progress for demo effect. In real app: calculate from 'workouts' collection
+                const pct = Math.floor(Math.random() * 100); 
+                const div = document.createElement('div');
+                div.className = 'muscle-bar-container';
+                div.innerHTML = `
+                    <div class="muscle-label"><span>${m}</span> <span>${pct}%</span></div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width: ${pct}%"></div>
+                    </div>
+                `;
                 list.appendChild(div);
             });
         }
 
-        function startWorkout(routine) {
-            activeWorkout = {
-                startTime: Date.now(),
-                routineName: routine.name,
-                exercises: routine.exs.map(name => {
-                    const exInfo = EXERCISE_DB.find(e => e.n === name) || {n:name, m:'general', t:'upper'};
-                    return {
-                        info: exInfo,
-                        sets: [
-                            {reps:20, weight:'', done:false},
-                            {reps:16, weight:'', done:false},
-                            {reps:16, weight:'', done:false},
-                            {reps:16, weight:'', done:false},
-                            {reps:16, weight:'', done:false}
-                        ]
-                    };
-                })
-            };
-
-            // Wake Lock
-            if(document.getElementById('toggle-wake').checked && 'wakeLock' in navigator) {
-                navigator.wakeLock.request('screen').then(l => wakeLock = l).catch(()=>{});
-            }
-
-            renderActiveWorkout();
-            window.switchTab('workout-view');
-        }
-
-        function renderActiveWorkout() {
-            const container = document.getElementById('workout-container');
-            container.innerHTML = '';
-            document.getElementById('workout-title-display').innerText = activeWorkout.routineName;
-
-            activeWorkout.exercises.forEach((ex, exIdx) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.style.borderLeft = "4px solid var(--accent-color)";
-                
-                // SVG Generator
-                const svgHtml = generateSVG(ex.info);
-
-                let setsHtml = '';
-                ex.sets.forEach((set, sIdx) => {
-                    setsHtml += `
-                        <div class="set-row">
-                            <div style="font-weight:bold; color:#555;">${sIdx+1}</div>
-                            <div>
-                                <span class="shadow-text">Prev: --</span>
-                                <input type="number" placeholder="kg" value="${set.weight}" onchange="window.updateSet(${exIdx}, ${sIdx}, 'weight', this.value)">
-                            </div>
-                            <div>
-                                <span class="shadow-text">&nbsp;</span>
-                                <input type="number" placeholder="reps" value="${set.reps}" onchange="window.updateSet(${exIdx}, ${sIdx}, 'reps', this.value)">
-                            </div>
-                            <button class="${set.done ? 'btn' : 'btn-outline'}" 
-                                style="margin:0; padding:0; height:40px; background:${set.done ? 'var(--success-color)' : 'transparent'}; border-color:${set.done?'transparent':'#444'}; color:${set.done?'black':'#666'}"
-                                onclick="window.toggleSet(${exIdx}, ${sIdx})">
-                                ${set.done ? '✓' : 'OK'}
-                            </button>
-                        </div>
-                    `;
-                });
-
-                card.innerHTML = `
-                    <div class="ex-svg-container">${svgHtml}</div>
-                    <h3 style="margin-bottom:10px;">${ex.info.n}</h3>
-                    <div style="display:grid; grid-template-columns: 30px 1fr 1fr 50px; gap:10px; font-size:0.7rem; color:#666; margin-bottom:5px;">
-                        <div>#</div><div>KG</div><div>REPS</div><div>FIN</div>
-                    </div>
-                    ${setsHtml}
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // SVG GENERATOR (Función Crítica corregida)
-        function generateSVG(info) {
-            const isLower = info.t === 'lower';
-            const muscle = info.m;
-            const cSkin = "#ffffff";
-            const cLine = "#000000";
-            const cTarget = "#ff0000"; // Rojo puro
-            
-            // Viewbox adaptado
-            if(isLower) {
-                return `
-                <svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg" style="height:100%;">
-                    <path d="M30,10 L70,10 L65,40 L35,40 Z" fill="${muscle==='gluteos' ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                    <rect x="30" y="40" width="16" height="45" fill="${muscle==='cuadriceps' ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                    <rect x="54" y="40" width="16" height="45" fill="${muscle==='cuadriceps' ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                    <rect x="32" y="90" width="12" height="35" fill="${muscle==='gemelos' ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                    <rect x="56" y="90" width="12" height="35" fill="${muscle==='gemelos' ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                </svg>`;
-            } else {
-                return `
-                <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="height:100%;">
-                    <circle cx="50" cy="20" r="12" fill="${cSkin}" stroke="${cLine}" stroke-width="2"/>
-                    <path d="M25,35 L75,35 L65,90 L35,90 Z" fill="${(muscle==='pecho'||muscle==='abs'||muscle==='espalda') ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                    <rect x="5" y="38" width="18" height="35" fill="${(muscle==='biceps'||muscle==='triceps'||muscle==='hombros') ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                    <rect x="77" y="38" width="18" height="35" fill="${(muscle==='biceps'||muscle==='triceps'||muscle==='hombros') ? cTarget : cSkin}" stroke="${cLine}" stroke-width="2"/>
-                </svg>`;
-            }
-        }
-
-        // --- WINDOW HELPERS FOR WORKOUT ---
-        window.updateSet = (exI, sI, field, val) => {
-            activeWorkout.exercises[exI].sets[sI][field] = val;
-        };
-
-        window.toggleSet = (exI, sI) => {
-            const set = activeWorkout.exercises[exI].sets[sI];
-            if(!set.weight) return alert("Pon el peso");
-            
-            set.done = !set.done;
-            renderActiveWorkout();
-            
-            if(set.done) {
-                // Timer
-                startTimer();
+        // PHOTO SLIDER LOGIC
+        window.loadPhoto = (input, imgId) => {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => document.getElementById(imgId).src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
             }
         };
 
-        function startTimer() {
-            const modal = document.getElementById('modal-timer');
-            const display = document.getElementById('timer-countdown');
-            modal.classList.add('active');
-            
-            let t = 60;
-            display.innerText = t;
-            
-            if(timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                t--;
-                display.innerText = t;
-                if(t<=0) {
-                    clearInterval(timerInterval);
-                    modal.classList.remove('active');
-                    if(document.getElementById('toggle-sound').checked) {
-                        // Simple beep simulado o vibración
-                        navigator.vibrate([200, 100, 200]);
-                    }
-                }
-            }, 1000);
-        }
-
-        window.addTime = (s) => {
-            const d = document.getElementById('timer-countdown');
-            d.innerText = parseInt(d.innerText) + s;
-        };
-        window.closeTimer = () => {
-            clearInterval(timerInterval);
-            document.getElementById('modal-timer').classList.remove('active');
+        window.updateSlider = (val) => {
+            document.getElementById('img-after').style.clipPath = `inset(0 ${100-val}% 0 0)`;
+            document.getElementById('slider-handle').style.left = `${val}%`;
         };
 
-        window.finishWorkoutPrompt = () => {
-             document.getElementById('modal-rpe').classList.add('active');
+        // AUTH LISTENERS
+        document.getElementById('btn-login').onclick = () => {
+            const e=document.getElementById('login-email').value, p=document.getElementById('login-pass').value;
+            signInWithEmailAndPassword(auth,e,p).catch(err=>alert(err.message));
         };
-
-        window.cancelWorkout = () => {
-            if(confirm("¿Cancelar entreno?")) {
-                activeWorkout = null;
-                if(wakeLock) wakeLock.release();
-                window.switchTab('routines-view');
-            }
-        };
-
-        window.saveWorkout = async (rpe) => {
-            document.getElementById('modal-rpe').classList.remove('active');
-            
-            // Calcular Volumen
-            let vol = 0; let sets = 0;
-            activeWorkout.exercises.forEach(e => {
-                e.sets.forEach(s => {
-                    if(s.done) {
-                        vol += (parseFloat(s.weight) * parseFloat(s.reps));
-                        sets++;
-                    }
-                });
-            });
-
-            // Guardar en Firestore
+        document.getElementById('btn-register').onclick = async () => {
+            const c=document.getElementById('reg-code').value;
+            if(c!==CODE) return alert("Código incorrecto");
+            const e=document.getElementById('reg-email').value, p=document.getElementById('reg-pass').value;
             try {
-                await addDoc(collection(db, "workouts"), {
-                    uid: currentUser.uid,
-                    date: serverTimestamp(),
-                    routine: activeWorkout.routineName,
-                    volume: vol,
-                    totalSets: sets,
-                    rpe: rpe
+                const cred = await createUserWithEmailAndPassword(auth,e,p);
+                await setDoc(doc(db,"users",cred.user.uid), {
+                    name: document.getElementById('reg-name').value,
+                    email: e,
+                    approved: e===ADMIN,
+                    createdAt: serverTimestamp()
                 });
-                
-                // Actualizar Stats User (Optimista)
-                userData.stats.kgs += vol;
-                userData.stats.workouts += 1;
-                userData.stats.sets += sets;
-                
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    stats: userData.stats
-                });
-
-                alert("Entreno Guardado. ¡Buen trabajo!");
-                activeWorkout = null;
-                if(wakeLock) wakeLock.release();
-                window.switchTab('routines-view');
-
-            } catch(e) {
-                alert("Error guardando: " + e.message);
-            }
+            } catch(er){alert(er.message);}
         };
-
-        /* --- PROFILE RENDER --- */
-        async function renderProfile() {
-            if(!userData) return;
-
-            document.getElementById('profile-name-display').innerText = userData.name;
-            document.getElementById('profile-initial').innerText = userData.name.charAt(0).toUpperCase();
-
-            // Stats
-            document.getElementById('stat-kgs').innerText = (userData.stats.kgs / 1000).toFixed(1) + 't';
-            document.getElementById('stat-workouts').innerText = userData.stats.workouts;
-            document.getElementById('stat-sets').innerText = userData.stats.sets;
-
-            // Chart
-            const ctx = document.getElementById('weightChart');
-            if(weightChart) weightChart.destroy();
-            
-            weightChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['S1', 'S2', 'S3', 'Hoy'],
-                    datasets: [{
-                        label: 'Peso Corp.',
-                        data: [70, 70.5, 70.2, 70.8], // Datos Demo, conectar con firebase real si se desea
-                        borderColor: '#ff3333',
-                        backgroundColor: 'rgba(255, 51, 51, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: {display:false} },
-                    scales: {
-                        y: { grid: {color:'#333'} },
-                        x: { display: false }
-                    }
-                }
-            });
-        }
-
-        window.addWeightEntry = () => {
-            const w = prompt("Peso actual (kg):");
-            if(w) alert("Peso registrado (Demo)");
-        };
-
-        /* --- ADMIN PANEL --- */
-        function loadAdminPanel() {
-            const list = document.getElementById('admin-pending-list');
-            const q = query(collection(db, "users"), where("approved", "==", false));
-            onSnapshot(q, (snap) => {
-                list.innerHTML = '';
-                if(snap.empty) list.innerHTML = '<p style="color:#666">No hay usuarios pendientes</p>';
-                snap.forEach(d => {
-                    const u = d.data();
-                    const div = document.createElement('div');
-                    div.style.cssText = "display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333";
-                    div.innerHTML = `
-                        <span>${u.name} <br><small style="color:#666">${u.email}</small></span>
-                        <button class="btn" style="width:auto; padding:5px 10px;" onclick="window.approveUser('${d.id}')">OK</button>
-                    `;
-                    list.appendChild(div);
-                });
-            });
-        }
-
-        window.approveUser = async (uid) => {
-            await updateDoc(doc(db, "users", uid), { approved: true });
-        };
-
+        document.getElementById('coach-btn').onclick = () => window.switchTab('admin-view');
     </script>
 </body>
 </html>
