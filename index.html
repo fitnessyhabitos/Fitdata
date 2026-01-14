@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fit Data">
+    <meta name="theme-color" content="#050505">
+
     <title>Fit Data | High Performance</title>
-    <link rel="icon" href="favicon.ico">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="logo.png"> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -19,10 +26,11 @@
             --success-color: #00ff88;
             --warning-color: #ffaa00;
             --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+            /* Variables de área segura para el Notch/Isla Dinámica del iPhone */
+            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
             --header-height: 60px;
-            --nav-height: 55px;
+            --nav-height: 70px; /* Un poco más alto para facilitar el toque */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -31,9 +39,10 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: var(--font-main);
-            height: 100vh;
+            /* USAR dvh (Dynamic Viewport Height) es la clave para que Safari no rompa el layout */
+            height: 100dvh; 
             width: 100vw;
-            overflow: hidden;
+            overflow: hidden; /* El body no hace scroll, lo hace el main */
             display: flex;
             flex-direction: column;
         }
@@ -41,7 +50,7 @@
         /* --- UTILIDADES --- */
         .hidden { display: none !important; }
         .btn {
-            background: var(--accent-color); color: white; border: none; padding: 12px;
+            background: var(--accent-color); color: white; border: none; padding: 14px;
             border-radius: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
             cursor: pointer; width: 100%; box-shadow: var(--accent-glow);
             display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem;
@@ -49,11 +58,11 @@
         .btn:active { transform: scale(0.98); }
         .btn-outline { 
             background: transparent; border: 1px solid #444; color: #ccc; 
-            padding: 10px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;
+            padding: 12px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer;
             margin-top: 10px; font-size: 0.85rem;
         }
 
-        /* --- LOADING SCREEN IMPACTANTE --- */
+        /* --- PANTALLA DE CARGA --- */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 9999;
@@ -75,10 +84,14 @@
 
         /* --- HEADER & COACH BTN --- */
         header {
-            flex-shrink: 0; height: calc(var(--header-height) + var(--safe-top));
-            padding-top: var(--safe-top); background: rgba(5, 5, 5, 0.98);
-            border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center;
-            padding-left: 15px; padding-right: 15px; z-index: 100;
+            flex-shrink: 0; 
+            height: calc(var(--header-height) + var(--safe-top));
+            padding-top: var(--safe-top); 
+            background: rgba(5, 5, 5, 0.98);
+            border-bottom: 1px solid #222; 
+            display: flex; justify-content: space-between; align-items: center;
+            padding-left: 20px; padding-right: 20px; 
+            z-index: 100;
         }
         .brand { font-weight: 900; font-size: 1.2rem; color: white; letter-spacing: -0.5px; }
         .brand span { color: var(--accent-color); }
@@ -91,9 +104,18 @@
         }
 
         /* --- SCROLL CONTAINER --- */
-        #main-container { flex: 1; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+        #main-container { 
+            flex: 1; 
+            overflow-y: auto; 
+            position: relative; 
+            scroll-behavior: smooth; 
+            /* Smooth scroll nativo en iOS */
+            -webkit-overflow-scrolling: touch; 
+        }
         .view-container {
-            min-height: 100%; padding: 20px 15px 100px 15px;
+            min-height: 100%; 
+            /* Padding inferior masivo para asegurar que NADA se tape con el menú */
+            padding: 20px 15px 150px 15px; 
             display: none; opacity: 0; animation: fadeIn 0.3s forwards;
         }
         .view-container.active { display: block; opacity: 1; }
@@ -104,7 +126,7 @@
         input, select { background: var(--input-bg); border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; font-size: 16px; }
         input:focus { outline: 1px solid var(--accent-color); }
 
-        /* --- PROFILE ELEMENTS --- */
+        /* --- PERFIL --- */
         .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .avatar-circle {
             width: 70px; height: 70px; border-radius: 50%; background: #222;
@@ -113,16 +135,16 @@
         }
         .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* HEATMAP BARS */
+        /* HEATMAP */
         .muscle-bar-group { margin-bottom: 8px; }
         .muscle-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: #ccc; margin-bottom: 2px; }
         .progress-track { width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #ff3333, #ff6666); width: 0%; transition: width 1s ease; }
 
-        /* PHOTO COMPARATOR */
+        /* PHOTO COMPARE */
         .compare-wrapper { position: relative; width: 100%; height: 250px; background: #000; border-radius: 8px; overflow: hidden; margin-top:10px; }
         .compare-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
-        .img-overlay { clip-path: inset(0 50% 0 0); transition: clip-path 0s; } /* JS updates this */
+        .img-overlay { clip-path: inset(0 50% 0 0); transition: clip-path 0s; }
         .slider-handle {
             position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white; cursor: ew-resize; z-index: 10;
         }
@@ -132,7 +154,7 @@
             box-shadow: 0 0 5px black;
         }
 
-        /* --- EXERCISE SELECTOR (SEARCH + IMG) --- */
+        /* --- EXERCISES LIST --- */
         .ex-select-item {
             display: flex; align-items: center; gap: 10px;
             padding: 8px; background: #1a1a1a; margin-bottom: 5px; border-radius: 6px;
@@ -141,15 +163,31 @@
         .ex-select-item img { width: 40px; height: 40px; object-fit: contain; background: black; border-radius: 4px; }
         .ex-select-item.selected { border-color: var(--accent-color); background: rgba(255,51,51,0.1); }
 
-        /* --- BOTTOM NAV --- */
+        /* --- BOTTOM NAV CORRECTA PARA IPHONE --- */
         nav.bottom-nav {
-            flex-shrink: 0; height: calc(var(--nav-height) + var(--safe-bottom));
-            padding-bottom: var(--safe-bottom); background: #0f0f0f; border-top: 1px solid #222;
-            display: flex; justify-content: space-around; z-index: 100;
+            flex-shrink: 0; 
+            /* Altura que respeta la zona segura inferior del iPhone */
+            height: calc(var(--nav-height) + var(--safe-bottom));
+            padding-bottom: var(--safe-bottom); 
+            background: #0f0f0f; 
+            border-top: 1px solid #222;
+            display: flex; justify-content: space-around; 
+            z-index: 999; /* Por encima de todo */
         }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.65rem; }
         .nav-item.active { color: var(--accent-color); }
         .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
+
+        /* --- WORKOUT --- */
+        .exercise-visual {
+            width: 100%; height: 160px; background: #000; border-radius: 8px; margin-bottom: 10px;
+            overflow: hidden; border: 1px solid #333; position: relative; display: flex; justify-content: center;
+        }
+        .exercise-visual img { height: 100%; object-fit: contain; }
+        .set-row {
+            display: grid; grid-template-columns: 25px 1fr 1fr 45px; gap: 8px;
+            align-items: center; margin-bottom: 8px; font-size: 0.9rem;
+        }
 
         /* --- MODAL --- */
         .modal {
@@ -160,9 +198,10 @@
         .modal-content { background: #1a1a1a; width: 90%; max-width: 350px; padding: 20px; border-radius: 12px; border: 1px solid var(--accent-color); text-align: center; }
 
         .btn-float {
-            position: absolute; bottom: 20px; right: 20px;
-            width: 50px; height: 50px; border-radius: 50%; background: var(--accent-color);
+            position: absolute; bottom: 30px; right: 20px;
+            width: 60px; height: 60px; border-radius: 50%; background: var(--accent-color);
             color: white; display: grid; place-items: center; font-size: 24px; box-shadow: 0 5px 15px rgba(255,51,51,0.5);
+            z-index: 80;
         }
         
         .switch { position: relative; display: inline-block; width: 40px; height: 22px; }
@@ -171,18 +210,6 @@
         .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent-color); }
         input:checked + .slider:before { transform: translateX(18px); }
-
-        /* --- EXERCISE VISUAL IN WORKOUT --- */
-        .exercise-visual {
-            width: 100%; height: 160px; background: #000; border-radius: 8px; margin-bottom: 10px;
-            overflow: hidden; border: 1px solid #333; position: relative; display: flex; justify-content: center;
-        }
-        .exercise-visual img { height: 100%; object-fit: contain; }
-        
-        .set-row {
-            display: grid; grid-template-columns: 25px 1fr 1fr 45px; gap: 8px;
-            align-items: center; margin-bottom: 8px; font-size: 0.9rem;
-        }
 
     </style>
 </head>
@@ -265,8 +292,7 @@
 
             <div class="card">
                 <h3>MAPA MUSCULAR (VOLUMEN)</h3>
-                <div id="heatmap-container">
-                    </div>
+                <div id="heatmap-container"></div>
             </div>
 
             <div class="card">
@@ -365,7 +391,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, query, where, addDoc, deleteDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        // FIREBASE
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
             authDomain: "fitdata-7a86b.firebaseapp.com",
@@ -381,99 +407,47 @@
         const ADMIN = "toni@fitdatapro.es";
         const CODE = "fityhab";
 
-        // --- BASE DE DATOS COMPLETA 82 EJERCICIOS ---
+        // --- BASE DE DATOS 82 EJERCICIOS COMPLETA ---
         const EXERCISES = [
-            // PIERNAS
-            {n:"Sentadilla con Barra", img:"cuadriceps.png"}, 
-            {n:"Sentadilla Jaca", img:"cuadriceps.png"}, 
-            {n:"Sentadilla con Cinturón", img:"cuadriceps.png"},
-            {n:"Prensa de Piernas", img:"cuadriceps.png"}, 
-            {n:"Extensión de Cuádriceps", img:"cuadriceps.png"}, 
-            {n:"Estocadas con Mancuernas", img:"cuadriceps.png"},
-            {n:"Curl de Pierna Tumbado", img:"isquiotibiales.png"}, 
-            {n:"Curl de Pierna Sentado", img:"isquiotibiales.png"}, 
-            {n:"Prensa Horizontal", img:"cuadriceps.png"},
-            {n:"Prensa de piernas 45°", img:"cuadriceps.png"}, 
-            {n:"Elevación de Talones Sentado", img:"gemelos.png"}, 
-            {n:"Elevación de Talones de Pie", img:"gemelos.png"},
-            {n:"Elevación de Talones en Máquina", img:"gemelos.png"}, 
-            {n:"Elevación de Cadera", img:"gluteos.png"}, 
-            {n:"Sentadilla Búlgara", img:"gluteos.png"},
-            {n:"Patada de Glúteo en Polea", img:"gluteos.png"}, 
-            {n:"Abducción de Cadera en Máquina", img:"gluteos.png"}, 
-            {n:"Prensa de Glúteos", img:"gluteos.png"},
+            // PIERNAS (19)
+            {n:"Sentadilla con Barra", img:"cuadriceps.png"}, {n:"Sentadilla Jaca", img:"cuadriceps.png"}, {n:"Sentadilla Cinturón", img:"cuadriceps.png"},
+            {n:"Prensa de Piernas", img:"cuadriceps.png"}, {n:"Extensión Cuádriceps", img:"cuadriceps.png"}, {n:"Zancadas Mancuernas", img:"cuadriceps.png"},
+            {n:"Curl Femoral Tumbado", img:"isquiotibiales.png"}, {n:"Curl Femoral Sentado", img:"isquiotibiales.png"}, {n:"Prensa Horizontal", img:"cuadriceps.png"},
+            {n:"Prensa 45 Grados", img:"cuadriceps.png"}, {n:"Gemelo Sentado", img:"gemelos.png"}, {n:"Gemelo de Pie", img:"gemelos.png"},
+            {n:"Gemelo Máquina", img:"gemelos.png"}, {n:"Hip Thrust", img:"gluteos.png"}, {n:"Sentadilla Búlgara", img:"gluteos.png"},
+            {n:"Patada Glúteo Polea", img:"gluteos.png"}, {n:"Abducción Máquina", img:"gluteos.png"}, {n:"Prensa Glúteos", img:"gluteos.png"},
             {n:"Peso Muerto Rumano", img:"isquiotibiales.png"},
 
-            // ESPALDA
-            {n:"Peso Muerto", img:"espalda.png"}, 
-            {n:"Peso Muerto Sumo", img:"espalda.png"}, 
-            {n:"Remo con Barra", img:"espalda.png"},
-            {n:"Remo con Mancuernas", img:"espalda.png"}, 
-            {n:"Jalón Lateral", img:"espalda.png"}, 
-            {n:"Jalón Lateral Cerrado", img:"espalda.png"},
-            {n:"Remo en Máquina", img:"espalda.png"}, 
-            {n:"Remo en Polea Baja", img:"espalda.png"}, 
-            {n:"Dominadas", img:"espalda.png"},
-            {n:"Dominadas Asistidas", img:"espalda.png"}, 
-            {n:"Remo Invertido", img:"espalda.png"}, 
-            {n:"Remo T", img:"espalda.png"},
-            {n:"Hiperextensión", img:"espalda.png"}, 
-            {n:"Buenos Días", img:"isquiotibiales.png"}, 
-            {n:"Remo Hammer", img:"espalda.png"},
-            {n:"Jalón Agarre Cerrado", img:"espalda.png"}, 
-            {n:"Jalón Agarre Abierto", img:"espalda.png"}, 
-            {n:"Remo alto", img:"espalda.png"},
+            // ESPALDA (18)
+            {n:"Peso Muerto", img:"espalda.png"}, {n:"Peso Muerto Sumo", img:"espalda.png"}, {n:"Remo con Barra", img:"espalda.png"},
+            {n:"Remo Mancuernas", img:"espalda.png"}, {n:"Jalón al Pecho", img:"espalda.png"}, {n:"Jalón Cerrado", img:"espalda.png"},
+            {n:"Remo en Máquina", img:"espalda.png"}, {n:"Remo Polea Baja", img:"espalda.png"}, {n:"Dominadas", img:"espalda.png"},
+            {n:"Dominadas Asistidas", img:"espalda.png"}, {n:"Remo Invertido", img:"espalda.png"}, {n:"Remo T", img:"espalda.png"},
+            {n:"Hiperextensiones", img:"espalda.png"}, {n:"Buenos Días", img:"isquiotibiales.png"}, {n:"Remo Hammer", img:"espalda.png"},
+            {n:"Jalón Neutro", img:"espalda.png"}, {n:"Jalón Abierto", img:"espalda.png"}, {n:"Remo al Cuello", img:"espalda.png"},
 
-            // PECHO
-            {n:"Press de Banca", img:"pecho.png"}, 
-            {n:"Press Inclinado con Mancuernas", img:"pecho.png"}, 
-            {n:"Aperturas con Mancuernas", img:"pecho.png"},
-            {n:"Cruces en Polea", img:"pecho.png"}, 
-            {n:"Prensa de Pecho en Máquina", img:"pecho.png"}, 
-            {n:"Prensa de Pecho Declinado", img:"pecho.png"},
-            {n:"Fondos en Paralelas", img:"triceps.png"}, 
-            {n:"Aperturas de Pecho", img:"pecho.png"}, 
-            {n:"Press Inclinado", img:"pecho.png"},
-            {n:"Press Plano", img:"pecho.png"}, 
-            {n:"Prensa Lateral Iso", img:"pecho.png"}, 
-            {n:"Prensa de Pecho", img:"pecho.png"},
+            // PECHO (12)
+            {n:"Press Banca", img:"pecho.png"}, {n:"Press Inclinado Mancuernas", img:"pecho.png"}, {n:"Aperturas Mancuernas", img:"pecho.png"},
+            {n:"Cruce de Poleas", img:"pecho.png"}, {n:"Press Máquina", img:"pecho.png"}, {n:"Press Declinado", img:"pecho.png"},
+            {n:"Fondos", img:"triceps.png"}, {n:"Contractora Pecho", img:"pecho.png"}, {n:"Press Inclinado Barra", img:"pecho.png"},
+            {n:"Press Plano Mancuernas", img:"pecho.png"}, {n:"Press Iso Lateral", img:"pecho.png"}, {n:"Press Vertical", img:"pecho.png"},
 
-            // HOMBROS
-            {n:"Encogimiento de Hombros", img:"hombros.png"}, 
-            {n:"Encogimiento con Mancuernas", img:"hombros.png"}, 
-            {n:"Press Militar", img:"hombros.png"},
-            {n:"Press de Hombros con Mancuernas", img:"hombros.png"}, 
-            {n:"Press de Hombros en Máquina", img:"hombros.png"}, 
-            {n:"Elevación Lateral", img:"hombros.png"},
-            {n:"Elevación Frontal", img:"hombros.png"}, 
-            {n:"Pájaros Inversos", img:"hombros.png"}, 
-            {n:"Elevación Lateral en Polea", img:"hombros.png"},
-            {n:"Press Arnold", img:"hombros.png"}, 
-            {n:"Press de Hombros", img:"hombros.png"}, 
-            {n:"Face Pull", img:"hombros.png"},
+            // HOMBROS (12)
+            {n:"Encogimientos Barra", img:"hombros.png"}, {n:"Encogimientos Mancuerna", img:"hombros.png"}, {n:"Press Militar", img:"hombros.png"},
+            {n:"Press Hombro Mancuerna", img:"hombros.png"}, {n:"Press Hombro Máquina", img:"hombros.png"}, {n:"Elevaciones Laterales", img:"hombros.png"},
+            {n:"Elevaciones Frontales", img:"hombros.png"}, {n:"Pájaros", img:"hombros.png"}, {n:"Laterales Polea", img:"hombros.png"},
+            {n:"Press Arnold", img:"hombros.png"}, {n:"Press Trasnuca", img:"hombros.png"}, {n:"Face Pull", img:"hombros.png"},
 
-            // BRAZOS
-            {n:"Curl de Barra", img:"biceps.png"}, 
-            {n:"Curl de Mancuernas", img:"biceps.png"}, 
-            {n:"Curl en Polea", img:"biceps.png"},
-            {n:"Curl Martillo", img:"biceps.png"}, 
-            {n:"Curl Concentrado", img:"biceps.png"}, 
-            {n:"Curl Predicador", img:"biceps.png"},
-            {n:"Extensión de Tríceps en Polea", img:"triceps.png"}, 
-            {n:"Extensión Francesa", img:"triceps.png"}, 
-            {n:"Extensiones Acostadas", img:"triceps.png"},
-            {n:"Fondos en Paralelas (Tríceps)", img:"triceps.png"}, 
-            {n:"Extensión Unilateral Tríceps", img:"triceps.png"}, 
-            {n:"Triceps Polea", img:"triceps.png"},
-            {n:"Triceps Barra", img:"triceps.png"},
+            // BRAZOS (13)
+            {n:"Curl Barra", img:"biceps.png"}, {n:"Curl Mancuernas", img:"biceps.png"}, {n:"Curl Polea", img:"biceps.png"},
+            {n:"Curl Martillo", img:"biceps.png"}, {n:"Curl Concentrado", img:"biceps.png"}, {n:"Curl Predicador", img:"biceps.png"},
+            {n:"Extensión Polea", img:"triceps.png"}, {n:"Press Francés", img:"triceps.png"}, {n:"Rompecráneos", img:"triceps.png"},
+            {n:"Fondos Tríceps", img:"triceps.png"}, {n:"Extensión Unilateral", img:"triceps.png"}, {n:"Patada Tríceps", img:"triceps.png"},
+            {n:"Copa Tríceps", img:"triceps.png"},
 
-            // ABS
-            {n:"Abdominales con Rueda", img:"abs.png"}, 
-            {n:"Crunch en Polea", img:"abs.png"}, 
-            {n:"Elevaciones de Pierna Colgadas", img:"abs.png"},
-            {n:"Abdominales en Banco", img:"abs.png"}, 
-            {n:"Crunch en Máquina", img:"abs.png"}, 
-            {n:"Levantamiento de Rodillas Colgado", img:"abs.png"}
+            // ABS (6)
+            {n:"Rueda Abdominal", img:"abs.png"}, {n:"Crunch Polea", img:"abs.png"}, {n:"Elevación Piernas", img:"abs.png"},
+            {n:"Abdominales Banco", img:"abs.png"}, {n:"Crunch Máquina", img:"abs.png"}, {n:"Rodillas al Pecho", img:"abs.png"}
         ];
 
         let currentUser = null;
@@ -520,10 +494,8 @@
             document.querySelectorAll('.view-container').forEach(e => e.classList.remove('active'));
             document.getElementById(tab).classList.add('active');
             document.getElementById('main-container').scrollTop = 0;
-            
             const ns = document.querySelectorAll('.nav-item');
             ns.forEach(n => n.classList.remove('active'));
-            
             if(tab === 'routines-view') ns[0].classList.add('active');
             if(tab === 'profile-view') {
                 ns[1].classList.add('active');
@@ -540,7 +512,7 @@
         async function loadRoutines() {
             const list = document.getElementById('routines-list');
             list.innerHTML = 'Cargando...';
-            const q = query(collection(db, "routines")); // Filtro cliente para demo
+            const q = query(collection(db, "routines"));
             const snap = await onSnapshot(q, (s) => {
                 list.innerHTML = '';
                 s.forEach(d => {
@@ -563,7 +535,7 @@
             });
         }
 
-        // EDITOR (SEARCH + IMG)
+        // EDITOR
         window.openRoutineEditor = () => {
             document.getElementById('editor-name').value = '';
             document.getElementById('ex-search').value = '';
@@ -602,7 +574,7 @@
         };
         window.delRoutine = async (id) => { if(confirm("¿Borrar?")) await deleteDoc(doc(db, "routines", id)); };
 
-        // PERFIL (HEATMAP + FOTOS)
+        // PERFIL
         async function loadProfile() {
             document.getElementById('profile-name').innerText = userData.name;
             if(userData.photo) {
@@ -611,12 +583,12 @@
                 document.getElementById('avatar-img').style.display='block';
             }
             
-            // Heatmap Demo (Aleatorio para visualizar funcionalidad si no hay historial)
+            // Heatmap Random
             const muscles = ["Pecho","Espalda","Cuádriceps","Isquios","Glúteos","Hombros","Bíceps","Tríceps"];
             const hC = document.getElementById('heatmap-container');
             hC.innerHTML = '';
             muscles.forEach(m => {
-                const pct = Math.floor(Math.random()*90)+10; // Simulación
+                const pct = Math.floor(Math.random()*90)+10;
                 const d = document.createElement('div');
                 d.className = 'muscle-bar-group';
                 d.innerHTML = `
@@ -654,7 +626,6 @@
             }
         };
 
-        // PHOTO COMPARE LOGIC
         window.loadCompImg = (inp, id) => {
             if(inp.files[0]) {
                 const r = new FileReader();
@@ -711,7 +682,7 @@
         window.tS = (i,j) => {
             const s = activeWorkout.exs[i].sets[j];
             s.d = !s.d;
-            window.startWorkout(null); // Re-render simple
+            window.startWorkout(null); 
             const btn = document.querySelectorAll('.card')[i].querySelectorAll('button')[j];
             btn.className = s.d ? 'btn' : 'btn-outline';
             btn.style.background = s.d ? '#0f8' : 'transparent';
@@ -775,13 +746,10 @@
             const m = document.getElementById('modal-coach');
             document.getElementById('coach-user-name').innerText = u.name;
             document.getElementById('coach-user-email').innerText = u.email;
-            
-            // Si no aprobado, aprobar
             if(!u.approved && confirm("¿Aprobar usuario?")) {
                 await updateDoc(doc(db,"users",uid),{approved:true});
                 loadAdminUsers();
             }
-
             const sel = document.getElementById('coach-routine-select');
             sel.innerHTML = '';
             const rS = await getDocs(collection(db,"routines"));
