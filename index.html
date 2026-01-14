@@ -22,7 +22,7 @@
             --input-bg: #1f1f1f;
             --text-color: #ffffff;
             --text-dim: #888888;
-            --accent-color: #ff3333;
+            --accent-color: #ff3333; /* Rojo Neón */
             --accent-dim: rgba(255, 51, 51, 0.2);
             --accent-glow: 0 0 12px rgba(255, 51, 51, 0.5);
             --success-color: #00ff88;
@@ -52,8 +52,7 @@
             background: transparent; border: 1px solid #444; color: #ccc; padding: 12px; width: 100%;
             border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.85rem;
         }
-        .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; }
-        .btn-danger { background: #600; color: #fcc; border: 1px solid #f00; margin-top: 10px; }
+        .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; margin:0;}
         
         .btn-done {
             background-color: rgba(255, 51, 51, 0.3) !important;
@@ -62,6 +61,7 @@
             box-shadow: 0 0 10px rgba(255, 51, 51, 0.4);
         }
 
+        /* LOADING */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -153,10 +153,11 @@
 
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
         .modal.active { opacity: 1; pointer-events: auto; }
+        /* MODAL COACH EXPANDIDO */
         .modal-content { 
-            background: #1a1a1a; width: 90%; max-width: 380px; padding: 25px; 
+            background: #1a1a1a; width: 90%; max-width: 400px; padding: 25px; 
             border-radius: 15px; border: 1px solid var(--accent-color); text-align: center;
-            max-height: 85vh; overflow-y: auto; /* Para el coach panel largo */
+            max-height: 85vh; overflow-y: auto;
         }
 
         .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
@@ -173,10 +174,13 @@
         .slider-btn { position: absolute; top: 50%; left: -15px; width: 30px; height: 30px; background: white; border-radius: 50%; display: grid; place-items: center; color: black; box-shadow: 0 0 10px black; }
 
         /* RPE BUTTONS */
-        .rpe-btn { width: 100%; margin-bottom: 10px; border: none; padding: 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+        .rpe-btn { width: 100%; margin-bottom: 10px; border: none; padding: 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .rpe-easy { background: #2e7d32; }
         .rpe-hard { background: #f57f17; color: black; }
         .rpe-max { background: #c62828; }
+        
+        .admin-user-row { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .btn-danger { background: #500; border: 1px solid #800; color: #fcc; margin-top: 15px; }
 
     </style>
 </head>
@@ -341,7 +345,7 @@
         <section id="admin-view" class="view-container">
             <h2>PANEL COACH</h2>
             <div class="card">
-                <h3>Atletas</h3>
+                <h3>Lista de Atletas</h3>
                 <div id="admin-list"></div>
             </div>
             <button class="btn-outline" onclick="switchTab('routines-view')">VOLVER</button>
@@ -372,7 +376,7 @@
     <div id="modal-rpe" class="modal">
         <div class="modal-content">
             <h3>FINALIZAR ENTRENO</h3>
-            <p style="color:#888; margin-bottom:20px;">¿Qué tal ha ido?</p>
+            <p style="color:#888; margin-bottom:20px;">¿Dificultad?</p>
             <button class="rpe-btn rpe-easy" onclick="finishWorkout('Suave')">🟢 Suave / Moderado</button>
             <button class="rpe-btn rpe-hard" onclick="finishWorkout('Duro')">🟠 Duro / Intenso</button>
             <button class="rpe-btn rpe-max" onclick="finishWorkout('Fallo')">🔴 Fallo / Extremo</button>
@@ -381,9 +385,9 @@
     </div>
 
     <div id="modal-coach" class="modal">
-        <div class="modal-content" style="max-height:90vh; overflow-y:auto; text-align:left;">
-            <div style="text-align:center; margin-bottom:15px;">
-                <h3 id="coach-user-name" style="border:none; margin:0;">Usuario</h3>
+        <div class="modal-content" style="text-align:left;">
+            <div style="text-align:center; margin-bottom:10px;">
+                <h3 id="coach-user-name" style="margin:0;">Usuario</h3>
                 <p id="coach-user-email" style="color:#666; font-size:0.8rem;"></p>
             </div>
             
@@ -391,21 +395,23 @@
                 <strong>STATS:</strong> <span id="coach-stats-text">Cargando...</span>
             </div>
 
-            <h4>Gráfica Peso</h4>
-            <div style="height:150px; margin-bottom:15px;"><canvas id="coachWeightChart"></canvas></div>
+            <h4 style="margin-bottom:5px;">Gráfica Peso</h4>
+            <div style="height:120px; margin-bottom:15px;"><canvas id="coachWeightChart"></canvas></div>
 
-            <h4>Historial Entrenos</h4>
-            <div id="coach-history-list" style="max-height:150px; overflow-y:auto; font-size:0.75rem; color:#aaa; margin-bottom:15px; border:1px solid #333; padding:5px;"></div>
+            <h4 style="margin-bottom:5px;">Últimos Entrenos</h4>
+            <div id="coach-history-list" style="height:100px; overflow-y:auto; font-size:0.75rem; color:#aaa; margin-bottom:15px; border:1px solid #333; padding:5px; background:#000;"></div>
 
             <hr style="border-color:#333; margin:15px 0;">
             
-            <div style="margin-bottom:20px;">
-                <label style="font-size:0.8rem;">Asignar Rutina:</label>
-                <select id="coach-routine-select" style="margin-top:5px;"></select>
-                <button class="btn-small btn" style="width:100%;" onclick="assignRoutine()">ASIGNAR</button>
+            <div style="margin-bottom:15px;">
+                <label style="font-size:0.8rem; color:#ccc;">Asignar Rutina:</label>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <select id="coach-routine-select" style="margin:0;"></select>
+                    <button class="btn-small btn" style="width:auto;" onclick="assignRoutine()">ENVIAR</button>
+                </div>
             </div>
 
-            <button class="btn-danger btn-small" style="width:100%;" onclick="deleteUser()">🗑️ ELIMINAR ATLETA</button>
+            <button class="btn-danger btn" style="width:100%;" onclick="deleteUser()">🗑️ ELIMINAR ATLETA</button>
             <button class="btn-outline" style="margin-top:10px;" onclick="document.getElementById('modal-coach').classList.remove('active')">CERRAR</button>
         </div>
     </div>
@@ -824,9 +830,12 @@
             const s = await getDocs(collection(db,"users"));
             s.forEach(d=>{
                 const u=d.data(); if(u.email===ADMIN)return;
-                const div=document.createElement('div'); div.style.cssText="padding:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center; cursor:pointer;";
-                div.innerHTML=`<div><strong>${u.name}</strong><br><small>${u.approved?'Aprobado':'Pendiente'}</small></div><div style="font-size:1.5rem;">${u.approved?'🟢':'⚠️'}</div>`;
-                div.onclick=()=>openCoachModal(d.id,u); l.appendChild(div);
+                const div=document.createElement('div');
+                div.className = "admin-user-row";
+                // --- BOTÓN EXPLÍCITO PARA GESTIONAR ---
+                div.innerHTML=`<div><strong>${u.name}</strong><br><small>${u.approved?'🟢':'⏳'} ${u.email}</small></div><button class="btn-outline btn-small" style="width:auto;">⚙️ VER FICHA</button>`;
+                div.onclick=()=>openCoachModal(d.id,u); 
+                l.appendChild(div);
             });
         }
 
@@ -874,13 +883,19 @@
             document.getElementById('modal-coach').classList.remove('active');
         };
 
+        // --- FUNCIÓN ELIMINAR USUARIO ---
         window.deleteUser = async () => {
-            if(confirm("¿ELIMINAR ATLETA DEFINITIVAMENTE? Esta acción no se puede deshacer.")) {
-                await deleteDoc(doc(db, "users", selectedUserCoach));
-                // Opcional: Borrar sus workouts (requiere cloud functions para batch delete real, aqui solo borramos perfil)
-                alert("Atleta eliminado.");
-                document.getElementById('modal-coach').classList.remove('active');
-                loadAdminUsers();
+            if(confirm("⚠ ¿ELIMINAR ATLETA DEFINITIVAMENTE?\nEsta acción no se puede deshacer.")) {
+                try {
+                    await deleteDoc(doc(db, "users", selectedUserCoach));
+                    // Nota: Borrar los entrenos del usuario requeriría una Cloud Function para ser perfecto,
+                    // pero al borrar el user ya no sale en la lista.
+                    alert("Atleta eliminado correctamente.");
+                    document.getElementById('modal-coach').classList.remove('active');
+                    loadAdminUsers();
+                } catch(e) {
+                    alert("Error: " + e.message);
+                }
             }
         };
 
