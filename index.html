@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0a0a0a">
     <title>Fit Data by Toni</title>
     
     <link rel="apple-touch-icon" href="favicon.png">
@@ -18,18 +17,16 @@
     
     <style>
         :root {
-            /* PALETA PREMIUM */
+            /* CORPORATIVO PREMIUM */
             --bg: #0a0a0a; 
             --card: #1a1a1a; 
-            --card-light: #222222;
+            --card-light: #222;
             --text: #ffffff; 
             --muted: #888888;
-            --accent: #ff4444;       /* Rojo Neón */
-            --accent-glow: rgba(255, 68, 68, 0.3);
+            --accent: #ff4444;       
+            --accent-glow: rgba(255, 68, 68, 0.25);
             --success: #22dd88; 
             --warning: #ffaa00;
-            
-            /* SAFE AREAS */
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
@@ -39,133 +36,125 @@
         body { 
             background:var(--bg); color:var(--text); 
             min-height:100vh; 
-            /* Espacio extra abajo para que no se corte nada */
             padding-bottom: calc(100px + var(--safe-bottom)); 
             overscroll-behavior-y:none; 
-            user-select: none;
+            user-select: none; 
         }
         
-        /* --- UTILIDADES --- */
+        /* UI HELPERS */
         .hidden { display:none !important; }
-        .container { max-width:600px; margin:0 auto; padding:20px; padding-top:10px; }
-        h1, h2, h3, h4 { font-weight:800; letter-spacing:-0.5px; margin-bottom:8px; }
+        .container { max-width:600px; margin:0 auto; padding:20px; padding-top:15px; }
         .text-accent { color:var(--accent); }
         .text-muted { color:var(--muted); font-size:0.8rem; }
         .text-center { text-align: center; }
-        
-        /* --- HEADER FIJO --- */
+        h1, h2, h3 { font-weight:800; letter-spacing:-0.5px; margin-bottom:10px; }
+
+        /* HEADER FIJO SEGURO */
         .navbar-top {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(12px);
+            background: rgba(20, 20, 20, 0.98);
+            backdrop-filter: blur(15px);
             border-bottom: 1px solid #333;
             padding: 15px 20px;
-            padding-top: calc(15px + var(--safe-top)); 
+            padding-top: calc(20px + var(--safe-top)); 
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        /* --- BOTONES E INPUTS --- */
-        .btn { width:100%; padding:14px; border:none; border-radius:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; font-size:0.95rem; transition: transform 0.1s; }
-        .btn:active { transform:scale(0.97); }
+        /* INPUTS & BOTONES */
+        .btn { width:100%; padding:14px; border:none; border-radius:12px; font-weight:700; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; transition:0.2s; }
+        .btn:active { transform:scale(0.98); }
         .btn-primary { background:var(--accent); color:white; box-shadow:0 0 15px var(--accent-glow); }
-        .btn-secondary { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); color:white; }
-        .btn-success { background:var(--success); color:black; font-weight: 800; }
-        .btn-icon { width:auto; padding:8px 12px; font-size:1.2rem; background:rgba(255,255,255,0.1); border-radius:8px; border:none; color: white; cursor: pointer;}
-        
-        .input { width:100%; padding:14px; margin-bottom:12px; background:#222; border:1px solid #333; color:white; border-radius:10px; font-size:1rem; }
-        .input:focus { border-color:var(--accent); background:#2a2a2a; }
-        
-        /* --- CARDS --- */
-        .card { background:var(--card); padding:20px; border-radius:16px; margin-bottom:15px; border:1px solid #252525; position:relative; overflow:hidden; border-left:4px solid var(--accent); }
-        
-        /* --- IMÁGENES SVG --- */
-        .ex-img { 
-            width: 70px; height: 70px; 
-            background: white; border: 3px solid var(--accent); border-radius: 12px;
-            padding: 0; object-fit: contain; flex-shrink: 0; display: block;
-        }
+        .btn-secondary { background:rgba(255,255,255,0.1); border:1px solid #444; color:white; }
+        .btn-success { background:var(--success); color:black; font-weight:800; }
+        .btn-icon { background:transparent; border:none; color:white; font-size:1.4rem; cursor:pointer; }
 
-        /* --- WORKOUT UI --- */
-        .set-row { display:grid; grid-template-columns:30px 1fr 1fr 40px 40px; gap:8px; align-items:center; background:#222; padding:10px; border-radius:8px; margin-bottom:8px; position:relative; border:1px solid #333; }
-        .set-row.done { border-color:var(--success); background:rgba(34,221,136,0.05); }
-        .prev-val { position:absolute; top:-9px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#666; background:#222; padding:0 6px; border-radius:4px; border:1px solid #333; z-index: 5; pointer-events: none; }
-        .check-btn { width:32px; height:32px; border-radius:10px; border:2px solid #444; background:none; display:flex; align-items:center; justify-content:center; cursor:pointer; color:transparent; font-weight:bold; transition:0.2s; }
+        .input { width:100%; padding:14px; margin-bottom:12px; background:#222; border:1px solid #444; color:white; border-radius:10px; font-size:1rem; }
+        .input:focus { border-color:var(--accent); background:#2a2a2a; }
+
+        /* CARDS & LISTS */
+        .card { background:var(--card); padding:20px; border-radius:16px; margin-bottom:15px; border:1px solid #2a2a2a; border-left:4px solid var(--accent); position:relative; }
+        
+        /* EXERCISE IMAGE (SVG) */
+        .ex-img { width: 60px; height: 60px; background: white; border: 3px solid var(--accent); border-radius: 12px; padding: 0; object-fit: contain; flex-shrink: 0; }
+
+        /* WORKOUT ROWS */
+        .set-row { 
+            display:grid; grid-template-columns:30px 1fr 1fr 40px 40px; gap:8px; align-items:center; 
+            background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #333; 
+        }
+        .set-row.done { border-color:var(--success); background:rgba(34, 221, 136, 0.05); }
+        
+        /* Shadow Data (Peso Anterior) */
+        .prev-val { position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#888; background:#222; padding:0 6px; border-radius:4px; border:1px solid #444; z-index:5; pointer-events:none; }
+
+        .check-btn { width:32px; height:32px; border-radius:50%; border:2px solid #555; background:transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; color:transparent; font-weight:bold; transition:0.2s; }
         .check-btn.checked { background:var(--success); border-color:var(--success); color:black; transform:scale(1.1); }
         .check-btn.checked::after { content:'✓'; }
 
-        /* --- NAV BOTTOM --- */
+        /* NAV BOTTOM */
         .nav-bottom { 
             position:fixed; bottom:0; left:0; width:100%; 
             background:rgba(20,20,20,0.98); border-top:1px solid #333; 
             display:flex; justify-content:space-around; padding:12px 0; 
-            padding-bottom: calc(12px + var(--safe-bottom)); 
+            padding-bottom: calc(15px + var(--safe-bottom)); 
             z-index:100; backdrop-filter: blur(10px);
         }
-        .nav-item { color:#555; background:none; border:none; font-size:0.65rem; display:flex; flex-direction:column; align-items:center; width:20%; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; transition:0.3s; }
-        .nav-item.active { color:var(--accent); transform:translateY(-2px); text-shadow: 0 0 10px var(--accent-glow); }
-        .nav-item i { font-size:1.4rem; margin-bottom:4px; font-style: normal; }
+        .nav-item { color:#666; background:none; border:none; font-size:0.65rem; display:flex; flex-direction:column; align-items:center; width:20%; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; transition:0.3s; }
+        .nav-item.active { color:var(--accent); transform:translateY(-3px); text-shadow:0 0 10px var(--accent-glow); }
+        .nav-item i { font-size:1.4rem; margin-bottom:4px; font-style:normal; }
 
-        /* --- STATS & HEATMAP --- */
+        /* STATS GRID */
         .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
         .stat-box { background:var(--card-light); padding:15px; border-radius:12px; text-align:center; border:1px solid #333; }
         .stat-val { font-size:1.4rem; font-weight:800; color:white; display:block; }
         .stat-lbl { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
-        .heatmap-container { width: 100%; height: 300px; display: flex; justify-content: center; margin-bottom: 20px; }
 
-        /* --- MODALS --- */
+        /* MODALS & OVERLAYS */
         .screen { display:none; opacity:0; transition:opacity 0.3s; }
         .screen.active { display:block; opacity:1; }
-        .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:3000; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
-        .modal-content { background:var(--card); width:95%; max-width:500px; padding:25px; border-radius:20px; border:1px solid #444; max-height:85vh; overflow-y:auto; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-
-        /* --- TOGGLES --- */
-        .toggle-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #222; }
-        .switch { position:relative; display:inline-block; width:40px; height:24px; }
-        .switch input { opacity:0; width:0; height:0; }
-        .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#333; transition:.4s; border-radius:34px; }
-        .slider:before { position:absolute; content:""; height:16px; width:16px; left:4px; bottom:4px; background-color:white; transition:.4s; border-radius:50%; }
-        input:checked + .slider { background-color:var(--accent); }
-        input:checked + .slider:before { transform:translateX(16px); }
-
-        /* --- TIMER & ALERTS --- */
-        .timer-overlay { position:fixed; bottom: calc(95px + var(--safe-bottom)); right:20px; width:70px; height:70px; background:var(--bg); border:3px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-family:monospace; color:var(--accent); box-shadow:0 0 20px rgba(255,68,68,0.4); z-index:2000; cursor:pointer; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);} 70% {box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);} }
-
-        #toast { visibility:hidden; min-width:250px; background-color:#222; color:#fff; text-align:center; border-radius:50px; padding:12px 24px; position:fixed; z-index:4000; left:50%; bottom:calc(90px + var(--safe-bottom)); transform:translateX(-50%); border:1px solid var(--accent); box-shadow:0 5px 15px rgba(0,0,0,0.5); font-size:0.9rem; font-weight:bold; }
-        #toast.show { visibility:visible; animation:fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from{bottom:60px; opacity:0;} to{bottom:calc(90px + var(--safe-bottom)); opacity:1;} }
-        @keyframes fadeout { from{bottom:calc(90px + var(--safe-bottom)); opacity:1;} to{bottom:60px; opacity:0;} }
-
-        /* --- LOADING ANIMATION --- */
-        .loading-logo { width: 140px; height: 140px; margin-bottom: 20px; border-radius: 30px; animation: heartbeat 2.5s infinite ease-in-out; box-shadow: 0 0 50px rgba(255, 68, 68, 0.3); }
-        @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
         
-        /* --- ADMIN LIST --- */
+        .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:5000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); }
+        .modal-content { background:var(--card); width:95%; max-width:500px; padding:25px; border-radius:20px; border:1px solid #444; max-height:85vh; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.8); }
+
+        /* TIMER FLOAT */
+        .timer-float { position:fixed; bottom:calc(100px + var(--safe-bottom)); right:20px; width:70px; height:70px; background:var(--bg); border:3px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-family:monospace; color:var(--accent); box-shadow:0 0 20px var(--accent-glow); z-index:2000; cursor:pointer; animation:pulse 1s infinite; }
+        @keyframes pulse { 0% {box-shadow:0 0 0 0 rgba(255,68,68,0.4);} 70% {box-shadow:0 0 0 10px rgba(255,68,68,0);} 100% {box-shadow:0 0 0 0 rgba(255,68,68,0);} }
+
+        /* TOAST */
+        #toast { visibility:hidden; min-width:250px; background-color:#222; color:#fff; text-align:center; border-radius:50px; padding:12px 24px; position:fixed; z-index:6000; left:50%; bottom:calc(100px + var(--safe-bottom)); transform:translateX(-50%); border:1px solid var(--accent); box-shadow:0 5px 20px rgba(0,0,0,0.6); font-size:0.9rem; font-weight:bold; }
+        #toast.show { visibility:visible; animation:fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from{bottom:60px; opacity:0;} to{bottom:calc(100px + var(--safe-bottom)); opacity:1;} }
+        @keyframes fadeout { from{bottom:calc(100px + var(--safe-bottom)); opacity:1;} to{bottom:60px; opacity:0;} }
+
+        /* ADMIN LIST */
         .user-row { display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--card-light); border-radius:10px; margin-bottom:10px; border-left:3px solid #444; }
-        .stagnant { border-left-color: var(--warning) !important; background: rgba(255, 170, 0, 0.05); }
+        
+        /* LOGO */
+        .loading-logo { width:140px; height:140px; margin-bottom:20px; border-radius:30px; animation:heartbeat 2.5s infinite ease-in-out; box-shadow:0 0 50px rgba(255,68,68,0.3); }
+        @keyframes heartbeat { 0% {transform:scale(1);} 50% {transform:scale(1.08);} 100% {transform:scale(1);} }
     </style>
 </head>
 <body>
 
     <div id="toast">Notificación</div>
 
-    <div id="loading" class="screen active" style="text-align:center; padding-top:30vh; background: #000; z-index: 5000;">
-        <img src="favicon.png" alt="Logo" class="loading-logo">
+    <div id="loading" class="screen active" style="text-align:center; padding-top:30vh; background:#000; z-index:9999;">
+        <img src="favicon.png" class="loading-logo">
         <h1 style="color:var(--accent); font-size:3.5rem; margin:0; letter-spacing:-2px;">FIT DATA</h1>
-        <p style="color:var(--muted); margin-top:10px; font-size:1.1rem; letter-spacing: 1px;">COACH INTELLIGENCE</p>
+        <p style="color:var(--muted); margin-top:10px; font-size:1.1rem; letter-spacing:1px;">COACH INTELLIGENCE</p>
     </div>
 
     <div id="login" class="screen">
         <div class="container" style="padding-top:60px; text-align:center;">
-            <img src="favicon.png" style="width:100px; border-radius:20px; margin-bottom:20px; box-shadow: 0 0 20px rgba(255,68,68,0.2);">
+            <img src="favicon.png" style="width:100px; border-radius:20px; margin-bottom:20px; box-shadow:0 0 20px rgba(255,68,68,0.2);">
             <h1 style="color:var(--accent); font-size:3rem; margin-bottom:10px;">FIT DATA</h1>
             <p style="color:var(--muted); margin-bottom:40px;">Acceso Atletas</p>
             <div class="card" style="border:none; background:transparent;">
                 <input id="log-email" class="input" type="email" placeholder="Email">
                 <input id="log-pass" class="input" type="password" placeholder="Contraseña">
                 <button onclick="doLogin()" class="btn btn-primary">INICIAR SESIÓN</button>
-                <p onclick="toRegister()" style="margin-top:20px; color:var(--muted); cursor:pointer; font-size:0.9rem;">Solicitar Cuenta</p>
+                <p onclick="toRegister()" style="margin-top:20px; color:var(--muted); cursor:pointer; font-size:0.9rem;">Solicitar Acceso</p>
             </div>
         </div>
     </div>
@@ -179,7 +168,7 @@
                 <input id="reg-height" type="number" class="input" placeholder="Altura (cm)">
                 <input id="reg-email" class="input" type="email" placeholder="Email">
                 <input id="reg-pass" class="input" type="password" placeholder="Contraseña">
-                <label class="text-accent" style="font-weight:bold; font-size:0.75rem; margin-left:5px;">CÓDIGO DE INVITACIÓN</label>
+                <label class="text-accent" style="font-weight:bold; font-size:0.75rem; margin-left:5px;">CÓDIGO SECRETO</label>
                 <input id="reg-code" class="input" style="text-align:center; border-color:var(--accent); letter-spacing:4px; font-weight:bold;">
                 <button onclick="doRegister()" class="btn btn-primary">SOLICITAR ACCESO</button>
                 <button onclick="toLogin()" class="btn btn-secondary">Cancelar</button>
@@ -193,7 +182,7 @@
             <div class="navbar-top">
                 <div>
                     <h2 id="u-name" style="margin:0; font-size:1.5rem;">Hola</h2>
-                    <span id="u-goal" style="color:var(--muted); font-size:0.75rem; text-transform:uppercase;">Objetivo no fijado</span>
+                    <span id="u-goal" style="color:var(--muted); font-size:0.75rem; text-transform:uppercase;">Cargando...</span>
                 </div>
                 <button id="admin-btn" onclick="nav('view-admin')" class="btn-icon hidden">👑</button>
             </div>
@@ -239,7 +228,6 @@
         <div id="view-profile" class="view hidden">
             <div class="navbar-top"><h2>Rendimiento</h2></div>
             <div class="container">
-                
                 <div class="card" style="text-align:center;">
                     <h3>Mapa de Trabajo</h3>
                     <p class="text-muted" style="font-size:0.8rem;">Volumen acumulado</p>
@@ -249,8 +237,8 @@
                 <div class="stats-grid">
                     <div class="stat-box"><span id="stat-kg" class="stat-val">0</span><span class="stat-lbl">TONELADAS</span></div>
                     <div class="stat-box"><span id="stat-workouts" class="stat-val">0</span><span class="stat-lbl">ENTRENOS</span></div>
-                    <div class="stat-box"><span id="stat-sets" class="stat-val">0</span><span class="stat-lbl">SERIES TOTALES</span></div>
-                    <div class="stat-box"><span id="stat-reps" class="stat-val">0</span><span class="stat-lbl">REPS TOTALES</span></div>
+                    <div class="stat-box"><span id="stat-sets" class="stat-val">0</span><span class="stat-lbl">SERIES</span></div>
+                    <div class="stat-box"><span id="stat-reps" class="stat-val">0</span><span class="stat-lbl">REPS</span></div>
                 </div>
 
                 <div class="card">
@@ -310,11 +298,11 @@
                     
                     <div class="toggle-row">
                         <span>Sonido Alarma</span>
-                        <label class="switch"><input type="checkbox" id="cfg-sound" onchange="saveConfig()"><span class="slider"></span></label>
+                        <input type="checkbox" id="cfg-sound" onchange="saveConfig()" style="width:20px; height:20px;">
                     </div>
                     <div class="toggle-row">
                         <span>Pantalla Encendida</span>
-                        <label class="switch"><input type="checkbox" id="cfg-screen" onchange="saveConfig()"><span class="slider"></span></label>
+                        <input type="checkbox" id="cfg-screen" onchange="saveConfig()" style="width:20px; height:20px;">
                     </div>
                 </div>
                 <button onclick="auth.signOut()" class="btn btn-secondary">Cerrar Sesión</button>
@@ -343,14 +331,14 @@
         </div>
     </div>
 
-    <div id="workout-ui" class="screen" style="z-index:1500; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); overflow-y:auto; padding-bottom:100px;">
+    <div id="workout-ui" class="screen" style="z-index:2000; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); overflow-y:auto;">
         <div class="navbar-top">
             <button onclick="exitWorkout()" style="width:auto; background:none; border:none; color:white; font-size:1.5rem;">←</button>
             <div id="wo-title" style="font-weight:bold; color:var(--accent);">Rutina</div>
             <div id="wo-timer" style="font-family:monospace; border:1px solid var(--accent); padding:2px 8px; border-radius:6px; color:var(--accent);">00:00</div>
         </div>
-        <div id="wo-container" class="container"></div>
-        <div style="position:fixed; bottom:0; left:0; width:100%; background:var(--bg); padding:15px; border-top:1px solid #333; padding-bottom:calc(15px + var(--safe-bottom));">
+        <div id="wo-container" class="container" style="padding-bottom:120px;"></div>
+        <div style="position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:15px; border-top:1px solid #333; padding-bottom:calc(15px + var(--safe-bottom));">
             <button onclick="finishPrompt()" class="btn btn-success" style="margin:0;">FINALIZAR ENTRENAMIENTO</button>
         </div>
         <div id="float-timer" class="timer-float hidden">
@@ -363,9 +351,8 @@
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between;">
                 <h2 id="adm-ath-name">Atleta</h2>
-                <button onclick="closeAdminModal()" class="btn-secondary" style="width:auto; padding:5px 10px;">X</button>
+                <button onclick="document.getElementById('modal-athlete').classList.add('hidden')" class="btn-secondary" style="width:auto; padding:5px 10px;">X</button>
             </div>
-            
             <div class="card">
                 <h3>Asignar Objetivos</h3>
                 <div style="display:flex; gap:10px;">
@@ -374,22 +361,19 @@
                 </div>
                 <button onclick="adminSaveTargets()" class="btn btn-primary">Guardar Objetivos</button>
             </div>
-
             <div class="card">
-                <h3>Datos & Stats</h3>
+                <h3>Datos</h3>
                 <p>Edad: <span id="adm-ath-age">-</span> | Altura: <span id="adm-ath-height">-</span></p>
                 <div class="stats-grid" style="margin-top:10px;">
                     <div class="stat-box"><span id="adm-ath-kg" class="stat-val">0</span><small>KG</small></div>
                     <div class="stat-box"><span id="adm-ath-sets" class="stat-val">0</span><small>SERIES</small></div>
                 </div>
             </div>
-
             <div class="card">
                 <h3>Gráfica Peso</h3>
                 <canvas id="adminWeightChart" style="max-height:150px;"></canvas>
             </div>
-
-            <h3>Fotos Recientes</h3>
+            <h3>Fotos</h3>
             <div id="admin-gallery" style="display:grid; grid-template-columns:1fr 1fr; gap:5px;"></div>
         </div>
     </div>
@@ -421,7 +405,7 @@
     <div id="modal-note" class="modal hidden">
         <div class="modal-content">
             <h3>Nota del Ejercicio</h3>
-            <textarea id="note-text" class="input" rows="4" placeholder="Ej: Sillín al 6..."></textarea>
+            <textarea id="note-text" class="input" rows="4" placeholder="Ej: Sillín al 6, molestias..."></textarea>
             <div style="display:flex; gap:10px;">
                 <button onclick="saveNote()" class="btn btn-primary">Guardar</button>
                 <button onclick="document.getElementById('modal-note').classList.add('hidden')" class="btn btn-secondary">Cancelar</button>
@@ -445,7 +429,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- 2. CONSTANTES GLOBALES ---
+        // --- 2. CONSTANTES ---
         const ADMIN_EMAIL = "toni@fitdata.com";
         const SECRET_CODE = "fityhab";
         
@@ -462,31 +446,29 @@
         let currentAdminUser = null;
         let currentNoteExId = null;
 
-        // --- 3. GENERADOR SVG INTELIGENTE (ESTILO ICONO) ---
+        // --- 3. GENERADOR SVG (ESTILO ICONO SILUETA) ---
         function getMuscleSvg(muscle) {
             const m = muscle.toLowerCase();
             let silhouette = "";
             let highlight = "";
 
-            // SILUETA TORSO (Negro Sólido - Cintura arriba)
+            // RUTAS SILUETAS SIMPLIFICADAS Y SÓLIDAS
             const torsoPath = "M 50,10 L 70,15 L 75,30 L 65,75 L 67,90 L 33,90 L 35,75 L 25,30 L 30,15 Z"; 
-            // SILUETA PIERNAS (Negro Sólido - Cintura abajo)
             const legsPath = "M 25,5 L 75,5 L 80,30 L 85,90 L 55,90 L 50,45 L 45,90 L 15,90 L 20,30 Z";
 
             if (m.includes('pierna') || m.includes('glute') || m.includes('femoral') || m.includes('gemelo') || m.includes('abductor')) {
-                // TREN INFERIOR
+                // Tren Inferior
                 silhouette = `<path d="${legsPath}" fill="#000000"/>`;
                 highlight = `<path d="${legsPath}" fill="#FF0000" stroke="none"/>`; 
             } else {
-                // TREN SUPERIOR
+                // Tren Superior
                 silhouette = `<path d="${torsoPath}" fill="#000000"/>`;
-                
                 if (m.includes('pecho')) highlight = `<rect x="35" y="30" width="30" height="15" fill="#FF0000"/>`;
                 else if (m.includes('hombro')) highlight = `<circle cx="25" cy="25" r="8" fill="#FF0000"/><circle cx="75" cy="25" r="8" fill="#FF0000"/>`;
                 else if (m.includes('biceps') || m.includes('brazo')) highlight = `<rect x="15" y="40" width="10" height="20" fill="#FF0000"/><rect x="75" y="40" width="10" height="20" fill="#FF0000"/>`;
                 else if (m.includes('espalda')) highlight = `<path d="M 30,25 L 70,25 L 60,60 L 40,60 Z" fill="#FF0000"/>`;
                 else if (m.includes('abs')) highlight = `<rect x="40" y="50" width="20" height="25" fill="#FF0000"/>`;
-                else if (m.includes('triceps') || m.includes('tríceps')) highlight = `<rect x="10" y="40" width="8" height="20" fill="#FF0000"/><rect x="82" y="40" width="8" height="20" fill="#FF0000"/>`;
+                else if (m.includes('triceps')) highlight = `<rect x="10" y="40" width="8" height="20" fill="#FF0000"/><rect x="82" y="40" width="8" height="20" fill="#FF0000"/>`;
             }
 
             return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
@@ -497,7 +479,7 @@
             </svg>`);
         }
 
-        // GENERADOR DE HEATMAP (Cuerpo Completo)
+        // GENERADOR HEATMAP (PERFIL)
         function renderHeatmap(stats) {
             const container = document.getElementById('heatmap-render');
             if (!container) return;
@@ -506,7 +488,12 @@
             container.innerHTML = `
             <svg viewBox="0 0 100 120" style="height:100%; display:block; margin:0 auto;">
                 <g fill="#333">
-                    <circle cx="50" cy="15" r="8" /> <path d="M30,25 L70,25 L65,70 L35,70 Z" /> <path d="M25,28 L15,55 L25,60 L32,30 Z" /> <path d="M75,28 L85,55 L75,60 L68,30 Z" /> <path d="M35,70 L30,110 L45,110 L48,80 L52,80 L55,110 L70,110 L65,70 Z" /> </g>
+                    <circle cx="50" cy="15" r="8" />
+                    <path d="M30,25 L70,25 L65,70 L35,70 Z" />
+                    <path d="M25,28 L15,55 L25,60 L32,30 Z" />
+                    <path d="M75,28 L85,55 L75,60 L68,30 Z" />
+                    <path d="M35,70 L30,110 L45,110 L48,80 L52,80 L55,110 L70,110 L65,70 Z" />
+                </g>
                 <path d="M35,30 L65,30 L63,45 L37,45 Z" fill="#ff4444" fill-opacity="${getOp('Pecho')}"/>
                 <path d="M40,48 L60,48 L58,68 L42,68 Z" fill="#ff4444" fill-opacity="${getOp('Abs')}"/>
                 <path d="M25,28 L15,55 L25,60 L32,30 Z" fill="#ff4444" fill-opacity="${getOp('Bíceps')}"/>
@@ -515,7 +502,7 @@
             </svg>`;
         }
 
-        // 4. BASE DE DATOS COMPLETA (82 ITEMS)
+        // 4. BASE DE DATOS COMPLETA (82 EJERCICIOS)
         const rawExercisesDB = [
             { id: 1, name: 'Sentadilla con Barra', muscle: 'Piernas', emoji: '🏋️' },
             { id: 2, name: 'Sentadilla Jaca', muscle: 'Piernas', emoji: '⚙️' },
@@ -614,10 +601,7 @@
                 db.collection('users').doc(u.uid).onSnapshot(doc => {
                     if(doc.exists) {
                         userData = doc.data();
-                        
-                        if(userData.email.toLowerCase() === ADMIN_EMAIL) {
-                            listenToAllUsers();
-                        }
+                        if(userData.email.toLowerCase() === ADMIN_EMAIL) listenToAllUsers();
                         
                         if(userData.approved || userData.email.toLowerCase() === ADMIN_EMAIL) {
                             currentUser = u;
@@ -625,7 +609,7 @@
                                 document.getElementById('loading').classList.remove('active');
                                 initApp();
                                 loadWorkoutFromStorage(); 
-                            }, 2500);
+                            }, 2000);
                         } else {
                             document.getElementById('loading').classList.remove('active');
                             showToast("Pendiente de Aprobación"); showScreen('login');
@@ -672,28 +656,19 @@
             document.getElementById('u-name').innerText = userData.username.split(' ')[0];
             document.getElementById('u-goal').innerText = userData.settings.goal || 'Objetivo no fijado';
             
-            // Nutrición
             if(userData.targets && (userData.targets.kcal > 0 || userData.targets.water > 0)) {
                 document.getElementById('nutrition-panel').classList.remove('hidden');
                 document.getElementById('target-kcal').innerText = userData.targets.kcal || '-';
                 document.getElementById('target-water').innerText = userData.targets.water || '-';
-            } else {
-                document.getElementById('nutrition-panel').classList.add('hidden');
             }
 
             if(userData.role === 'admin') document.getElementById('admin-btn').classList.remove('hidden');
             
-            // Cargar Config
             document.getElementById('cfg-goal').value = userData.settings.goal || 'Mantenimiento';
             document.getElementById('cfg-rest').value = userData.settings.rest || 60;
             document.getElementById('cfg-screen').checked = userData.settings.screen;
             document.getElementById('cfg-sound').checked = userData.settings.sound;
             document.getElementById('cfg-alarm-day').value = userData.settings.alarmDay || -1;
-            
-            if(userData.settings.alarmDay && userData.settings.alarmDay != -1) {
-                const today = new Date().getDay();
-                if(today == userData.settings.alarmDay) showToast("📷 ¡Hoy toca foto de revisión!");
-            }
 
             loadRoutines(); loadProfile();
         }
@@ -707,7 +682,7 @@
             if(vid.includes('config')) document.querySelector('.nav-item:nth-child(3)').classList.add('active');
         }
 
-        // 7. DASHBOARD & ROUTINES
+        // 7. RUTINAS
         async function loadRoutines() {
             const l = document.getElementById('routines-list'); 
             db.collection('users').doc(currentUser.uid).collection('routines').orderBy('createdAt','desc').onSnapshot(s => {
@@ -735,7 +710,7 @@
             showToast("Registro guardado");
         }
 
-        // 8. AUTOGUARDADO & WORKOUT CORE
+        // 8. ENTRENAMIENTO
         function saveWorkoutToStorage() {
             if (activeRoutine) {
                 localStorage.setItem('fitdata_wo', JSON.stringify({routine: activeRoutine, start: woStartTime}));
@@ -758,7 +733,6 @@
         async function startWo(id) {
             const doc = await db.collection('users').doc(currentUser.uid).collection('routines').doc(id).get();
             const r = doc.data(); 
-            // 5 Series por defecto
             const preparedExercises = r.exercises.map(ex => ({
                 ...ex,
                 series: Array(5).fill().map((_, i) => ({ weight: '', reps: i===0?20:16, completed: false }))
@@ -777,29 +751,37 @@
             document.getElementById('wo-title').innerText = activeRoutine.name;
             const c = document.getElementById('wo-container'); c.innerHTML='';
 
-            const hSnap = await db.collection('users').doc(currentUser.uid).collection('history')
-                .where('routineId','==',activeRoutine.id).orderBy('date','desc').limit(1).get();
-            const last = !hSnap.empty ? hSnap.docs[0].data() : null;
+            // Obtener pesos anteriores
+            let lastWorkout = null;
+            try {
+                const hSnap = await db.collection('users').doc(currentUser.uid).collection('history')
+                    .where('routineId','==',activeRoutine.id).orderBy('date','desc').limit(1).get();
+                if(!hSnap.empty) lastWorkout = hSnap.docs[0].data();
+            } catch(e) { console.log("No history found"); }
 
             activeRoutine.exercises.forEach((ex, idx) => {
                 let rows = '';
                 ex.series.forEach((s, i) => {
-                    const prev = last?.exercises[idx]?.series[i]?.weight || '-';
+                    const prev = lastWorkout?.exercises?.[idx]?.series?.[i]?.weight || '-';
                     const rowClass = s.completed ? 'set-row done' : 'set-row';
                     const checkClass = s.completed ? 'check-btn checked' : 'check-btn';
                     
                     rows += `
                     <div class="${rowClass}" id="row-${idx}-${i}">
                         <div style="text-align:center; color:#888;">${i+1}</div>
-                        <input type="number" class="input reps" value="${s.reps}" onchange="updateSet(${idx},${i},'reps',this.value)" style="margin:0; text-align:center; height:35px;">
+                        <input type="number" class="input" value="${s.reps}" onchange="updateSet(${idx},${i},'reps',this.value)" style="margin:0; text-align:center; height:35px; background:#333;">
                         <div style="position:relative;">
                             <span class="prev-val">${prev}kg</span>
-                            <input type="number" class="input weight" value="${s.weight}" onchange="updateSet(${idx},${i},'weight',this.value)" placeholder="kg" style="margin:0; text-align:center; height:35px;">
+                            <input type="number" class="input" value="${s.weight}" onchange="updateSet(${idx},${i},'weight',this.value)" placeholder="kg" style="margin:0; text-align:center; height:35px; background:#333;">
                         </div>
                         <div class="${checkClass}" onclick="checkSet(this, ${idx}, ${i})">✓</div>
                     </div>`;
                 });
-                c.innerHTML += `<div class="card">
+                
+                // USAR createElement PARA EVITAR ERRORES DE PARSEO
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <img src="${ex.image}" class="ex-img">
@@ -807,8 +789,8 @@
                         </div>
                         <button onclick="openNote(${idx})" class="btn-icon">📝</button>
                     </div>
-                    ${rows}
-                </div>`;
+                    ${rows}`;
+                c.appendChild(card);
             });
 
             if(woTimerInt) clearInterval(woTimerInt);
@@ -901,12 +883,11 @@
             document.getElementById('modal-note').classList.remove('hidden');
         }
         function saveNote() {
-            // Nota simplificada, se guarda en la sesión activa
             showToast("Nota guardada");
             document.getElementById('modal-note').classList.add('hidden');
         }
 
-        // 9. PROFILE & STATS
+        // 9. PERFIL
         function loadProfile() {
             const s = userData.stats || {kg:0, workouts:0, sets:0, reps:0, heatmap:{}};
             document.getElementById('stat-kg').innerText = (s.kg/1000).toFixed(1) + 't';
@@ -985,12 +966,10 @@
                     const u = d.data();
                     const item = `
                     <div class="user-row">
-                        <div><b>${u.username}</b><br><small style="color:#888">${u.email}</small>
-                        <br><span class="stat-badge">${u.settings?.goal || '-'}</span></div>
+                        <div><b>${u.username}</b><br><small style="color:#888">${u.email}</small></div>
                         <div style="text-align:right;">
                             ${u.approved ? `<button onclick="viewUserAdmin('${d.id}')" class="btn-icon">👁️</button>` : 
                             `<button onclick="approve('${d.id}')" class="btn-success" style="padding:4px 8px; width:auto; font-size:0.8rem;">OK</button>`}
-                            <button onclick="assignRout('${d.id}')" style="background:#333; border:none; padding:5px; margin-right:5px;">📋</button>
                             <button onclick="delUser('${d.id}')" style="background:none; border:none; color:#666;">❌</button>
                         </div>
                     </div>`;
@@ -1007,7 +986,7 @@
         async function viewUserAdmin(uid) {
             currentAdminUser = uid;
             
-            // PRIMERO MOSTRAR MODAL PARA QUE CHARTJS PUEDA DIBUJAR
+            // PRIMERO HACER VISIBLE EL MODAL
             document.getElementById('modal-athlete').classList.remove('hidden');
 
             const uDoc = await db.collection('users').doc(uid).get();
@@ -1030,11 +1009,7 @@
 
             const pSnap = await db.collection('users').doc(uid).collection('photos').orderBy('date','desc').limit(4).get();
             const gallery = document.getElementById('admin-gallery'); gallery.innerHTML='';
-            pSnap.forEach(d => { gallery.innerHTML += `<div class="photo-item"><img src="${d.data().img}"></div>`; });
-        }
-
-        function closeAdminModal() {
-            document.getElementById('modal-athlete').classList.add('hidden');
+            pSnap.forEach(d => { gallery.innerHTML += `<div class="photo-item"><img src="${d.data().img}" style="width:100%;"></div>`; });
         }
 
         async function adminSaveTargets() {
@@ -1047,41 +1022,42 @@
 
         async function approve(id) { await db.collection('users').doc(id).update({approved:true}); }
         async function delUser(id) { if(confirm("Borrar?")) await db.collection('users').doc(id).delete(); }
-        async function assignRout(uid) {
-            if(confirm("¿Asignar rutina básica?")) {
-                const exs = exercisesDB.slice(0,5); 
-                await db.collection('users').doc(uid).collection('routines').add({name:"Rutina Coach", exercises:exs, createdAt:new Date()});
-                showToast("Rutina enviada");
-            }
-        }
 
         // --- UTILS ---
         function openRoutineModal() { selectedExs=[]; document.getElementById('new-rout-name').value=''; renderExSelector(); document.getElementById('modal-create').classList.remove('hidden'); }
+        
         function renderExSelector() {
             const f = document.getElementById('search-ex').value.toLowerCase();
             const c = document.getElementById('ex-list'); c.innerHTML='';
             exercisesDB.filter(e=>e.name.toLowerCase().includes(f)).forEach(e => {
                 const d = document.createElement('div');
-                d.style.cssText = `display:flex; align-items:center; gap:10px; padding:8px; border-bottom:1px solid #333; ${selectedExs.includes(e.id)?'background:rgba(255,68,68,0.2)':''}`;
+                d.style.cssText = `display:flex; align-items:center; gap:10px; padding:8px; border-bottom:1px solid #333; cursor:pointer; ${selectedExs.includes(e.id)?'background:rgba(255,68,68,0.2)':''}`;
                 d.innerHTML = `<img src="${e.image}" style="width:40px; background:white; border-radius:4px;"><div><b>${e.name}</b><br><small style="color:#888">${e.muscle}</small></div>`;
-                d.onclick = ()=>{ if(selectedExs.includes(e.id)) selectedExs=selectedExs.filter(x=>x!==e.id); else selectedExs.push(e.id); renderExSelector(); };
+                d.onclick = ()=>{ 
+                    if(selectedExs.includes(e.id)) selectedExs=selectedExs.filter(x=>x!==e.id); 
+                    else selectedExs.push(e.id); 
+                    renderExSelector(); 
+                };
                 c.appendChild(d);
             });
         }
+
         async function saveRoutine() {
             const name = document.getElementById('new-rout-name').value;
-            if(!name || !selectedExs.length) return showToast("Faltan datos");
+            if(!name || selectedExs.length === 0) return showToast("Faltan datos");
             
-            try {
-                const exs = selectedExs.map(id=>exercisesDB.find(e=>e.id===id));
-                await db.collection('users').doc(currentUser.uid).collection('routines').add({name, exercises:exs, createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-                document.getElementById('modal-create').classList.add('hidden');
-                // No need to call loadRoutines because onSnapshot handles it
-                showToast("Rutina guardada correctamente");
-            } catch (e) {
-                alert("Error al guardar: " + e.message);
-            }
+            // MAPEO SEGURO
+            const exs = selectedExs.map(id => exercisesDB.find(e => e.id === id)).filter(e => e !== undefined);
+            
+            if(exs.length === 0) return showToast("Error al procesar ejercicios");
+
+            await db.collection('users').doc(currentUser.uid).collection('routines').add({
+                name, exercises: exs, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            document.getElementById('modal-create').classList.add('hidden');
+            showToast("Rutina guardada");
         }
+
         async function delRout(id) { if(confirm("¿Borrar?")) await db.collection('users').doc(currentUser.uid).collection('routines').doc(id).delete(); }
     </script>
 </body>
