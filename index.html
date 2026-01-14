@@ -25,7 +25,7 @@
             --text: #ffffff; 
             --muted: #888888;
             --accent: #ff4444;       /* Rojo Neón */
-            --accent-glow: rgba(255, 68, 68, 0.4);
+            --accent-glow: rgba(255, 68, 68, 0.3);
             --success: #22dd88; 
             --warning: #ffaa00;
             
@@ -39,8 +39,8 @@
         body { 
             background:var(--bg); color:var(--text); 
             min-height:100vh; 
-            /* Padding inferior para la nav bar + safe area */
-            padding-bottom: calc(85px + var(--safe-bottom)); 
+            /* Espacio para la barra inferior + área segura */
+            padding-bottom: calc(90px + var(--safe-bottom)); 
             overscroll-behavior-y:none; 
             user-select: none;
         }
@@ -141,7 +141,7 @@
         @keyframes fadeout { from{bottom:calc(90px + var(--safe-bottom)); opacity:1;} to{bottom:60px; opacity:0;} }
 
         /* --- LOADING ANIMATION --- */
-        .loading-logo { width: 140px; height: 140px; margin-bottom: 20px; border-radius: 30px; animation: heartbeat 2s infinite ease-in-out; box-shadow: 0 0 50px rgba(255, 68, 68, 0.3); }
+        .loading-logo { width: 140px; height: 140px; margin-bottom: 20px; border-radius: 30px; animation: heartbeat 2.5s infinite ease-in-out; box-shadow: 0 0 50px rgba(255, 68, 68, 0.3); }
         @keyframes heartbeat { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
         
         /* --- ADMIN LIST --- */
@@ -198,7 +198,7 @@
                     <h2 id="u-name" style="margin:0; font-size:1.5rem;">Hola</h2>
                     <span id="u-goal" style="color:var(--muted); font-size:0.75rem; text-transform:uppercase;">Objetivo no fijado</span>
                 </div>
-                <button id="admin-btn" onclick="nav('view-admin')" class="btn-icon hidden">👑 COACH</button>
+                <button id="admin-btn" onclick="nav('view-admin')" class="btn-icon hidden">👑</button>
             </div>
 
             <div class="container">
@@ -219,6 +219,14 @@
                             <div id="target-water" style="font-weight:bold; font-size:1.2rem; color:white;">-</div>
                             <small class="text-muted">Litros</small>
                         </div>
+                    </div>
+                    <div style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">
+                        <small class="text-muted">Registro de hoy:</small>
+                        <div style="display:flex; gap:10px; margin-top:5px;">
+                            <input id="user-kcal" type="number" class="input" placeholder="Ingerido (Kcal)" style="margin:0;">
+                            <input id="user-water" type="number" class="input" placeholder="Bebido (L)" style="margin:0;">
+                        </div>
+                        <button onclick="saveDailyNutrition()" class="btn btn-secondary" style="margin-top:10px; width:100%;">Guardar Registro</button>
                     </div>
                 </div>
 
@@ -244,8 +252,8 @@
                 <div class="stats-grid">
                     <div class="stat-box"><span id="stat-kg" class="stat-val">0</span><span class="stat-lbl">TONELADAS</span></div>
                     <div class="stat-box"><span id="stat-workouts" class="stat-val">0</span><span class="stat-lbl">ENTRENOS</span></div>
-                    <div class="stat-box"><span id="stat-sets" class="stat-val">0</span><span class="stat-lbl">SERIES</span></div>
-                    <div class="stat-box"><span id="stat-reps" class="stat-val">0</span><span class="stat-lbl">REPS</span></div>
+                    <div class="stat-box"><span id="stat-sets" class="stat-val">0</span><span class="stat-lbl">SERIES TOTALES</span></div>
+                    <div class="stat-box"><span id="stat-reps" class="stat-val">0</span><span class="stat-lbl">REPS TOTALES</span></div>
                 </div>
 
                 <div class="card">
@@ -264,7 +272,7 @@
                             📷 Subir <input type="file" id="photo-in" accept="image/*" hidden onchange="uploadPhoto(this)">
                         </label>
                     </div>
-                    <p class="text-muted" style="margin:10px 0; font-size:0.8rem; background:#222; padding:8px; border-radius:6px;">💡 Usa siempre la misma luz, misma ropa y mismo lugar.</p>
+                    <p class="text-muted" style="margin:10px 0; font-size:0.8rem; background:#222; padding:8px; border-radius:6px;">💡 Usa siempre la misma luz, misma ropa y mismo ángulo.</p>
                     
                     <div style="display:flex; gap:5px; margin-bottom:15px;">
                         <div id="comp-before" style="flex:1; aspect-ratio:3/4; border:1px dashed #444; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden;"><small>Inicio</small></div>
@@ -290,10 +298,10 @@
                     <div class="toggle-row">
                         <span>Recordatorio Fotos</span>
                         <select id="cfg-alarm-day" class="input" style="width:120px; margin:0;" onchange="saveConfig()">
-                            <option value="0">Domingo</option>
+                            <option value="-1">Off</option>
                             <option value="1">Lunes</option>
                             <option value="5">Viernes</option>
-                            <option value="-1">Desactivado</option>
+                            <option value="0">Domingo</option>
                         </select>
                     </div>
 
@@ -364,8 +372,8 @@
             <div class="card">
                 <h3>Asignar Objetivos</h3>
                 <div style="display:flex; gap:10px;">
-                    <div><small>Kcal</small><input id="adm-set-kcal" type="number" class="input"></div>
-                    <div><small>Agua (L)</small><input id="adm-set-water" type="number" class="input"></div>
+                    <div><small>Kcal Objetivo</small><input id="adm-set-kcal" type="number" class="input"></div>
+                    <div><small>Agua (L) Objetivo</small><input id="adm-set-water" type="number" class="input"></div>
                 </div>
                 <button onclick="adminSaveTargets()" class="btn btn-primary">Guardar Objetivos</button>
             </div>
@@ -404,7 +412,7 @@
 
     <div id="modal-rpe" class="modal hidden">
         <div class="modal-content" style="text-align:center;">
-            <h3>Dificultad (RPE)</h3>
+            <h3>Intensidad (RPE)</h3>
             <div style="display:grid; gap:10px; margin-top:20px;">
                 <button onclick="saveWorkoutLog(1)" class="btn" style="background:#22dd88; color:black;">RPE 1-4 (Fácil)</button>
                 <button onclick="saveWorkoutLog(2)" class="btn" style="background:#ffaa00; color:black;">RPE 5-7 (Medio)</button>
@@ -416,7 +424,7 @@
     <audio id="beep" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio>
 
     <script>
-        // --- 1. FIREBASE CONFIG ---
+        // --- 1. FIREBASE CONFIG (PON TUS CLAVES AQUÍ) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCmM0gViU3itZ4HIZZVTEm7OaV0iBtsiGs",
             authDomain: "fitdata-7a86b.firebaseapp.com",
@@ -451,9 +459,9 @@
             let silhouette = "";
             let highlight = "";
 
-            // SILUETA TORSO (Negro Sólido)
+            // SILUETA TORSO (Negro Sólido - Cintura arriba)
             const torsoPath = "M 50,10 L 70,15 L 75,30 L 65,75 L 67,90 L 33,90 L 35,75 L 25,30 L 30,15 Z"; 
-            // SILUETA PIERNAS (Negro Sólido)
+            // SILUETA PIERNAS (Negro Sólido - Cintura abajo)
             const legsPath = "M 25,5 L 75,5 L 80,30 L 85,90 L 55,90 L 50,45 L 45,90 L 15,90 L 20,30 Z";
 
             if (m.includes('pierna') || m.includes('glute') || m.includes('femoral') || m.includes('gemelo') || m.includes('abductor')) {
@@ -597,7 +605,7 @@
                 db.collection('users').doc(u.uid).onSnapshot(doc => {
                     if(doc.exists) {
                         userData = doc.data();
-                        // Si soy Admin, escuchar cambios globales
+                        
                         if(userData.email.toLowerCase() === ADMIN_EMAIL) {
                             listenToAllUsers();
                         }
@@ -634,9 +642,12 @@
                 const isAdmin = email.toLowerCase() === ADMIN_EMAIL;
                 const cred = await auth.createUserWithEmailAndPassword(email, document.getElementById('reg-pass').value);
                 await db.collection('users').doc(cred.user.uid).set({
-                    username: document.getElementById('reg-name').value, email, 
+                    username: document.getElementById('reg-name').value, 
+                    email, 
+                    age: document.getElementById('reg-age').value,
+                    height: document.getElementById('reg-height').value,
                     role: isAdmin?'admin':'user', approved: isAdmin, 
-                    settings:{rest:60, screen:true, sound:true, goal:'Mantenimiento'},
+                    settings:{rest:60, screen:true, sound:true, goal:'Mantenimiento', alarmDay: -1},
                     stats:{kg:0, workouts:0, sets:0, reps:0, heatmap:{}},
                     targets:{kcal:0, water:0},
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -663,11 +674,12 @@
 
             if(userData.role === 'admin') document.getElementById('admin-btn').classList.remove('hidden');
             
-            // Cargar Config y Alarma Fotos
+            // Cargar Config
             document.getElementById('cfg-goal').value = userData.settings.goal || 'Mantenimiento';
             document.getElementById('cfg-rest').value = userData.settings.rest || 60;
             document.getElementById('cfg-screen').checked = userData.settings.screen;
             document.getElementById('cfg-sound').checked = userData.settings.sound;
+            document.getElementById('cfg-alarm-day').value = userData.settings.alarmDay || -1;
             
             if(userData.settings.alarmDay && userData.settings.alarmDay != -1) {
                 const today = new Date().getDay();
@@ -703,6 +715,15 @@
                     l.appendChild(div);
                 });
             });
+        }
+
+        async function saveDailyNutrition() {
+            const k = document.getElementById('user-kcal').value;
+            const w = document.getElementById('user-water').value;
+            await db.collection('users').doc(currentUser.uid).collection('nutrition').add({
+                kcal: k, water: w, date: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            showToast("Registro guardado");
         }
 
         // 8. AUTOGUARDADO & WORKOUT CORE
@@ -830,7 +851,6 @@
                         totalKg += (parseFloat(s.weight)||0) * (parseFloat(s.reps)||0);
                         totalSets++;
                         totalReps += parseFloat(s.reps)||0;
-                        // Heatmap logic simple
                         muscleMap[ex.muscle] = (muscleMap[ex.muscle] || 0) + 1;
                     }
                 });
@@ -935,10 +955,8 @@
                 
                 snap.forEach(d => {
                     const u = d.data();
-                    // Detectar estancamiento (admin visual)
-                    const isStagnant = false; // Lógica compleja omitida por espacio
                     const item = `
-                    <div class="user-row ${isStagnant?'stagnant':''}">
+                    <div class="user-row">
                         <div><b>${u.username}</b><br><small style="color:#888">${u.email}</small>
                         <br><span class="stat-badge">${u.settings?.goal || '-'}</span></div>
                         <div style="text-align:right;">
@@ -993,7 +1011,6 @@
         }
 
         async function approve(id) { await db.collection('users').doc(id).update({approved:true}); }
-        async function toggleNut(id, val) { await db.collection('users').doc(id).update({nutrition:val}); showToast(val?"Nutrición Activada":"Desactivada"); }
         async function delUser(id) { if(confirm("Borrar?")) await db.collection('users').doc(id).delete(); }
         async function assignRout(uid) {
             if(confirm("¿Asignar rutina básica?")) {
