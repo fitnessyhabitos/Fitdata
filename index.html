@@ -8,8 +8,8 @@
     <meta name="theme-color" content="#0a0a0a">
     <title>Fit Data by Toni</title>
     
-    <link rel="apple-touch-icon" href="logo.png">
-    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -18,89 +18,58 @@
     
     <style>
         :root {
-            --bg: #0a0a0a; 
-            --card: #1a1a1a; 
-            --card-light: #222;
-            --text: #ffffff; 
-            --muted: #888888;
-            --accent: #ff4444;       
-            --accent-glow: rgba(255, 68, 68, 0.25);
-            --success: #22dd88; 
-            --warning: #ffaa00;
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+            --bg: #0a0a0a; --card: #141414; --card-light: #1f1f1f; --text: #ffffff; 
+            --muted: #888; --accent: #ff4444; --accent-glow: rgba(255, 68, 68, 0.2);
+            --success: #22dd88; --warning: #ffaa00;
+            --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom);
         }
         
         * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color:transparent; outline:none; }
-        
-        body { 
-            background:var(--bg); color:var(--text); 
-            min-height:100vh; 
-            padding-bottom: calc(100px + var(--safe-bottom)); 
-            overscroll-behavior-y:none; 
-            user-select: none; 
-        }
+        body { background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:calc(100px + var(--safe-bottom)); user-select:none; }
         
         .hidden { display:none !important; }
         .container { max-width:600px; margin:0 auto; padding:20px; padding-top:15px; }
         .text-accent { color:var(--accent); }
         .text-muted { color:var(--muted); font-size:0.8rem; }
-        .text-center { text-align: center; }
-        h1, h2, h3 { font-weight:800; letter-spacing:-0.5px; margin-bottom:10px; }
+        
+        /* HEADER */
+        .navbar-top { position:sticky; top:0; z-index:100; background:rgba(20,20,20,0.95); backdrop-filter:blur(15px); border-bottom:1px solid #333; padding:15px 20px; padding-top:calc(15px + var(--safe-top)); display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 20px rgba(0,0,0,0.5); }
 
-        /* HEADER FIJO */
-        .navbar-top {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(20, 20, 20, 0.98);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid #333;
-            padding: 15px 20px;
-            padding-top: calc(20px + var(--safe-top)); 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        }
-
-        /* INPUTS & BOTONES */
+        /* UI ELEMENTS */
         .btn { width:100%; padding:14px; border:none; border-radius:12px; font-weight:700; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; transition:0.2s; }
-        .btn:active { transform:scale(0.98); }
+        .btn:active { transform:scale(0.97); }
         .btn-primary { background:var(--accent); color:white; box-shadow:0 0 15px var(--accent-glow); }
         .btn-secondary { background:rgba(255,255,255,0.1); border:1px solid #444; color:white; }
         .btn-success { background:var(--success); color:black; font-weight:800; }
-        .btn-icon { background:transparent; border:none; color:#bbb; font-size:1.2rem; cursor:pointer; padding: 5px; border-radius: 5px; border: 1px solid #333; min-width: 40px;}
-        .btn-icon:hover { color:white; border-color: #666; background: #333; }
-
+        .btn-icon { background:transparent; border:none; color:#bbb; font-size:1.2rem; cursor:pointer; padding:5px; border-radius:5px; border:1px solid #333; min-width:40px; }
+        
         .input { width:100%; padding:14px; margin-bottom:12px; background:#222; border:1px solid #444; color:white; border-radius:10px; font-size:1rem; }
         .input:focus { border-color:var(--accent); background:#2a2a2a; }
-
-        /* CARDS */
+        
         .card { background:var(--card); padding:20px; border-radius:16px; margin-bottom:15px; border:1px solid #2a2a2a; border-left:4px solid var(--accent); position:relative; }
         
-        /* EXERCISE IMAGE (JPG) */
-        .ex-img { width: 65px; height: 65px; background: white; border: 2px solid var(--accent); border-radius: 12px; padding: 0; object-fit: cover; flex-shrink: 0; }
+        /* SVG GENERATED IMAGE */
+        .ex-img { width:65px; height:65px; background:white; border:2px solid var(--accent); border-radius:12px; padding:2px; object-fit:contain; flex-shrink:0; }
 
-        /* WORKOUT ROWS */
-        .set-row { 
-            display:grid; grid-template-columns:30px 1fr 1fr 40px 40px; gap:8px; align-items:center; 
-            background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #333; 
-        }
-        .set-row.done { border-color:var(--success); background:rgba(34, 221, 136, 0.05); }
-        .prev-val { position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#888; background:#222; padding:0 6px; border-radius:4px; border:1px solid #444; z-index:5; pointer-events:none; }
-
+        /* WORKOUT */
+        .set-row { display:grid; grid-template-columns:30px 1fr 1fr 40px 40px; gap:8px; align-items:center; background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #333; }
+        .set-row.done { border-color:var(--success); background:rgba(34,221,136,0.05); }
+        .prev-val { position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:0.65rem; color:#888; background:#222; padding:0 6px; border-radius:4px; border:1px solid #444; pointer-events:none; }
         .check-btn { width:32px; height:32px; border-radius:50%; border:2px solid #555; background:transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; color:transparent; font-weight:bold; transition:0.2s; }
         .check-btn.checked { background:var(--success); border-color:var(--success); color:black; transform:scale(1.1); }
         .check-btn.checked::after { content:'✓'; }
 
-        /* NAV BOTTOM */
-        .nav-bottom { 
-            position:fixed; bottom:0; left:0; width:100%; 
-            background:rgba(20,20,20,0.98); border-top:1px solid #333; 
-            display:flex; justify-content:space-around; padding:12px 0; 
-            padding-bottom: calc(15px + var(--safe-bottom)); 
-            z-index:100; backdrop-filter: blur(10px);
-        }
+        /* NAV */
+        .nav-bottom { position:fixed; bottom:0; left:0; width:100%; background:rgba(20,20,20,0.98); border-top:1px solid #333; display:flex; justify-content:space-around; padding:12px 0; padding-bottom:calc(15px + var(--safe-bottom)); z-index:100; backdrop-filter:blur(10px); }
         .nav-item { color:#666; background:none; border:none; font-size:0.65rem; display:flex; flex-direction:column; align-items:center; width:20%; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; transition:0.3s; }
         .nav-item.active { color:var(--accent); transform:translateY(-3px); text-shadow:0 0 10px var(--accent-glow); }
         .nav-item i { font-size:1.4rem; margin-bottom:4px; font-style:normal; }
+
+        /* STATS */
+        .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+        .stat-box { background:var(--card-light); padding:15px; border-radius:12px; text-align:center; border:1px solid #333; }
+        .stat-val { font-size:1.4rem; font-weight:800; color:white; display:block; }
+        .stat-lbl { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
 
         /* MODALS */
         .screen { display:none; opacity:0; transition:opacity 0.3s; }
@@ -108,27 +77,19 @@
         .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:5000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); }
         .modal-content { background:var(--card); width:95%; max-width:500px; padding:25px; border-radius:20px; border:1px solid #444; max-height:85vh; overflow-y:auto; box-shadow:0 10px 40px rgba(0,0,0,0.8); }
 
-        /* TIMER FLOAT */
+        /* EXTRA */
         .timer-float { position:fixed; bottom:calc(100px + var(--safe-bottom)); right:20px; width:70px; height:70px; background:var(--bg); border:3px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-family:monospace; color:var(--accent); box-shadow:0 0 20px var(--accent-glow); z-index:2000; cursor:pointer; animation:pulse 1s infinite; }
         @keyframes pulse { 0% {box-shadow:0 0 0 0 rgba(255,68,68,0.4);} 70% {box-shadow:0 0 0 10px rgba(255,68,68,0);} 100% {box-shadow:0 0 0 0 rgba(255,68,68,0);} }
-
-        /* TOAST */
         #toast { visibility:hidden; min-width:250px; background-color:#222; color:#fff; text-align:center; border-radius:50px; padding:12px 24px; position:fixed; z-index:6000; left:50%; bottom:calc(100px + var(--safe-bottom)); transform:translateX(-50%); border:1px solid var(--accent); box-shadow:0 5px 20px rgba(0,0,0,0.6); font-size:0.9rem; font-weight:bold; }
         #toast.show { visibility:visible; animation:fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from{bottom:60px; opacity:0;} to{bottom:calc(100px + var(--safe-bottom)); opacity:1;} }
         @keyframes fadeout { from{bottom:calc(100px + var(--safe-bottom)); opacity:1;} to{bottom:60px; opacity:0;} }
-
-        /* ADMIN LIST */
-        .user-row { display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--card-light); border-radius:10px; margin-bottom:10px; border-left:3px solid #444; }
-        .stagnant { border-left-color: var(--warning) !important; background: rgba(255, 170, 0, 0.05); }
         
-        /* LOGO */
+        .user-row { display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--card-light); border-radius:10px; margin-bottom:10px; border-left:3px solid #444; }
         .loading-logo { width:140px; height:140px; margin-bottom:20px; border-radius:30px; animation:heartbeat 2.5s infinite ease-in-out; box-shadow:0 0 50px rgba(255,68,68,0.3); }
         @keyframes heartbeat { 0% {transform:scale(1);} 50% {transform:scale(1.08);} 100% {transform:scale(1);} }
-
-        /* HEATMAP CONTAINERS */
-        .heatmap-wrapper { display: flex; justify-content: center; gap: 20px; height: 350px; }
-        .body-svg { height: 100%; width: auto; filter: drop-shadow(0 0 5px rgba(255,68,68,0.2)); }
+        
+        .heatmap-svg { width:100%; height:auto; max-height:300px; filter:drop-shadow(0 0 5px rgba(255,68,68,0.3)); }
     </style>
 </head>
 <body>
@@ -136,21 +97,19 @@
     <div id="toast">Notificación</div>
 
     <div id="loading" class="screen active" style="text-align:center; padding-top:30vh; background:#000; z-index:9999;">
-        <img src="logo.png" class="loading-logo">
+        <img src="favicon.png" class="loading-logo" onerror="this.src='https://via.placeholder.com/150/ff4444/000000?text=FD'">
         <h1 style="color:var(--accent); font-size:3.5rem; margin:0; letter-spacing:-2px;">FIT DATA</h1>
         <p style="color:var(--muted); margin-top:10px; font-size:1.1rem; letter-spacing:1px;">COACH INTELLIGENCE</p>
     </div>
 
     <div id="login" class="screen">
         <div class="container" style="padding-top:60px; text-align:center;">
-            <img src="logo.png" style="width:100px; border-radius:20px; margin-bottom:20px; box-shadow:0 0 20px rgba(255,68,68,0.2);">
-            <h1 style="color:var(--accent); font-size:3rem; margin-bottom:10px;">FIT DATA</h1>
-            <p style="color:var(--muted); margin-bottom:40px;">Acceso Atletas</p>
+            <h1 style="color:var(--accent); font-size:3rem;">FIT DATA</h1>
             <div class="card" style="border:none; background:transparent;">
                 <input id="log-email" class="input" type="email" placeholder="Email">
                 <input id="log-pass" class="input" type="password" placeholder="Contraseña">
                 <button onclick="doLogin()" class="btn btn-primary">INICIAR SESIÓN</button>
-                <p onclick="toRegister()" style="margin-top:20px; color:var(--muted); cursor:pointer; font-size:0.9rem;">Solicitar Acceso</p>
+                <p onclick="toRegister()" style="margin-top:20px; color:var(--muted); cursor:pointer;">Solicitar Acceso</p>
             </div>
         </div>
     </div>
@@ -164,7 +123,7 @@
                 <input id="reg-height" type="number" class="input" placeholder="Altura (cm)">
                 <input id="reg-email" class="input" type="email" placeholder="Email">
                 <input id="reg-pass" class="input" type="password" placeholder="Contraseña">
-                <label class="text-accent" style="font-weight:bold; font-size:0.75rem; margin-left:5px;">CÓDIGO SECRETO</label>
+                <label class="text-accent" style="font-weight:bold; font-size:0.75rem;">CÓDIGO SECRETO</label>
                 <input id="reg-code" class="input" style="text-align:center; border-color:var(--accent); letter-spacing:4px; font-weight:bold;">
                 <button onclick="doRegister()" class="btn btn-primary">SOLICITAR ACCESO</button>
                 <button onclick="toLogin()" class="btn btn-secondary">Cancelar</button>
@@ -178,7 +137,7 @@
             <div class="navbar-top">
                 <div>
                     <h2 id="u-name" style="margin:0; font-size:1.5rem;">Hola</h2>
-                    <span id="u-goal" style="color:var(--muted); font-size:0.75rem; text-transform:uppercase;">Cargando...</span>
+                    <span id="u-goal" style="color:var(--muted); font-size:0.75rem; text-transform:uppercase;">Objetivo no fijado</span>
                 </div>
                 <button id="admin-btn" onclick="nav('view-admin')" class="btn-icon hidden">👑</button>
             </div>
@@ -224,11 +183,9 @@
         <div id="view-profile" class="view hidden">
             <div class="navbar-top"><h2>Rendimiento</h2></div>
             <div class="container">
-                
-                <div class="card" style="text-align:center; overflow-x: auto;">
+                <div class="card" style="text-align:center;">
                     <h3>Mapa de Trabajo</h3>
-                    <p class="text-muted" style="font-size:0.8rem;">Intensidad acumulada</p>
-                    <div id="heatmap-render" class="heatmap-wrapper"></div>
+                    <div id="heatmap-render"></div>
                 </div>
 
                 <div class="stats-grid">
@@ -255,7 +212,6 @@
                         </label>
                     </div>
                     <p class="text-muted" style="margin:10px 0; font-size:0.8rem; background:#222; padding:8px; border-radius:6px;">💡 Usa siempre la misma luz, misma ropa y mismo ángulo.</p>
-                    
                     <div style="display:flex; gap:5px; margin-bottom:15px;">
                         <div id="comp-before" style="flex:1; aspect-ratio:3/4; border:1px dashed #444; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden;"><small>Inicio</small></div>
                         <div id="comp-now" style="flex:1; aspect-ratio:3/4; border:1px dashed #444; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden;"><small>Actual</small></div>
@@ -277,7 +233,7 @@
                     </select>
 
                     <h3>Avisos</h3>
-                    <div class="toggle-row">
+                    <div class="toggle-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0;">
                         <span>Recordatorio Fotos</span>
                         <div style="display:flex; gap:5px;">
                             <select id="cfg-alarm-day" class="input" style="width:auto; margin:0;" onchange="saveConfig()">
@@ -298,15 +254,6 @@
                     <div style="margin-top:15px;">
                         <label style="color:var(--muted); font-size:0.9rem;">Tiempo Descanso (seg)</label>
                         <input id="cfg-rest" type="number" class="input" value="60" onchange="saveConfig()">
-                    </div>
-                    
-                    <div class="toggle-row">
-                        <span>Sonido Alarma</span>
-                        <label class="switch"><input type="checkbox" id="cfg-sound" onchange="saveConfig()"><span class="slider"></span></label>
-                    </div>
-                    <div class="toggle-row">
-                        <span>Pantalla Encendida</span>
-                        <label class="switch"><input type="checkbox" id="cfg-screen" onchange="saveConfig()"><span class="slider"></span></label>
                     </div>
                 </div>
                 <button onclick="auth.signOut()" class="btn btn-secondary">Cerrar Sesión</button>
@@ -358,13 +305,13 @@
                 <button onclick="closeAdminModal()" class="btn-secondary" style="width:auto; padding:5px 10px;">X</button>
             </div>
             
-            <div class="card">
-                <h3>Asignar Objetivos</h3>
+            <div class="card" style="border-left-color: var(--success);">
+                <h3>🥗 Plan Nutricional</h3>
                 <div style="display:flex; gap:10px;">
                     <div><small>Kcal Objetivo</small><input id="adm-set-kcal" type="number" class="input"></div>
                     <div><small>Agua (L) Objetivo</small><input id="adm-set-water" type="number" class="input"></div>
                 </div>
-                <button onclick="adminSaveTargets()" class="btn btn-primary">Guardar Objetivos</button>
+                <button onclick="adminSaveTargets()" class="btn btn-primary" style="margin-top:10px;">Guardar Plan</button>
             </div>
 
             <div class="card">
@@ -386,20 +333,10 @@
         </div>
     </div>
 
-    <div id="modal-alert" class="modal hidden">
-        <div class="modal-content">
-            <h3>Enviar Alerta</h3>
-            <input id="alert-msg" class="input" placeholder="Escribe el mensaje...">
-            <button onclick="sendAdminAlert()" class="btn btn-primary">Enviar</button>
-            <button onclick="document.getElementById('modal-alert').classList.add('hidden')" class="btn btn-secondary">Cancelar</button>
-        </div>
-    </div>
-
     <div id="modal-create" class="modal hidden">
         <div class="modal-content">
             <h3 id="modal-routine-title">Nueva Rutina</h3>
             <p id="routine-target-msg" class="text-muted hidden">Asignando a: <span id="target-user-name"></span></p>
-            
             <input id="new-rout-name" class="input" placeholder="Nombre (Ej: Pierna A)">
             <input id="search-ex" class="input" placeholder="🔍 Buscar..." onkeyup="renderExSelector()">
             <div id="ex-list" style="max-height:300px; overflow-y:auto; margin-bottom:15px; border:1px solid #333; border-radius:8px; padding:5px;"></div>
@@ -429,6 +366,15 @@
                 <button onclick="saveNote()" class="btn btn-primary">Guardar</button>
                 <button onclick="document.getElementById('modal-note').classList.add('hidden')" class="btn btn-secondary">Cancelar</button>
             </div>
+        </div>
+    </div>
+
+    <div id="modal-alert" class="modal hidden">
+        <div class="modal-content">
+            <h3>Enviar Alerta</h3>
+            <input id="alert-msg" class="input" placeholder="Escribe el mensaje...">
+            <button onclick="sendAdminAlert()" class="btn btn-primary">Enviar</button>
+            <button onclick="document.getElementById('modal-alert').classList.add('hidden')" class="btn btn-secondary">Cancelar</button>
         </div>
     </div>
 
@@ -467,50 +413,55 @@
         let currentNoteExId = null;
         let editingRoutineId = null;
 
-        // --- 3. GESTIÓN IMÁGENES (LOCALES) ---
-        function getMuscleImg(muscle) {
+        // --- 3. GENERADOR SVG AVANZADO (Frente y Espalda) ---
+        function getMuscleSvg(muscle) {
             const m = muscle.toLowerCase();
-            if (m.includes('pecho')) return 'pecho.jpg';
-            if (m.includes('espalda')) return 'espalda.jpg';
-            if (m.includes('pierna') || m.includes('femoral')) return 'piernas.jpg';
-            if (m.includes('hombro')) return 'hombros.jpg';
-            if (m.includes('biceps') || m.includes('bíceps')) return 'biceps.jpg';
-            if (m.includes('triceps') || m.includes('tríceps')) return 'triceps.jpg';
-            if (m.includes('abs')) return 'abs.jpg';
-            if (m.includes('glute') || m.includes('glúteo')) return 'gluteos.jpg';
-            return 'logo.png'; 
-        }
-
-        // GENERADOR DE MAPA DE CALOR REALISTA (FRENTE Y ESPALDA)
-        function renderHeatmap(stats) {
-            const container = document.getElementById('heatmap-render');
-            if (!container) return;
-            const getOp = (key) => Math.min(0.2 + ((stats[key]||0) / 50), 1);
+            let svgContent = '';
             
-            // DIBUJOS ANATÓMICOS SIMPLIFICADOS EN SVG (FRENTE Y ESPALDA)
-            container.innerHTML = `
-            <svg viewBox="0 0 200 120" class="body-svg">
-                <g transform="translate(0,0)">
-                    <path d="M50,5 C55,5 60,10 60,15 L65,18 L70,35 L60,60 L62,80 L65,115 L55,115 L52,85 L48,85 L45,115 L35,115 L38,80 L40,60 L30,35 L35,18 L40,15 C40,10 45,5 50,5" fill="#222" />
-                    <path d="M38,22 L62,22 L60,35 L40,35 Z" fill="#ff4444" fill-opacity="${getOp('Pecho')}"/>
-                    <rect x="42" y="38" width="16" height="25" fill="#ff4444" fill-opacity="${getOp('Abs')}"/>
-                    <path d="M30,35 L20,60 L35,60 Z" fill="#ff4444" fill-opacity="${getOp('Bíceps')}"/>
-                    <path d="M70,35 L80,60 L65,60 Z" fill="#ff4444" fill-opacity="${getOp('Bíceps')}"/>
-                    <path d="M40,65 L35,95 L48,95 L48,65 Z" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
-                    <path d="M60,65 L65,95 L52,95 L52,65 Z" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
-                </g>
+            // Paths detallados de las zonas musculares (simplificados para vector)
+            // CUERPO BASE (FRONTAL Y TRASERO)
+            const frontBody = "M50,5 C55,5 60,10 60,15 L65,18 L70,35 L60,60 L62,80 L65,115 L55,115 L52,85 L48,85 L45,115 L35,115 L38,80 L40,60 L30,35 L35,18 L40,15 C40,10 45,5 50,5";
+            const backBody = "M50,5 C55,5 60,10 60,15 L68,18 L75,35 L65,60 L62,80 L65,115 L55,115 L52,85 L48,85 L45,115 L35,115 L38,80 L35,60 L25,35 L32,18 L40,15 C40,10 45,5 50,5";
+            
+            let highlight = "";
+            let view = ""; 
 
-                <g transform="translate(100,0)">
-                    <path d="M50,5 C55,5 60,10 60,15 L68,18 L75,35 L65,60 L62,80 L65,115 L55,115 L52,85 L48,85 L45,115 L35,115 L38,80 L35,60 L25,35 L32,18 L40,15 C40,10 45,5 50,5" fill="#222" />
-                    <path d="M35,20 L65,20 L58,50 L42,50 Z" fill="#ff4444" fill-opacity="${getOp('Espalda')}"/>
-                    <path d="M25,35 L20,55 L32,55 Z" fill="#ff4444" fill-opacity="${getOp('Tríceps')}"/>
-                    <path d="M75,35 L80,55 L68,55 Z" fill="#ff4444" fill-opacity="${getOp('Tríceps')}"/>
-                    <circle cx="42" cy="65" r="7" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
-                    <circle cx="58" cy="65" r="7" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
-                    <rect x="38" y="75" width="8" height="15" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
-                    <rect x="54" y="75" width="8" height="15" fill="#ff4444" fill-opacity="${getOp('Piernas')}"/>
-                </g>
-            </svg>`;
+            if (m.includes('pecho')) {
+                view = `<path d="${frontBody}" fill="#000"/>`;
+                highlight = `<path d="M38,22 L62,22 L60,35 L40,35 Z" fill="#ff4444"/>`;
+            } else if (m.includes('espalda')) {
+                view = `<path d="${backBody}" fill="#000"/>`;
+                highlight = `<path d="M35,20 L65,20 L58,50 L42,50 Z" fill="#ff4444"/>`;
+            } else if (m.includes('pierna') || m.includes('femoral') || m.includes('glute')) {
+                if(m.includes('femoral') || m.includes('glute')) {
+                     view = `<path d="${backBody}" fill="#000"/>`;
+                     highlight = `<path d="M35,60 L30,110 L45,110 L48,80 L52,80 L55,110 L70,110 L65,60 Z" fill="#ff4444"/>`; // Piernas traseras
+                } else {
+                     view = `<path d="${frontBody}" fill="#000"/>`;
+                     highlight = `<path d="M38,60 L35,115 L45,115 L48,85 L52,85 L55,115 L65,115 L62,60 Z" fill="#ff4444"/>`; // Cuadriceps
+                }
+            } else if (m.includes('hombro')) {
+                view = `<path d="${frontBody}" fill="#000"/>`;
+                highlight = `<circle cx="30" cy="22" r="5" fill="#ff4444"/><circle cx="70" cy="22" r="5" fill="#ff4444"/>`;
+            } else if (m.includes('biceps') || m.includes('brazo')) {
+                 view = `<path d="${frontBody}" fill="#000"/>`;
+                 highlight = `<path d="M28,35 L22,55 L32,55 Z" fill="#ff4444"/><path d="M72,35 L78,55 L68,55 Z" fill="#ff4444"/>`;
+            } else if (m.includes('triceps') || m.includes('tríceps')) {
+                 view = `<path d="${backBody}" fill="#000"/>`;
+                 highlight = `<path d="M25,30 L20,50 L30,50 Z" fill="#ff4444"/><path d="M75,30 L80,50 L70,50 Z" fill="#ff4444"/>`;
+            } else if (m.includes('abs')) {
+                 view = `<path d="${frontBody}" fill="#000"/>`;
+                 highlight = `<rect x="42" y="38" width="16" height="20" fill="#ff4444"/>`;
+            } else {
+                 view = `<path d="${frontBody}" fill="#000"/>`;
+            }
+
+            return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
+              <rect x="2" y="2" width="96" height="116" rx="10" fill="#ffffff" stroke="#ff4444" stroke-width="4"/>
+              ${view}
+              ${highlight}
+            </svg>`);
         }
 
         // 4. BASE DE DATOS COMPLETA
@@ -521,21 +472,21 @@
             { id: 4, name: 'Prensa de Piernas', muscle: 'Piernas', emoji: '⚙️' },
             { id: 5, name: 'Extensión de Cuádriceps', muscle: 'Piernas', emoji: '⚙️' },
             { id: 6, name: 'Estocadas con Mancuernas', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 7, name: 'Curl de Pierna Tumbado', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 8, name: 'Curl de Pierna Sentado', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 7, name: 'Curl de Pierna Tumbado', muscle: 'Femoral', emoji: '⚙️' },
+            { id: 8, name: 'Curl de Pierna Sentado', muscle: 'Femoral', emoji: '⚙️' },
             { id: 9, name: 'Prensa Horizontal', muscle: 'Piernas', emoji: '⚙️' },
             { id: 10, name: 'Prensa de piernas 45°', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 11, name: 'Elevación de Talones Sentado', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 12, name: 'Elevación de Talones de Pie', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 13, name: 'Elevación de Talones en Máquina', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 14, name: 'Elevación de Cadera', muscle: 'Piernas', emoji: '🏋️' },
+            { id: 11, name: 'Elevación de Talones Sentado', muscle: 'Gemelo', emoji: '⚙️' },
+            { id: 12, name: 'Elevación de Talones de Pie', muscle: 'Gemelo', emoji: '🏋️' },
+            { id: 13, name: 'Elevación de Talones en Máquina', muscle: 'Gemelo', emoji: '⚙️' },
+            { id: 14, name: 'Elevación de Cadera', muscle: 'Glute', emoji: '🏋️' },
             { id: 15, name: 'Sentadilla Búlgara', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 16, name: 'Patada de Glúteo en Polea', muscle: 'Piernas', emoji: '🔗' },
-            { id: 17, name: 'Abducción de Cadera en Máquina', muscle: 'Piernas', emoji: '⚙️' },
-            { id: 18, name: 'Prensa de Glúteos', muscle: 'Piernas', emoji: '⚙️' },
+            { id: 16, name: 'Patada de Glúteo en Polea', muscle: 'Glute', emoji: '🔗' },
+            { id: 17, name: 'Abducción de Cadera en Máquina', muscle: 'Glute', emoji: '⚙️' },
+            { id: 18, name: 'Prensa de Glúteos', muscle: 'Glute', emoji: '⚙️' },
             { id: 19, name: 'Peso Muerto', muscle: 'Espalda', emoji: '🏋️' },
-            { id: 20, name: 'Peso Muerto Rumano', muscle: 'Piernas', emoji: '🏋️' },
-            { id: 21, name: 'Peso Muerto Sumo', muscle: 'Espalda', emoji: '🏋️' },
+            { id: 20, name: 'Peso Muerto Rumano', muscle: 'Femoral', emoji: '🏋️' },
+            { id: 21, name: 'Peso Muerto Sumo', muscle: 'Piernas', emoji: '🏋️' },
             { id: 22, name: 'Remo con Barra', muscle: 'Espalda', emoji: '🏋️' },
             { id: 23, name: 'Remo con Mancuernas', muscle: 'Espalda', emoji: '🏋️' },
             { id: 24, name: 'Jalón Lateral', muscle: 'Espalda', emoji: '🔗' },
@@ -601,7 +552,7 @@
 
         const exercisesDB = rawExercisesDB.map(ex => ({
             ...ex,
-            image: getMuscleImg(ex.muscle)
+            image: getMuscleSvg(ex.muscle)
         }));
 
         function showToast(msg) { const t=document.getElementById("toast"); t.innerText=msg; t.className="show"; setTimeout(()=>t.className="",3000); }
@@ -674,15 +625,20 @@
             if(!userData.settings.alarmDay || userData.settings.alarmDay == -1) return;
             const now = new Date();
             const today = now.getDay();
-            
-            // Si coincide el día y no se ha mostrado hoy
-            const lastCheck = localStorage.getItem('last_photo_alarm');
             const todayStr = now.toDateString();
+            const lastCheck = localStorage.getItem('last_photo_alarm');
             
-            if(today == userData.settings.alarmDay && lastCheck !== todayStr) {
-                // Verificar hora si se configuró (opcional, aquí simplificado a aviso al abrir)
-                alert("📸 RECORDATORIO: ¡Hoy toca subir foto de revisión!");
-                localStorage.setItem('last_photo_alarm', todayStr);
+            // Comprobar Hora
+            const alarmTime = userData.settings.alarmTime; // "14:30"
+            if(alarmTime) {
+                const [h, m] = alarmTime.split(':');
+                const nowMins = now.getHours()*60 + now.getMinutes();
+                const alarmMins = parseInt(h)*60 + parseInt(m);
+                // Si es el día y la hora ya pasó
+                if(today == userData.settings.alarmDay && nowMins >= alarmMins && lastCheck !== todayStr) {
+                    alert("📸 RECORDATORIO: ¡Hoy toca subir foto de revisión!");
+                    localStorage.setItem('last_photo_alarm', todayStr);
+                }
             }
         }
 
@@ -710,13 +666,11 @@
 
             if(userData.role === 'admin') document.getElementById('admin-btn').classList.remove('hidden');
             
-            // Cargar Config
             document.getElementById('cfg-goal').value = userData.settings.goal || 'Mantenimiento';
             document.getElementById('cfg-rest').value = userData.settings.rest || 60;
             document.getElementById('cfg-screen').checked = userData.settings.screen;
             document.getElementById('cfg-sound').checked = userData.settings.sound;
             document.getElementById('cfg-alarm-day').value = userData.settings.alarmDay || -1;
-            // Hora alarma (si existiera en DB)
             if(userData.settings.alarmTime) document.getElementById('cfg-alarm-time').value = userData.settings.alarmTime;
 
             loadRoutines(); loadProfile();
@@ -739,7 +693,7 @@
                 if(s.empty) l.innerHTML = '<p style="color:#666;">No tienes rutinas asignadas.</p>';
                 s.forEach(d => {
                     const r = d.data();
-                    const icons = r.exercises.slice(0,5).map(e=>`<img src="${e.image}" style="width:30px; height:30px; margin-right:5px; border-radius:4px; object-fit:cover;">`).join('');
+                    const icons = r.exercises.slice(0,5).map(e=>`<img src="${e.image}" style="width:30px; height:30px; margin-right:5px; border-radius:4px; object-fit:contain;">`).join('');
                     const div = document.createElement('div'); div.className='card';
                     div.innerHTML = `
                         <div style="display:flex; justify-content:space-between;"><h3>${r.name}</h3>
