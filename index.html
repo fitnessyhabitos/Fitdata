@@ -22,7 +22,7 @@
             --input-bg: #1f1f1f;
             --text-color: #ffffff;
             --text-dim: #888888;
-            --accent-color: #ff3333; /* Rojo Neón */
+            --accent-color: #ff3333;
             --accent-dim: rgba(255, 51, 51, 0.2);
             --accent-glow: 0 0 12px rgba(255, 51, 51, 0.5);
             --success-color: #00ff88;
@@ -61,7 +61,6 @@
             box-shadow: 0 0 10px rgba(255, 51, 51, 0.4);
         }
 
-        /* LOADING */
         #loading-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -154,7 +153,6 @@
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; }
         .modal.active { opacity: 1; pointer-events: auto; }
         
-        /* MODAL COACH EXPANDIDO */
         .modal-content { 
             background: #1a1a1a; width: 90%; max-width: 400px; padding: 25px; 
             border-radius: 15px; border: 1px solid var(--accent-color); text-align: center;
@@ -181,6 +179,10 @@
         
         .admin-user-row { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .btn-danger { background: #500; border: 1px solid #800; color: #fcc; margin-top: 15px; }
+        
+        .coach-photos-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+        .coach-photo-box { width: 45%; height: 120px; background: #000; border: 1px solid #333; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .coach-photo-box img { width: 100%; height: 100%; object-fit: contain; }
 
     </style>
 </head>
@@ -278,8 +280,8 @@
                     <button class="btn-outline" style="padding:8px; margin:0;" onclick="document.getElementById('f-before').click()">1. ANTES</button>
                     <button class="btn-outline" style="padding:8px; margin:0;" onclick="document.getElementById('f-after').click()">2. AHORA</button>
                 </div>
-                <input type="file" id="f-before" class="hidden" accept="image/*" onchange="loadCompImg(this,'img-before')">
-                <input type="file" id="f-after" class="hidden" accept="image/*" onchange="loadCompImg(this,'img-overlay')">
+                <input type="file" id="f-before" class="hidden" accept="image/*" onchange="loadCompImg(this,'photoBefore')">
+                <input type="file" id="f-after" class="hidden" accept="image/*" onchange="loadCompImg(this,'photoAfter')">
                 <div class="compare-wrapper">
                     <img src="" id="img-before" class="compare-img">
                     <img src="" id="img-overlay" class="compare-img img-overlay">
@@ -399,6 +401,12 @@
                 <strong>STATS:</strong> <span id="coach-stats-text">Cargando...</span>
             </div>
 
+            <h4 style="margin-bottom:5px;">📸 Fotos Progreso</h4>
+            <div class="coach-photos-row" id="coach-photos-container">
+                <div class="coach-photo-box" style="color:#666; font-size:0.7rem;">Sin Foto Antes</div>
+                <div class="coach-photo-box" style="color:#666; font-size:0.7rem;">Sin Foto Ahora</div>
+            </div>
+
             <h4 style="margin-bottom:5px;">Gráfica Peso</h4>
             <div style="height:120px; margin-bottom:15px;"><canvas id="coachWeightChart"></canvas></div>
 
@@ -411,6 +419,7 @@
                 <label style="font-size:0.8rem; color:#ccc;">Asignar Rutina:</label>
                 <div style="display:flex; gap:5px; margin-top:5px;">
                     <select id="coach-routine-select" style="margin:0;"></select>
+                    <button class="btn-small btn-outline" style="width:auto; padding:0 10px;" onclick="goToCreateRoutine()">➕ NUEVA</button>
                     <button class="btn-small btn" style="width:auto;" onclick="assignRoutine()">ENVIAR</button>
                 </div>
             </div>
@@ -673,6 +682,10 @@
         async function loadProfile() {
             document.getElementById('profile-name').innerText = userData.name;
             if(userData.photo) { document.getElementById('avatar-text').style.display='none'; document.getElementById('avatar-img').src = userData.photo; document.getElementById('avatar-img').style.display='block'; }
+            // Cargar fotos comparativas si existen
+            if(userData.photoBefore) document.getElementById('img-before').src = userData.photoBefore;
+            if(userData.photoAfter) document.getElementById('img-overlay').src = userData.photoAfter;
+
             if(userData.restTime) document.getElementById('cfg-rest-time').value = userData.restTime;
             
             // STATS
@@ -714,7 +727,38 @@
             alert("Alarma Guardada");
         };
         window.uploadAvatar = (inp) => { if(inp.files[0]) { const r = new FileReader(); r.onload=async(e)=>{ await updateDoc(doc(db,"users",currentUser.uid), {photo:e.target.result}); loadProfile(); }; r.readAsDataURL(inp.files[0]); } };
-        window.loadCompImg = (inp,id) => { if(inp.files[0]) { const r = new FileReader(); r.onload=(e)=>document.getElementById(id).src=e.target.result; r.readAsDataURL(inp.files[0]); } };
+        
+        // COMPRESION Y GUARDADO DE FOTOS COMPARATIVAS
+        window.loadCompImg = (inp, field) => { 
+            if(inp.files[0]) { 
+                const r = new FileReader(); 
+                r.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = async () => {
+                        // Resize canvas
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 600;
+                        const scale = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scale;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        // Update UI
+                        if(field==='photoBefore') document.getElementById('img-before').src = dataUrl;
+                        if(field==='photoAfter') document.getElementById('img-overlay').src = dataUrl;
+                        
+                        // Save to Firebase
+                        let update = {}; update[field] = dataUrl;
+                        await updateDoc(doc(db, "users", currentUser.uid), update);
+                    };
+                }; 
+                r.readAsDataURL(inp.files[0]); 
+            } 
+        };
+        
         window.moveSlider = (v) => { document.getElementById('img-overlay').style.clipPath = `inset(0 ${100-v}% 0 0)`; document.getElementById('slider-handle').style.left = `${v}%`; };
         window.addWeightEntry = async () => { const w=prompt("Kg:"); if(w){ let h=userData.weightHistory||[]; h.push(parseFloat(w)); await updateDoc(doc(db,"users",currentUser.uid),{weightHistory:h}); userData.weightHistory=h; loadProfile(); } };
 
@@ -863,6 +907,17 @@
                 initial.style.display = 'block';
             }
             
+            // PHOTOS PROGRESO
+            const pCont = document.getElementById('coach-photos-container');
+            if(u.photoBefore || u.photoAfter) {
+                pCont.innerHTML = `
+                    <div class="coach-photo-box">${u.photoBefore ? `<img src="${u.photoBefore}">` : 'Sin Foto'}</div>
+                    <div class="coach-photo-box">${u.photoAfter ? `<img src="${u.photoAfter}">` : 'Sin Foto'}</div>
+                `;
+            } else {
+                pCont.innerHTML = '<span style="font-size:0.7rem; color:#666;">Sin fotos de progreso.</span>';
+            }
+            
             try {
                 // Stats Summary (Safe access)
                 const st = u.stats || {};
@@ -901,6 +956,11 @@
             }
         }
 
+        window.goToCreateRoutine = () => {
+            document.getElementById('modal-coach').classList.remove('active');
+            openEditor(); // Abre el editor normal
+        };
+
         window.assignRoutine = async () => {
             const rid=document.getElementById('coach-routine-select').value; if(!rid||!selectedUserCoach)return;
             const rRef=doc(db,"routines",rid); const rSnap=await getDoc(rRef);
@@ -929,3 +989,4 @@
     </script>
 </body>
 </html>
+
