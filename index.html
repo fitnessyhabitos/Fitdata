@@ -16,7 +16,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
     <style>
-        /* --- VARIABLES GLOBALES --- */
         :root {
             --bg-color: #050505; --card-color: #121212; --input-bg: #1f1f1f; --text-color: #ffffff;
             --text-dim: #888888; --accent-color: #ff3333; --accent-dim: rgba(255, 51, 51, 0.2);
@@ -28,7 +27,6 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        /* IOS SCROLL FIX */
         body {
             background-color: var(--bg-color); color: var(--text-color); font-family: var(--font-main);
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%;
@@ -43,16 +41,16 @@
         .btn-outline { background: transparent; border: 1px solid #444; color: #ccc; padding: 12px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.85rem; }
         .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; margin:0; }
         .btn-danger { background: #600; border: 1px solid #f00; color: #fcc; margin-top: 15px; }
+        .btn-success { background: var(--success-color); color: black; border: none; margin-bottom: 15px; box-shadow: 0 0 15px rgba(0,255,136,0.4); }
+        
         .btn-done { background-color: rgba(255, 51, 51, 0.3) !important; border: 1px solid var(--accent-color) !important; color: white !important; box-shadow: 0 0 10px rgba(255, 51, 51, 0.4); }
 
-        /* LOADING */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #loading-logo { width: 140px; border-radius: 25px; box-shadow: 0 0 40px rgba(255, 51, 51, 0.6); animation: breathe 3s infinite; clip-path: inset(0 round 25px); }
         .loading-text { margin-top: 30px; color: var(--accent-color); font-family: monospace; font-size: 1.1rem; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 10px var(--accent-color); animation: blink 0.8s infinite; }
         @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 50px rgba(255,51,51,0.7); } 50% { transform: scale(1.05); opacity: 0.8; box-shadow: 0 0 20px rgba(255,51,51,0.3); } }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* LAYOUT */
         header { flex-shrink: 0; height: calc(var(--header-height) + var(--safe-top)); padding-top: var(--safe-top); background: rgba(5,5,5,0.98); border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; padding-left: 20px; padding-right: 20px; z-index: 100; }
         .brand { font-weight: 900; font-size: 1.3rem; color: white; letter-spacing: -0.5px; }
         .brand span { color: var(--accent-color); text-shadow: 0 0 10px rgba(255,51,51,0.5); }
@@ -100,7 +98,6 @@
         .ex-select-item img { width: 45px; height: 45px; object-fit: contain; background: black; border: 1px solid #333; border-radius: 4px; }
         .ex-select-item.selected { border-color: var(--accent-color); background: rgba(255,51,51,0.1); }
 
-        /* IOS MENU FIX */
         nav.bottom-nav { flex-shrink: 0; height: calc(60px + var(--safe-bottom)); padding-bottom: var(--safe-bottom); box-sizing: border-box; background: #0f0f0f; border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; z-index: 999; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.65rem; height: 100%; }
         .nav-item.active { color: var(--accent-color); }
@@ -240,30 +237,24 @@
 
             <div class="card">
                 <h3>EVOLUCIÓN FÍSICA</h3>
-                
                 <div class="tip-box">💡 TIP: Usa siempre la misma luz, ropa y lugar.</div>
-
                 <div class="photo-tabs">
                     <div class="photo-tab active" id="tab-front" onclick="switchPose('front')">👤 FRONTAL</div>
                     <div class="photo-tab" id="tab-back" onclick="switchPose('back')">🛡️ ESPALDA</div>
                 </div>
-
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.7rem; color:#888;">
                     <span id="date-before">-</span>
                     <span id="date-after">-</span>
                 </div>
-
                 <div class="compare-wrapper">
                     <img src="" id="img-before" class="compare-img">
                     <img src="" id="img-overlay" class="compare-img img-overlay">
                     <div class="slider-handle" id="slider-handle"><div class="slider-btn">↔</div></div>
                 </div>
                 <input type="range" min="0" max="100" value="50" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
-
                 <div class="photo-actions">
                     <button class="btn-outline" style="margin:0; padding:10px 5px;" onclick="document.getElementById('f-before').click()">1. ANTES</button>
                     <button class="btn-danger btn-small" style="margin:0;" onclick="deletePhoto('before')">🗑️</button>
-                    
                     <button class="btn-outline" style="margin:0; padding:10px 5px;" onclick="document.getElementById('f-after').click()">2. AHORA</button>
                     <button class="btn-danger btn-small" style="margin:0;" onclick="deletePhoto('after')">🗑️</button>
                 </div>
@@ -374,6 +365,9 @@
                 </div>
                 <h3 id="coach-user-name" style="margin:0;">Usuario</h3>
                 <p id="coach-user-email" style="color:#666; font-size:0.8rem;"></p>
+                <div id="pending-approval-banner" class="hidden">
+                    <button class="btn btn-success" style="margin-top:10px;" onclick="approveUser()">✅ APROBAR ACCESO</button>
+                </div>
             </div>
             
             <div id="coach-stats-text" class="stat-pill-grid" style="margin-bottom:15px;"></div>
@@ -519,7 +513,7 @@
             {n:"Crunch Máquina", img:"abs.png", m:"Abs"}, {n:"Rodillas al Pecho", img:"abs.png", m:"Abs"}
         ];
 
-        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[];
+        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
 
         function getExerciseData(name) {
             let match = EXERCISES.find(e => e.n === name);
@@ -666,7 +660,7 @@
             currentPose = pose;
             document.getElementById('tab-front').classList.toggle('active', pose==='front');
             document.getElementById('tab-back').classList.toggle('active', pose==='back');
-            updatePhotoDisplay(userData); // Reload images based on pose
+            updatePhotoDisplay(userData); 
         };
 
         function updatePhotoDisplay(u) {
@@ -676,8 +670,10 @@
             const dateB = u[`dateBefore${prefix}`] || '-';
             const dateA = u[`dateAfter${prefix}`] || '-';
 
-            document.getElementById('img-before').src = before;
-            document.getElementById('img-overlay').src = after;
+            // Clear previous to avoid confusion
+            document.getElementById('img-before').src = before ? before : ''; 
+            document.getElementById('img-overlay').src = after ? after : '';
+            
             document.getElementById('date-before').innerText = `ANTES (${dateB})`;
             document.getElementById('date-after').innerText = `AHORA (${dateA})`;
         }
@@ -699,7 +695,6 @@
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
                         
-                        // Determinar campos según pose actual
                         const prefix = currentPose === 'front' ? '' : '_back';
                         const fieldName = field === 'before' ? `photoBefore${prefix}` : `photoAfter${prefix}`;
                         const dateField = field === 'before' ? `dateBefore${prefix}` : `dateAfter${prefix}`;
@@ -1009,6 +1004,14 @@
             
             document.getElementById('coach-user-name').innerText=freshU.name;
             document.getElementById('coach-user-email').innerText=freshU.email;
+
+            // SHOW APPROVE BUTTON IF PENDING
+            const banner = document.getElementById('pending-approval-banner');
+            if(!freshU.approved) {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
             
             const img = document.getElementById('coach-user-img');
             const initial = document.getElementById('coach-user-initial');
@@ -1083,14 +1086,19 @@
                     const noteIcon = (d.note && d.note.trim().length > 0) ? `<span class="note-icon" title="${d.note}" onclick="alert('${d.note}')">📝</span>` : '';
                     hList.innerHTML += `<div class="history-row"><div class="hist-date">${date}</div><div class="hist-name">${d.routine} ${noteIcon}</div><div class="hist-rpe">${rpeBadge}</div></div>`;
                 });
-
-                if(!freshU.approved && confirm("¿Aprobar acceso a este atleta?")) { 
-                    await updateDoc(doc(db,"users",uid),{approved:true}); 
-                    window.loadAdminUsers(); // REFRESH LIST MANUALLY
-                }
             
             } catch(e) { console.error("Error loading coach details", e); }
         }
+
+        // NEW APPROVE FUNCTION
+        window.approveUser = async () => {
+            if(confirm("¿Confirmar acceso a este atleta?")) {
+                await updateDoc(doc(db,"users",selectedUserCoach), {approved: true});
+                alert("Atleta Aprobado ✅");
+                document.getElementById('modal-coach').classList.remove('active');
+                window.loadAdminUsers();
+            }
+        };
 
         window.renderCoachRoutines = (list) => {
             const s = document.getElementById('coach-routine-select'); s.innerHTML = '';
