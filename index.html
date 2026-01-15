@@ -13,7 +13,10 @@
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="logo.png">
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
     <style>
@@ -37,6 +40,7 @@
 
         .hidden { display: none !important; }
 
+        /* UI KIT */
         .btn { background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; width: 100%; box-shadow: var(--accent-glow); display: flex; justify-content: center; align-items: center; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; border: 1px solid #444; color: #ccc; padding: 12px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.85rem; }
@@ -162,7 +166,7 @@
     </div>
 
     <header id="main-header" class="hidden">
-        <div class="brand">FIT DATA <span>PRO v45</span></div>
+        <div class="brand">FIT DATA <span>PRO v46</span></div>
         <button id="coach-btn" class="hidden btn-neon-text">COACH</button>
     </header>
 
@@ -260,7 +264,6 @@
                     <div class="slider-handle" id="slider-handle"><div class="slider-btn"></div></div>
                 </div>
                 <input type="range" min="0" max="100" value="100" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
-                
                 <div class="photo-actions">
                     <button class="btn-outline" style="margin:0; padding:10px 5px;" onclick="document.getElementById('f-before').click()">1. ANTES</button>
                     <button class="btn-danger btn-small" style="margin:0;" onclick="deletePhoto('before')">🗑️</button>
@@ -546,7 +549,7 @@
 
         let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
         
-        // GLOBAL SELECTION STATE FOR EDITOR
+        let creatingForAthleteId = null; // GLOBAL FLAG FOR COACH CREATION FLOW
         let currentRoutineSelections = [];
 
         function getExerciseData(name) {
@@ -724,13 +727,33 @@
             btn.innerText = "💾 GUARDANDO...";
             
             try {
-                const data = { uid:currentUser.uid, name:n, exercises:s, createdAt:serverTimestamp() };
+                // IMPORTANT: Initialize assignedTo as empty array for athletes
+                // For coach creation flow, we handle assignment below
+                let assignedArr = [];
+                if(creatingForAthleteId) assignedArr = [creatingForAthleteId];
+
+                const data = { 
+                    uid:currentUser.uid, 
+                    name:n, 
+                    exercises:s, 
+                    createdAt:serverTimestamp(), 
+                    assignedTo: assignedArr // FIX: Initialize array to avoid permission errors
+                };
+
                 if(editingRoutineId) await updateDoc(doc(db,"routines",editingRoutineId), {name:n, exercises:s});
                 else await addDoc(collection(db,"routines"), data);
                 
-                switchTab('routines-view');
+                if(creatingForAthleteId) {
+                    const u = await getDoc(doc(db,"users",creatingForAthleteId));
+                    openCoachView(creatingForAthleteId, u.data());
+                    creatingForAthleteId = null; // Reset flag
+                } else {
+                    switchTab('routines-view');
+                }
+
             } catch(e) {
                 alert("Error al guardar: " + e.message);
+                console.error(e);
             } finally {
                 btn.innerText = originalText;
             }
@@ -756,8 +779,9 @@
             const imgB = document.getElementById('img-before');
             const imgA = document.getElementById('img-overlay');
             
-            if(after) imgB.src = after; else imgB.src = "";
-            if(before) imgA.src = before; else imgA.src = "";
+            // Logic: Background = Current (After), Overlay = Past (Before)
+            if(after) imgB.src = after; else imgB.removeAttribute('src');
+            if(before) imgA.src = before; else imgA.removeAttribute('src');
 
             document.getElementById('date-before').innerText = `ANTES (${dateB})`;
             document.getElementById('date-after').innerText = `AHORA (${dateA})`;
@@ -1192,6 +1216,7 @@
                     const d = w.data();
                     const date = d.date ? new Date(d.date.seconds*1000).toLocaleDateString() : '-';
                     let rpeBadge = d.rpe === 'Suave' ? '<span class="badge green">🟢 Suave</span>' : (d.rpe === 'Duro' ? '<span class="badge orange">🟠 Duro</span>' : (d.rpe === 'Fallo' ? '<span class="badge red">🔴 Fallo</span>' : '<span class="badge gray">--</span>'));
+                    // Note logic: only show icon if text exists and is not empty spaces
                     const noteIcon = (d.note && d.note.trim().length > 0) ? `<span class="note-icon" title="${d.note}" onclick="alert('${d.note}')">📝</span>` : '';
                     hList.innerHTML += `<div class="history-row"><div class="hist-date">${date}</div><div class="hist-name">${d.routine} ${noteIcon}</div><div class="hist-rpe">${rpeBadge}</div></div>`;
                 });
@@ -1199,6 +1224,7 @@
             } catch(e) { console.error("Error loading coach details", e); }
         }
 
+        // NEW APPROVE FUNCTION
         window.approveUser = async () => {
             if(confirm("¿Confirmar acceso a este atleta?")) {
                 await updateDoc(doc(db,"users",selectedUserCoach), {approved: true});
@@ -1237,6 +1263,7 @@
             
             pCont.innerHTML = `
                 <div class="compare-wrapper">
+                    <div class="slider-labels"><span class="label-tag">ANTES</span><span class="label-tag">AHORA</span></div>
                     <img src="${a || ''}" class="compare-img">
                     <img src="${b || ''}" id="coach-overlay-img" class="compare-img img-overlay" style="clip-path:inset(0 0 0 0)">
                     <div class="slider-handle" id="coach-slider-handle" style="left:0%"><div class="slider-btn"></div></div>
@@ -1253,7 +1280,9 @@
             document.getElementById('coach-slider-handle').style.left = `${v}%`;
         };
 
+        // GLOBAL FLAG FOR CREATION CONTEXT
         window.goToCreateRoutine = () => {
+            creatingForAthleteId = selectedUserCoach; // SET CONTEXT
             switchTab('routines-view'); 
             openEditor(); 
         };
@@ -1290,18 +1319,8 @@
         document.getElementById('btn-register').onclick=async()=>{
             if(document.getElementById('reg-code').value!==CODE)return alert("Código incorrecto");
             try{ const c=await createUserWithEmailAndPassword(auth,document.getElementById('reg-email').value,document.getElementById('reg-pass').value);
-            // CRITICAL FIX: Ensure user object has ALL fields to prevent permission errors
-            await setDoc(doc(db,"users",c.user.uid),{
-                name:document.getElementById('reg-name').value,
-                email:document.getElementById('reg-email').value,
-                approved:document.getElementById('reg-email').value===ADMIN,
-                age:parseInt(document.getElementById('reg-age').value),
-                height:parseInt(document.getElementById('reg-height').value), 
-                weightHistory: [],
-                prs: {}, // Fixed: Initialize PRs object
-                stats: {workouts:0, totalKg:0, totalSets:0, totalReps:0},
-                muscleStats: {}
-            });
+            // FULL INIT
+            await setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('reg-name').value,email:document.getElementById('reg-email').value,approved:document.getElementById('reg-email').value===ADMIN,age:parseInt(document.getElementById('reg-age').value),height:parseInt(document.getElementById('reg-height').value), weightHistory: [], prs: {}, stats: {workouts:0, totalKg:0, totalSets:0, totalReps:0}, muscleStats: {}});
             }catch(e){alert(e.message)}
         };
     </script>
