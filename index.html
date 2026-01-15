@@ -37,6 +37,7 @@
 
         .hidden { display: none !important; }
 
+        /* UI KIT */
         .btn { background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; width: 100%; box-shadow: var(--accent-glow); display: flex; justify-content: center; align-items: center; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; border: 1px solid #444; color: #ccc; padding: 12px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.85rem; }
@@ -121,10 +122,10 @@
 
         .compare-wrapper { position: relative; width: 100%; height: 250px; background: black; border-radius: 8px; overflow: hidden; margin-top: 5px; border:1px solid #333; }
         .compare-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
-        /* INICIALMENTE OVERLAY OCULTO (width 0) PARA VER EL FONDO (ACTUAL) */
+        /* LÓGICA INVERTIDA: Overlay es ANTES, Fondo es AHORA. Empezamos con el slider a la derecha (100) -> overlay invisible */
         .img-overlay { clip-path: inset(0 100% 0 0); border-right: 2px solid white; }
-        /* BARRA INVISIBLE */
-        .slider-handle { position: absolute; top: 0; bottom: 0; left: 0%; width: 50px; margin-left: -25px; cursor: ew-resize; z-index: 10; background: transparent; }
+        /* BARRA TRANSPARENTE */
+        .slider-handle { position: absolute; top: 0; bottom: 0; left: 100%; width: 50px; margin-left:-25px; cursor: ew-resize; z-index: 10; background: transparent; }
         .slider-btn { display: none; }
         .slider-labels { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none; z-index: 20; }
         .label-tag { background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; color: white; border: 1px solid #555; }
@@ -251,20 +252,17 @@
                     <div class="photo-tab active" id="tab-front" onclick="switchPose('front')">👤 FRONTAL</div>
                     <div class="photo-tab" id="tab-back" onclick="switchPose('back')">🛡️ ESPALDA</div>
                 </div>
-                
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.7rem; color:#888;">
+                    <span id="date-before">-</span>
+                    <span id="date-after">-</span>
+                </div>
                 <div class="compare-wrapper">
                     <div class="slider-labels"><span class="label-tag">ANTES</span><span class="label-tag">AHORA</span></div>
                     <img src="" id="img-before" class="compare-img">
                     <img src="" id="img-overlay" class="compare-img img-overlay">
                     <div class="slider-handle" id="slider-handle"><div class="slider-btn"></div></div>
                 </div>
-                <input type="range" min="0" max="100" value="0" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
-                
-                <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.7rem; color:#888;">
-                    <span id="date-before">-</span>
-                    <span id="date-after">-</span>
-                </div>
-
+                <input type="range" min="0" max="100" value="100" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
                 <div class="photo-actions">
                     <button class="btn-outline" style="margin:0; padding:10px 5px;" onclick="document.getElementById('f-before').click()">1. ANTES</button>
                     <button class="btn-danger btn-small" style="margin:0;" onclick="deletePhoto('before')">🗑️</button>
@@ -277,6 +275,12 @@
 
             <div class="card">
                 <h3>CONFIGURACIÓN & ALARMAS</h3>
+                
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;">
+                     <span>Tiempo Descanso (seg)</span>
+                     <input type="number" id="cfg-rest-time" style="width:80px; margin:0; text-align:center;" value="60">
+                </div>
+
                 <div style="margin-bottom:15px;">
                     <div style="font-size:0.8rem; color:#aaa; margin-bottom:5px;">Recordatorio Fotos:</div>
                     <div style="display:flex; gap:10px;">
@@ -369,7 +373,7 @@
                     <img src="" id="coach-img-overlay" class="compare-img img-overlay">
                     <div class="slider-handle" id="coach-slider-handle"><div class="slider-btn"></div></div>
                 </div>
-                <input type="range" min="0" max="100" value="0" style="width:100%; margin-top:15px;" oninput="moveCoachSlider(this.value)">
+                <input type="range" min="0" max="100" value="100" style="width:100%; margin-top:15px;" oninput="moveCoachSlider(this.value)">
                 
                 <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.7rem; color:#888;">
                     <span id="coach-date-before">-</span>
@@ -385,8 +389,6 @@
             <div class="card">
                 <h3>RUTINAS ASIGNADAS</h3>
                 <div id="coach-assigned-list" style="font-size:0.8rem; color:#888; margin-bottom:15px;">Cargando...</div>
-                
-                <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
 
                 <label style="font-size:0.7rem; color:#ccc; text-transform:uppercase;">Asignar Existente:</label>
                 <div style="display:flex; gap:10px;">
@@ -553,9 +555,8 @@
 
         let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
         
-        // GLOBAL SELECTION STATE FOR EDITOR
         let currentRoutineSelections = [];
-        let creatingForAthleteId = null; // IMPORTANT: Coach Creation Context
+        let creatingForAthleteId = null;
 
         function getExerciseData(name) {
             let match = EXERCISES.find(e => e.n === name);
@@ -782,14 +783,15 @@
             const imgB = document.getElementById('img-before');
             const imgA = document.getElementById('img-overlay');
             
-            if(after) imgB.src = after; else imgB.src = ""; // Base is Current
-            if(before) imgA.src = before; else imgA.src = ""; // Overlay is Past
+            // Logic: Background = Current (After), Overlay = Past (Before)
+            if(after) imgB.src = after; else imgB.removeAttribute('src');
+            if(before) imgA.src = before; else imgA.removeAttribute('src');
 
             document.getElementById('date-before').innerText = `ANTES (${dateB})`;
             document.getElementById('date-after').innerText = `AHORA (${dateA})`;
             
-            // RESET TO LEFT (0%) -> Show Full Overlay (ANTES)
-            document.getElementById('slider-handle').style.left = '0%';
+            // RESET TO LEFT (100%) -> Show Full Overlay (ANTES)
+            document.getElementById('slider-handle').style.left = '100%';
             imgA.style.clipPath = 'inset(0 0 0 0)';
         }
 
@@ -1082,13 +1084,13 @@
             switchTab('routines-view');
         };
 
-        // GLOBAL ADMIN LOADER
+        // GLOBAL ADMIN LOADER - ATTACHED TO WINDOW FOR BUTTON TO WORK
         window.loadAdminUsers = async () => {
             const l = document.getElementById('admin-list');
             l.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">↻ Cargando base de datos...</div>';
             
             try {
-                // FORCE FRESH FETCH
+                // FORCE FRESH FETCH FROM SERVER
                 const s = await getDocs(collection(db, "users"));
                 l.innerHTML = '';
                 
@@ -1103,6 +1105,7 @@
                     const div = document.createElement('div');
                     div.className = "admin-user-row";
                     
+                    // STATUS ICON
                     const statusIcon = u.approved ? '🟢' : '⏳';
                     const statusText = u.approved ? 'Activo' : 'Pendiente';
 
@@ -1122,10 +1125,10 @@
             }
         };
 
+        // NEW: ROBUST COACH VIEW WITH ROUTINE LOADER
         async function openCoachView(uid,u) {
             selectedUserCoach=uid;
             
-            // FIX: Refresh user data to ensure realtime
             const freshSnap = await getDoc(doc(db, "users", uid));
             const freshU = freshSnap.data();
             selectedUserObj = freshU; // Update local obj
