@@ -42,7 +42,6 @@
         .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; margin:0; }
         .btn-danger { background: #600; border: 1px solid #f00; color: #fcc; margin-top: 15px; }
         .btn-success { background: var(--success-color); color: black; border: none; margin-bottom: 15px; box-shadow: 0 0 15px rgba(0,255,136,0.4); }
-        
         .btn-done { background-color: rgba(255, 51, 51, 0.3) !important; border: 1px solid var(--accent-color) !important; color: white !important; box-shadow: 0 0 10px rgba(255, 51, 51, 0.4); }
 
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -92,11 +91,17 @@
         .set-row { display: grid; grid-template-columns: 25px 1fr 1fr 45px; gap: 10px; align-items: center; margin-bottom: 10px; }
         .set-num { font-size: 0.85rem; color: #666; font-weight: bold; text-align: center; }
         .shadow-val { display: block; font-size: 0.65rem; color: #555; text-align: center; margin-bottom: 2px; }
+        
+        .sets-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px; }
+        .btn-set-control { background: #222; border: 1px solid #444; color: #888; padding: 2px 8px; font-size: 0.7rem; border-radius: 4px; }
 
         .sticky-editor-header { position: sticky; top: -20px; background: var(--bg-color); z-index: 50; padding: 20px 0 10px 0; border-bottom: 1px solid #222; margin-top: -20px; margin-bottom: 15px; }
         .ex-select-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: #1a1a1a; margin-bottom: 6px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
         .ex-select-item img { width: 45px; height: 45px; object-fit: contain; background: black; border: 1px solid #333; border-radius: 4px; }
         .ex-select-item.selected { border-color: var(--accent-color); background: rgba(255,51,51,0.1); }
+        .selected-summary { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+        .summary-pill { background: var(--accent-color); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; display: flex; align-items: center; gap: 5px; }
+        .summary-pill span { cursor: pointer; font-weight: bold; }
 
         nav.bottom-nav { flex-shrink: 0; height: calc(60px + var(--safe-bottom)); padding-bottom: var(--safe-bottom); box-sizing: border-box; background: #0f0f0f; border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; z-index: 999; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.65rem; height: 100%; }
@@ -118,8 +123,9 @@
         .compare-wrapper { position: relative; width: 100%; height: 250px; background: black; border-radius: 8px; overflow: hidden; margin-top: 5px; border:1px solid #333; }
         .compare-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
         .img-overlay { clip-path: inset(0 50% 0 0); border-right: 2px solid white; }
-        .slider-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; cursor: ew-resize; z-index: 10; }
-        .slider-btn { position: absolute; top: 50%; left: -15px; width: 30px; height: 30px; background: white; border-radius: 50%; display: grid; place-items: center; color: black; box-shadow: 0 0 10px black; }
+        .slider-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; cursor: ew-resize; z-index: 10; background: rgba(255,255,255,0.5); }
+        /* NO BOLITA: .slider-btn removed visually */
+        .slider-btn { display: none; }
 
         .admin-user-row { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .coach-photos-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
@@ -197,9 +203,10 @@
                 <h2 id="editor-title">NUEVA RUTINA</h2>
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
                     <input type="text" id="editor-name" placeholder="Nombre de Rutina" style="margin:0;">
-                    <button class="btn" style="width:auto; padding:0 25px;" onclick="saveRoutine()">GUARDAR</button>
+                    <button id="btn-save-routine" class="btn" style="width:auto; padding:0 25px;" onclick="window.saveRoutine()">GUARDAR</button>
                 </div>
                 <input type="search" id="ex-search" placeholder="🔍 Buscar ejercicio..." oninput="filterExercises(this.value)" style="margin-bottom:0;">
+                <div id="selected-summary" class="selected-summary"></div>
             </div>
             <div class="card">
                 <div id="exercise-selector-list"></div>
@@ -249,7 +256,7 @@
                 <div class="compare-wrapper">
                     <img src="" id="img-before" class="compare-img">
                     <img src="" id="img-overlay" class="compare-img img-overlay">
-                    <div class="slider-handle" id="slider-handle"><div class="slider-btn">↔</div></div>
+                    <div class="slider-handle" id="slider-handle"><div class="slider-btn"></div></div>
                 </div>
                 <input type="range" min="0" max="100" value="50" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
                 <div class="photo-actions">
@@ -366,7 +373,7 @@
                 <h3 id="coach-user-name" style="margin:0;">Usuario</h3>
                 <p id="coach-user-email" style="color:#666; font-size:0.8rem;"></p>
                 <div id="pending-approval-banner" class="hidden">
-                    <button class="btn btn-success" style="margin-top:10px;" onclick="approveUser()">✅ APROBAR ACCESO</button>
+                    <button class="btn btn-success" style="margin-top:10px;" onclick="window.approveUser()">✅ APROBAR ACCESO</button>
                 </div>
             </div>
             
@@ -383,7 +390,7 @@
             </div>
 
             <h4 style="margin-bottom:5px;">Gráfica Peso</h4>
-            <div style="height:120px; margin-bottom:15px;"><canvas id="coachWeightChart"></canvas></div>
+            <div style="height:120px; margin-bottom:20px; position:relative;"><canvas id="coachWeightChart"></canvas></div>
 
             <h4 style="margin-bottom:5px;">📋 Rutinas Activas</h4>
             <div id="coach-assigned-list" style="font-size:0.8rem; color:#888; margin-bottom:10px;">Cargando...</div>
@@ -514,6 +521,9 @@
         ];
 
         let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
+        
+        // GLOBAL SELECTION STATE FOR EDITOR
+        let currentRoutineSelections = [];
 
         function getExerciseData(name) {
             let match = EXERCISES.find(e => e.n === name);
@@ -615,44 +625,95 @@
             });
         }
 
+        // EDITOR LOGIC REWRITTEN FOR SELECTION PERSISTENCE
         window.openEditor = async (id=null) => {
             editingRoutineId = id;
             document.getElementById('editor-name').value = '';
             document.getElementById('editor-title').innerText = id ? "EDITAR RUTINA" : "NUEVA RUTINA";
-            renderExercises(EXERCISES);
+            currentRoutineSelections = [];
+            
             if(id) {
                 const docSnap = await getDoc(doc(db,"routines",id));
                 const r = docSnap.data();
                 document.getElementById('editor-name').value = r.name;
-                const items = document.querySelectorAll('.ex-select-item');
-                items.forEach(item => { 
-                    const name = item.querySelector('span').innerText;
-                    if(r.exercises.includes(name)) item.classList.add('selected'); 
-                });
+                currentRoutineSelections = r.exercises || [];
             }
+            
+            renderExercises(EXERCISES); // Render all initially
+            renderSelectedSummary();
             switchTab('editor-view');
         };
 
-        window.filterExercises = (t) => renderExercises(EXERCISES.filter(e=>e.n.toLowerCase().includes(t.toLowerCase())));
+        window.filterExercises = (t) => {
+            const filtered = EXERCISES.filter(e => e.n.toLowerCase().includes(t.toLowerCase()));
+            renderExercises(filtered);
+        };
+
         function renderExercises(l) {
             const c = document.getElementById('exercise-selector-list'); c.innerHTML = '';
-            l.forEach(e=>{
-                const d = document.createElement('div'); d.className = 'ex-select-item';
+            l.forEach(e => {
+                const d = document.createElement('div'); 
+                d.className = 'ex-select-item';
+                if(currentRoutineSelections.includes(e.n)) d.classList.add('selected');
+                
                 d.innerHTML = `<img src="${e.img}" onerror="this.src='logo.png'"><span>${e.n}</span>`;
-                d.onclick = () => d.classList.toggle('selected');
+                
+                d.onclick = () => {
+                    if(currentRoutineSelections.includes(e.n)) {
+                        currentRoutineSelections = currentRoutineSelections.filter(x => x !== e.n);
+                        d.classList.remove('selected');
+                    } else {
+                        currentRoutineSelections.push(e.n);
+                        d.classList.add('selected');
+                    }
+                    renderSelectedSummary();
+                };
                 c.appendChild(d);
             });
         }
 
+        function renderSelectedSummary() {
+            const div = document.getElementById('selected-summary');
+            div.innerHTML = '';
+            currentRoutineSelections.forEach(name => {
+                const pill = document.createElement('div');
+                pill.className = 'summary-pill';
+                pill.innerHTML = `<span>${name}</span> <b onclick="removeSelection('${name}')">✕</b>`;
+                div.appendChild(pill);
+            });
+        }
+        
+        window.removeSelection = (name) => {
+            currentRoutineSelections = currentRoutineSelections.filter(x => x !== name);
+            renderSelectedSummary();
+            // Re-render list to update UI state if visible
+            const searchVal = document.getElementById('ex-search').value;
+            window.filterExercises(searchVal); 
+        }
+
         window.saveRoutine = async () => {
             const n = document.getElementById('editor-name').value;
-            const s = Array.from(document.querySelectorAll('.ex-select-item.selected')).map(e=>e.innerText);
-            if(!n || s.length===0) return alert("Faltan datos");
-            const data = { uid:currentUser.uid, name:n, exercises:s, createdAt:serverTimestamp() };
-            if(editingRoutineId) await updateDoc(doc(db,"routines",editingRoutineId), {name:n, exercises:s});
-            else await addDoc(collection(db,"routines"), data);
-            switchTab('routines-view');
+            const s = currentRoutineSelections;
+            
+            if(!n || s.length===0) return alert("❌ Faltan datos: Pon un nombre y elige ejercicios.");
+            
+            const btn = document.getElementById('btn-save-routine');
+            const originalText = btn.innerText;
+            btn.innerText = "💾 GUARDANDO...";
+            
+            try {
+                const data = { uid:currentUser.uid, name:n, exercises:s, createdAt:serverTimestamp() };
+                if(editingRoutineId) await updateDoc(doc(db,"routines",editingRoutineId), {name:n, exercises:s});
+                else await addDoc(collection(db,"routines"), data);
+                
+                switchTab('routines-view');
+            } catch(e) {
+                alert("Error al guardar: " + e.message);
+            } finally {
+                btn.innerText = originalText;
+            }
         };
+        
         window.delRoutine = async (id) => { if(confirm("¿Borrar?")) await deleteDoc(doc(db,"routines",id)); };
 
         // --- PHOTO COMPARISON LOGIC ---
@@ -670,10 +731,13 @@
             const dateB = u[`dateBefore${prefix}`] || '-';
             const dateA = u[`dateAfter${prefix}`] || '-';
 
-            // Clear previous to avoid confusion
-            document.getElementById('img-before').src = before ? before : ''; 
-            document.getElementById('img-overlay').src = after ? after : '';
+            // FIX: Explicitly clear if empty
+            const imgB = document.getElementById('img-before');
+            const imgA = document.getElementById('img-overlay');
             
+            if(before) imgB.src = before; else imgB.src = "";
+            if(after) imgA.src = after; else imgA.src = "";
+
             document.getElementById('date-before').innerText = `ANTES (${dateB})`;
             document.getElementById('date-after').innerText = `AHORA (${dateA})`;
         }
@@ -829,37 +893,61 @@
             const r = snap.data();
             activeWorkout = { name: r.name, exs: r.exercises.map(n => {
                 const data = getExerciseData(n);
-                return { n:n, img:data.img, mInfo: data.mInfo, sets:Array(5).fill().map((_,i)=>({r:i===0?20:16, w:'', d:false})) };
+                return { n:n, img:data.img, mInfo: data.mInfo, sets:Array(3).fill().map((_,i)=>({r:10, w:0, d:false})) }; // Default 3 sets
             })};
             
+            renderWorkout();
+            switchTab('workout-view');
+            startTimerMini();
+        };
+
+        // NEW: DYNAMIC SETS
+        window.addSet = (exIdx) => {
+            activeWorkout.exs[exIdx].sets.push({r:10, w:0, d:false});
+            renderWorkout();
+        };
+
+        window.removeSet = (exIdx) => {
+            if(activeWorkout.exs[exIdx].sets.length > 1) {
+                activeWorkout.exs[exIdx].sets.pop();
+                renderWorkout();
+            }
+        };
+
+        function renderWorkout() {
             const c = document.getElementById('workout-exercises'); c.innerHTML = '';
             document.getElementById('workout-title').innerText = activeWorkout.name;
+            
             activeWorkout.exs.forEach((e,i) => {
                 const card = document.createElement('div'); card.className = 'card'; card.style.borderLeft="3px solid var(--accent-color)";
                 let bars = `<div class="mini-bar-label"><span>${e.mInfo.main}</span><span>100%</span></div><div class="mini-track"><div class="mini-fill fill-primary"></div></div>`;
                 e.mInfo.sec.forEach(s => { bars += `<div class="mini-bar-label" style="margin-top:4px;"><span>${s}</span><span>40%</span></div><div class="mini-track"><div class="mini-fill fill-sec"></div></div>`; });
                 let setsHtml = `<div class="set-header"><div>#</div><div>REPS</div><div>KG</div><div></div></div>`;
+                
                 e.sets.forEach((s,j) => {
-                    setsHtml += `<div class="set-row"><div class="set-num">${j+1}</div><div><span class="shadow-val">${s.r}</span><input type="number" value="${s.r}" onchange="uS(${i},${j},'r',this.value)"></div><div><span class="shadow-val">--</span><input type="number" placeholder="kg" value="${s.w}" onchange="uS(${i},${j},'w',this.value)"></div><button id="btn-${i}-${j}" class="btn-outline" style="margin:0;padding:0;height:35px;" onclick="tS(${i},${j})"></button></div>`;
+                    setsHtml += `<div class="set-row"><div class="set-num">${j+1}</div><div><span class="shadow-val">${s.r}</span><input type="number" value="${s.r}" onchange="uS(${i},${j},'r',this.value)"></div><div><span class="shadow-val">--</span><input type="number" placeholder="kg" value="${s.w}" onchange="uS(${i},${j},'w',this.value)"></div><button id="btn-${i}-${j}" class="btn-outline ${s.d?'btn-done':''}" style="margin:0;padding:0;height:35px;" onclick="tS(${i},${j})">${s.d?'✓':''}</button></div>`;
                 });
+
+                // ADD SET BUTTONS
+                setsHtml += `<div class="sets-actions"><button class="btn-set-control" onclick="removeSet(${i})">- Serie</button><button class="btn-set-control" onclick="addSet(${i})">+ Serie</button></div>`;
+
                 card.innerHTML = `<div class="workout-split"><div class="workout-visual"><img src="${e.img}" onerror="this.src='logo.png'"></div><div class="workout-bars" style="width:100%">${bars}</div></div><h3 style="margin-bottom:10px; border:none;">${e.n}</h3>${setsHtml}`;
                 c.appendChild(card);
             });
-            switchTab('workout-view');
-            startTimerMini();
-        };
+        }
 
         window.uS = (i,j,k,v) => activeWorkout.exs[i].sets[j][k]=v;
         window.tS = (i,j) => {
             const s = activeWorkout.exs[i].sets[j]; s.d = !s.d;
+            // Re-render not needed for simple toggle, just update class
             const btn = document.getElementById(`btn-${i}-${j}`);
             if(s.d) {
                 btn.classList.add('btn-done');
-                btn.innerHTML = '✓';
+                btn.innerText = '✓';
                 openRest();
             } else {
                 btn.classList.remove('btn-done');
-                btn.innerHTML = '';
+                btn.innerText = '';
             }
         };
 
@@ -1086,19 +1174,14 @@
                     const noteIcon = (d.note && d.note.trim().length > 0) ? `<span class="note-icon" title="${d.note}" onclick="alert('${d.note}')">📝</span>` : '';
                     hList.innerHTML += `<div class="history-row"><div class="hist-date">${date}</div><div class="hist-name">${d.routine} ${noteIcon}</div><div class="hist-rpe">${rpeBadge}</div></div>`;
                 });
+
+                if(!freshU.approved && confirm("¿Aprobar acceso a este atleta?")) { 
+                    await updateDoc(doc(db,"users",uid),{approved:true}); 
+                    window.loadAdminUsers(); // REFRESH LIST MANUALLY
+                }
             
             } catch(e) { console.error("Error loading coach details", e); }
         }
-
-        // NEW APPROVE FUNCTION
-        window.approveUser = async () => {
-            if(confirm("¿Confirmar acceso a este atleta?")) {
-                await updateDoc(doc(db,"users",selectedUserCoach), {approved: true});
-                alert("Atleta Aprobado ✅");
-                document.getElementById('modal-coach').classList.remove('active');
-                window.loadAdminUsers();
-            }
-        };
 
         window.renderCoachRoutines = (list) => {
             const s = document.getElementById('coach-routine-select'); s.innerHTML = '';
