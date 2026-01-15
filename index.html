@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -217,13 +218,13 @@
 <body>
 
     <div id="loading-screen">
-        <img src="logo.png" id="loading-logo" onerror="this.style.display='none'">
+        <img src="logo.png" id="loading-logo" alt="Logo" onerror="this.style.display='none'">
         <div class="loading-text">SYSTEM INITIALIZED</div>
     </div>
 
     <header id="main-header" class="hidden">
         <div class="brand">FIT DATA <span>PRO</span></div>
-        <button id="coach-btn" class="hidden" style="background:0;border:1px solid var(--accent);color:var(--accent);padding:5px 10px;border-radius:4px;font-weight:bold;cursor:pointer">COACH</button>
+        <button id="coach-btn" class="hidden btn-neon-text">COACH</button>
     </header>
 
     <main id="main-container">
@@ -365,7 +366,7 @@
         function play5Beeps(){ if(!audioCtx)unlockAudio(); if(audioCtx){ const now=audioCtx.currentTime; for(let i=0;i<5;i++){ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.value=880; o.connect(g); g.connect(audioCtx.destination); o.start(now+(i*0.6)); o.stop(now+(i*0.6)+0.15); g.gain.setValueAtTime(0.5,now+(i*0.6)); g.gain.exponentialRampToValueAtTime(0.01,now+(i*0.6)+0.15); } } }
         window.testSound=play5Beeps;
 
-        // FULL DATABASE
+        // BASE DE DATOS COMPLETA
         const EXERCISES = [
             {n:"Sentadilla con Barra", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Sentadilla Jaca", img:"cuadriceps.png", m:"Cuádriceps"},
             {n:"Sentadilla Cinturón", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Prensa de Piernas", img:"cuadriceps.png", m:"Cuádriceps"},
