@@ -36,14 +36,13 @@
         .hidden { display: none !important; }
 
         /* UI KIT */
-        .btn { background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; width: 100%; box-shadow: var(--accent-glow); display: flex; justify-content: center; align-items: center; }
+        .btn { background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; width: 100%; box-shadow: var(--accent-glow); display: flex; justify-content: center; align-items: center; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; border: 1px solid #444; color: #ccc; padding: 12px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.85rem; }
         .btn-small { padding: 6px 12px; font-size: 0.75rem; width: auto; margin:0; }
         .btn-danger { background: #600; border: 1px solid #f00; color: #fcc; margin-top: 15px; }
         .btn-done { background-color: rgba(255, 51, 51, 0.3) !important; border: 1px solid var(--accent-color) !important; color: white !important; box-shadow: 0 0 10px rgba(255, 51, 51, 0.4); }
 
-        /* LOADING */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #loading-logo { width: 140px; border-radius: 25px; box-shadow: 0 0 40px rgba(255, 51, 51, 0.6); animation: breathe 3s infinite; clip-path: inset(0 round 25px); }
         .loading-text { margin-top: 30px; color: var(--accent-color); font-family: monospace; font-size: 1.1rem; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 10px var(--accent-color); animation: blink 0.8s infinite; }
@@ -97,6 +96,7 @@
         .ex-select-item img { width: 45px; height: 45px; object-fit: contain; background: black; border: 1px solid #333; border-radius: 4px; }
         .ex-select-item.selected { border-color: var(--accent-color); background: rgba(255,51,51,0.1); }
 
+        /* IOS MENU FIX */
         nav.bottom-nav { flex-shrink: 0; height: calc(60px + var(--safe-bottom)); padding-bottom: var(--safe-bottom); box-sizing: border-box; background: #0f0f0f; border-top: 1px solid #222; display: flex; justify-content: space-around; align-items: center; z-index: 999; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; font-size: 0.65rem; height: 100%; }
         .nav-item.active { color: var(--accent-color); }
@@ -310,7 +310,10 @@
         </section>
 
         <section id="admin-view" class="view-container">
-            <h2>PANEL COACH</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2>PANEL COACH</h2>
+                <button class="btn-small btn-outline" style="width:auto; margin:0;" onclick="loadAdminUsers()">🔄 ACTUALIZAR</button>
+            </div>
             <div class="card">
                 <h3>Lista de Atletas</h3>
                 <div id="admin-list"></div>
@@ -506,7 +509,7 @@
             {n:"Crunch Máquina", img:"abs.png", m:"Abs"}, {n:"Rodillas al Pecho", img:"abs.png", m:"Abs"}
         ];
 
-        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
+        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[];
 
         function getExerciseData(name) {
             let match = EXERCISES.find(e => e.n === name);
@@ -942,14 +945,18 @@
             switchTab('routines-view');
         };
 
-        // REAL-TIME COACH LIST (FIXED)
-        function loadAdminUsers() {
+        // ADMIN LOADER - ROBUST VERSION
+        async function loadAdminUsers() {
             const l = document.getElementById('admin-list');
-            if(adminUnsub) adminUnsub(); 
             l.innerHTML = 'Cargando...';
-            
-            adminUnsub = onSnapshot(collection(db, "users"), (s) => {
+            try {
+                // FALLBACK TO STANDARD FETCH FOR STABILITY
+                const s = await getDocs(collection(db, "users"));
                 l.innerHTML = '';
+                if(s.empty) {
+                    l.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">No hay atletas registrados.</div>';
+                    return;
+                }
                 s.forEach(d => {
                     const u = d.data(); 
                     if(u.email === ADMIN) return;
@@ -959,7 +966,10 @@
                     div.onclick=()=>openCoachModal(d.id,u); 
                     l.appendChild(div);
                 });
-            });
+            } catch(e) {
+                l.innerHTML = '<div style="text-align:center; color:red;">Error al cargar lista.</div>';
+                console.error(e);
+            }
         }
 
         async function openCoachModal(uid,u) {
@@ -1050,7 +1060,10 @@
                     hList.innerHTML += `<div class="history-row"><div class="hist-date">${date}</div><div class="hist-name">${d.routine} ${noteIcon}</div><div class="hist-rpe">${rpeBadge}</div></div>`;
                 });
 
-                if(!freshU.approved && confirm("¿Aprobar acceso a este atleta?")) { await updateDoc(doc(db,"users",uid),{approved:true}); }
+                if(!freshU.approved && confirm("¿Aprobar acceso a este atleta?")) { 
+                    await updateDoc(doc(db,"users",uid),{approved:true}); 
+                    loadAdminUsers(); // REFRESH LIST MANUALLY
+                }
             
             } catch(e) { console.error("Error loading coach details", e); }
         }
@@ -1118,7 +1131,7 @@
                         await deleteDoc(doc(db, "users", selectedUserCoach));
                         alert("Atleta eliminado.");
                         document.getElementById('modal-coach').classList.remove('active');
-                        // No need to reload, onSnapshot handles it
+                        loadAdminUsers();
                     } catch(e) { alert("Error: " + e.message); }
                 }
             }
