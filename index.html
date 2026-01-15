@@ -13,10 +13,7 @@
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="logo.png">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
     <style>
@@ -40,7 +37,6 @@
 
         .hidden { display: none !important; }
 
-        /* UI KIT */
         .btn { background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; width: 100%; box-shadow: var(--accent-glow); display: flex; justify-content: center; align-items: center; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; border: 1px solid #444; color: #ccc; padding: 12px; width: 100%; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.85rem; }
@@ -166,7 +162,7 @@
     </div>
 
     <header id="main-header" class="hidden">
-        <div class="brand">FIT DATA <span>PRO v46</span></div>
+        <div class="brand">FIT DATA <span>PRO v47</span></div>
         <button id="coach-btn" class="hidden btn-neon-text">COACH</button>
     </header>
 
@@ -264,6 +260,7 @@
                     <div class="slider-handle" id="slider-handle"><div class="slider-btn"></div></div>
                 </div>
                 <input type="range" min="0" max="100" value="100" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
+                
                 <div class="photo-actions">
                     <button class="btn-outline" style="margin:0; padding:10px 5px;" onclick="document.getElementById('f-before').click()">1. ANTES</button>
                     <button class="btn-danger btn-small" style="margin:0;" onclick="deletePhoto('before')">🗑️</button>
@@ -549,8 +546,9 @@
 
         let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
         
-        let creatingForAthleteId = null; // GLOBAL FLAG FOR COACH CREATION FLOW
+        // GLOBAL SELECTION STATE FOR EDITOR
         let currentRoutineSelections = [];
+        let creatingForAthleteId = null; // IMPORTANT: Coach Creation Context
 
         function getExerciseData(name) {
             let match = EXERCISES.find(e => e.n === name);
@@ -779,16 +777,14 @@
             const imgB = document.getElementById('img-before');
             const imgA = document.getElementById('img-overlay');
             
-            // Logic: Background = Current (After), Overlay = Past (Before)
-            if(after) imgB.src = after; else imgB.removeAttribute('src');
-            if(before) imgA.src = before; else imgA.removeAttribute('src');
+            if(after) imgB.src = after; else imgB.src = "";
+            if(before) imgA.src = before; else imgA.src = "";
 
             document.getElementById('date-before').innerText = `ANTES (${dateB})`;
             document.getElementById('date-after').innerText = `AHORA (${dateA})`;
             
-            // Reset to 0 (Left = Show Overlay = Show Before)
-            // Clip path: inset(0 0 0 0) -> shows full overlay
-            document.getElementById('slider-handle').style.left = '0%';
+            // RESET TO LEFT (100%) -> Show Full Overlay (ANTES)
+            document.getElementById('slider-handle').style.left = '100%';
             imgA.style.clipPath = 'inset(0 0 0 0)';
         }
 
@@ -1122,10 +1118,10 @@
             }
         };
 
+        // NEW: ROBUST COACH VIEW WITH ROUTINE LOADER
         async function openCoachView(uid,u) {
             selectedUserCoach=uid;
             
-            // FIX: Refresh user data to ensure realtime
             const freshSnap = await getDoc(doc(db, "users", uid));
             const freshU = freshSnap.data();
             selectedUserObj = freshU; // Update local obj
@@ -1152,41 +1148,9 @@
             }
             
             updateCoachPhotoDisplay('front');
-
-            // --- FAIL-SAFE ROUTINE LOADING ---
-            try {
-                // 1. Load All Routines for Dropdown
-                const s = document.getElementById('coach-routine-select'); s.innerHTML = '';
-                const allRoutinesSnap = await getDocs(collection(db, "routines"));
-                allRoutinesCache = [];
-                
-                allRoutinesSnap.forEach(r => {
-                    const data = r.data();
-                    allRoutinesCache.push({id: r.id, ...data});
-                    const o = document.createElement('option'); 
-                    o.value = r.id; 
-                    o.innerText = data.name; 
-                    s.appendChild(o); 
-                });
-
-                // 2. Filter Assigned Routines in Memory (Avoids Index Error)
-                const rList = document.getElementById('coach-assigned-list');
-                rList.innerHTML = '';
-                
-                const assignedRoutines = allRoutinesCache.filter(r => r.assignedTo && r.assignedTo.includes(uid));
-                
-                if(assignedRoutines.length === 0) {
-                    rList.innerHTML = 'Ninguna rutina asignada.';
-                } else {
-                    assignedRoutines.forEach(r => {
-                        const div = document.createElement('div');
-                        div.className = "assigned-routine-item";
-                        div.innerHTML = `<span>${r.name}</span><button style="background:none;border:none;color:#f55;font-weight:bold;cursor:pointer;" onclick="unassignRoutine('${r.id}')">❌</button>`;
-                        rList.appendChild(div);
-                    });
-                }
-            } catch(e) { console.error("Error loading routines", e); }
-
+            loadRoutinesForCoach(uid); // TRIGGER ROUTINE LOADING
+            
+            // LOAD STATS & GRAPH
             try {
                 const st = freshU.stats || {};
                 const age = freshU.age ? freshU.age : 'N/D';
@@ -1195,17 +1159,29 @@
                     <div class="stat-pill"><b>${(st.totalKg/1000||0).toFixed(1)}t</b><span>CARGA</span></div>
                     <div class="stat-pill"><b>${age}</b><span>AÑOS</span></div>
                 `;
-                
-                // FORCE CHART RENDER AFTER DELAY
+
+                // GRAPH LOAD WITH DELAY TO ENSURE CANVAS IS READY
                 setTimeout(() => {
                     if(coachChart) coachChart.destroy();
                     const ctx = document.getElementById('coachWeightChart');
                     const wData = freshU.weightHistory || [];
                     const data = (wData && wData.length > 0) ? wData : [70];
                     
-                    coachChart = new Chart(ctx, { type:'line', data:{ labels:data.map((_,i)=>i+1), datasets:[{label:'Kg', data:data, borderColor:'#ff3333', fill:false}] }, options:{plugins:{legend:{display:false}}, scales:{x:{display:false},y:{grid:{color:'#333'}}}, maintainAspectRatio: false}});
+                    coachChart = new Chart(ctx, { 
+                        type:'line', 
+                        data:{ 
+                            labels:data.map((_,i)=>i+1), 
+                            datasets:[{label:'Kg', data:data, borderColor:'#ff3333', fill:false}] 
+                        }, 
+                        options:{
+                            plugins:{legend:{display:false}}, 
+                            scales:{x:{display:false},y:{grid:{color:'#333'}}}, 
+                            maintainAspectRatio: false
+                        }
+                    });
                 }, 300);
 
+                // LOAD HISTORY
                 const hList = document.getElementById('coach-history-list');
                 hList.innerHTML = 'Cargando historial...';
                 const qH = query(collection(db,"workouts"), where("uid","==",uid), orderBy("date","desc"), limit(10));
@@ -1216,12 +1192,56 @@
                     const d = w.data();
                     const date = d.date ? new Date(d.date.seconds*1000).toLocaleDateString() : '-';
                     let rpeBadge = d.rpe === 'Suave' ? '<span class="badge green">🟢 Suave</span>' : (d.rpe === 'Duro' ? '<span class="badge orange">🟠 Duro</span>' : (d.rpe === 'Fallo' ? '<span class="badge red">🔴 Fallo</span>' : '<span class="badge gray">--</span>'));
-                    // Note logic: only show icon if text exists and is not empty spaces
                     const noteIcon = (d.note && d.note.trim().length > 0) ? `<span class="note-icon" title="${d.note}" onclick="alert('${d.note}')">📝</span>` : '';
                     hList.innerHTML += `<div class="history-row"><div class="hist-date">${date}</div><div class="hist-name">${d.routine} ${noteIcon}</div><div class="hist-rpe">${rpeBadge}</div></div>`;
                 });
             
             } catch(e) { console.error("Error loading coach details", e); }
+        }
+
+        // SEPARATE FUNCTION TO LOAD ROUTINES ROBUSTLY
+        async function loadRoutinesForCoach(uid) {
+             const s = document.getElementById('coach-routine-select'); 
+             const rList = document.getElementById('coach-assigned-list');
+             
+             s.innerHTML = '<option>Cargando lista...</option>';
+             rList.innerHTML = 'Cargando asignadas...';
+             
+             try {
+                const allRoutinesSnap = await getDocs(collection(db, "routines"));
+                allRoutinesCache = [];
+                s.innerHTML = '';
+                rList.innerHTML = '';
+
+                let assignedCount = 0;
+
+                allRoutinesSnap.forEach(r => {
+                    const data = r.data();
+                    const routineObj = {id: r.id, ...data};
+                    allRoutinesCache.push(routineObj);
+                    
+                    // ADD TO SELECT
+                    const o = document.createElement('option'); 
+                    o.value = r.id; 
+                    o.innerText = data.name; 
+                    s.appendChild(o);
+
+                    // CHECK IF ASSIGNED
+                    if(data.assignedTo && data.assignedTo.includes(uid)) {
+                        assignedCount++;
+                        const div = document.createElement('div');
+                        div.className = "assigned-routine-item";
+                        div.innerHTML = `<span>${data.name}</span><button style="background:none;border:none;color:#f55;font-weight:bold;cursor:pointer;" onclick="unassignRoutine('${r.id}')">❌</button>`;
+                        rList.appendChild(div);
+                    }
+                });
+
+                if(assignedCount === 0) rList.innerHTML = 'Ninguna rutina asignada.';
+
+             } catch(e) {
+                 console.error("Error fetching routines:", e);
+                 s.innerHTML = '<option>Error de carga</option>';
+             }
         }
 
         // NEW APPROVE FUNCTION
@@ -1288,17 +1308,24 @@
         };
 
         window.assignRoutine = async () => {
-            const rid=document.getElementById('coach-routine-select').value; if(!rid||!selectedUserCoach)return;
-            const rRef=doc(db,"routines",rid); 
-            await updateDoc(rRef,{assignedTo: arrayUnion(selectedUserCoach)}); 
-            alert("Rutina Asignada");
-            openCoachView(selectedUserCoach, selectedUserObj); 
+            const rid=document.getElementById('coach-routine-select').value; 
+            if(!rid||!selectedUserCoach) return alert("Selecciona una rutina");
+            
+            try {
+                const rRef=doc(db,"routines",rid); 
+                await updateDoc(rRef,{assignedTo: arrayUnion(selectedUserCoach)}); 
+                alert("Rutina Asignada ✅");
+                // Refresh list manually
+                loadRoutinesForCoach(selectedUserCoach);
+            } catch(e) {
+                alert("Error al asignar: " + e.message);
+            }
         };
 
         window.unassignRoutine = async (rid) => {
             if(confirm("¿Quitar esta rutina al atleta?")) {
                 await updateDoc(doc(db, "routines", rid), { assignedTo: arrayRemove(selectedUserCoach) });
-                openCoachView(selectedUserCoach, selectedUserObj); 
+                loadRoutinesForCoach(selectedUserCoach); // Refresh list manually
             }
         };
 
