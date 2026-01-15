@@ -120,8 +120,9 @@
 
         .compare-wrapper { position: relative; width: 100%; height: 250px; background: black; border-radius: 8px; overflow: hidden; margin-top: 5px; border:1px solid #333; }
         .compare-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
-        .img-overlay { clip-path: inset(0 50% 0 0); border-right: 2px solid white; }
-        .slider-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; cursor: ew-resize; z-index: 10; background: rgba(255,255,255,0.5); }
+        /* FIX SLIDER LOGIC: Overlay starts hidden (0% width) if slider is 0 */
+        .img-overlay { clip-path: inset(0 100% 0 0); border-right: 2px solid white; }
+        .slider-handle { position: absolute; top: 0; bottom: 0; left: 0%; width: 2px; cursor: ew-resize; z-index: 10; background: rgba(255,255,255,0.8); }
         .slider-btn { display: none; }
 
         .admin-user-row { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
@@ -255,7 +256,7 @@
                     <img src="" id="img-overlay" class="compare-img img-overlay">
                     <div class="slider-handle" id="slider-handle"><div class="slider-btn"></div></div>
                 </div>
-                <input type="range" min="0" max="100" value="50" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
+                <input type="range" min="0" max="100" value="0" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
                 <div class="photo-actions">
                     <button class="btn-outline" style="margin:0; padding:10px 5px;" onclick="document.getElementById('f-before').click()">1. ANTES</button>
                     <button class="btn-danger btn-small" style="margin:0;" onclick="deletePhoto('before')">🗑️</button>
@@ -353,9 +354,17 @@
                     <div class="photo-tab active" id="coach-tab-front" onclick="switchCoachPose('front')">FRONTAL</div>
                     <div class="photo-tab" id="coach-tab-back" onclick="switchCoachPose('back')">ESPALDA</div>
                 </div>
-                <div class="coach-photos-row" id="coach-photos-container">
-                    <div class="coach-photo-box" style="color:#666; font-size:0.7rem;">Sin Foto Antes</div>
-                    <div class="coach-photo-box" style="color:#666; font-size:0.7rem;">Sin Foto Ahora</div>
+                
+                <div class="compare-wrapper">
+                    <img src="" id="coach-img-before" class="compare-img">
+                    <img src="" id="coach-img-overlay" class="compare-img img-overlay">
+                    <div class="slider-handle" id="coach-slider-handle"><div class="slider-btn"></div></div>
+                </div>
+                <input type="range" min="0" max="100" value="0" style="width:100%; margin-top:15px;" oninput="moveCoachSlider(this.value)">
+                
+                <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.7rem; color:#888;">
+                    <span id="coach-date-before">ANTES</span>
+                    <span id="coach-date-after">AHORA</span>
                 </div>
             </div>
 
@@ -531,8 +540,6 @@
         ];
 
         let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
-        
-        // GLOBAL SELECTION STATE FOR EDITOR
         let currentRoutineSelections = [];
 
         function getExerciseData(name) {
@@ -724,6 +731,7 @@
         
         window.delRoutine = async (id) => { if(confirm("¿Borrar?")) await deleteDoc(doc(db,"routines",id)); };
 
+        // --- PHOTO LOGIC (INVERTED: LEFT=BEFORE, RIGHT=AFTER) ---
         window.switchPose = (pose) => {
             currentPose = pose;
             document.getElementById('tab-front').classList.toggle('active', pose==='front');
@@ -741,11 +749,15 @@
             const imgB = document.getElementById('img-before');
             const imgA = document.getElementById('img-overlay');
             
-            if(before) imgB.src = before; else imgB.src = "";
-            if(after) imgA.src = after; else imgA.src = "";
+            if(before) imgB.src = before; else imgB.removeAttribute('src');
+            if(after) imgA.src = after; else imgA.removeAttribute('src');
 
             document.getElementById('date-before').innerText = `ANTES (${dateB})`;
             document.getElementById('date-after').innerText = `AHORA (${dateA})`;
+            
+            // Reset slider to 0 (Before)
+            document.getElementById('slider-handle').style.left = '0%';
+            imgA.style.clipPath = 'inset(0 100% 0 0)';
         }
 
         window.loadCompImg = (inp, field) => { 
@@ -797,6 +809,12 @@
             userData[fieldDate] = "";
             updatePhotoDisplay(userData);
         }
+
+        // SLIDER LOGIC INVERTED: 0 = BEFORE (Hide overlay), 100 = AFTER (Show overlay)
+        window.moveSlider = (v) => { 
+            document.getElementById('img-overlay').style.clipPath = `inset(0 ${100-v}% 0 0)`; 
+            document.getElementById('slider-handle').style.left = `${v}%`; 
+        };
 
         async function loadProfile() {
             document.getElementById('profile-name').innerText = userData.name;
@@ -866,8 +884,6 @@
         };
         window.uploadAvatar = (inp) => { if(inp.files[0]) { const r = new FileReader(); r.onload=async(e)=>{ await updateDoc(doc(db,"users",currentUser.uid), {photo:e.target.result}); loadProfile(); }; r.readAsDataURL(inp.files[0]); } };
         
-        window.moveSlider = (v) => { document.getElementById('img-overlay').style.clipPath = `inset(0 ${100-v}% 0 0)`; document.getElementById('slider-handle').style.left = `${v}%`; };
-        
         window.addWeightEntry = async () => { 
             const wStr = prompt("Introduce tu peso (kg):");
             if(!wStr) return;
@@ -893,7 +909,6 @@
             const r = snap.data();
             activeWorkout = { name: r.name, exs: r.exercises.map(n => {
                 const data = getExerciseData(n);
-                // FIXED SETS: 5 SETS TOTAL. 1st is 20 reps, others 16.
                 return { n:n, img:data.img, mInfo: data.mInfo, sets:Array(5).fill().map((_,i)=>({r: i===0 ? 20 : 16, w:0, d:false})) }; 
             })};
             
@@ -903,7 +918,7 @@
         };
 
         window.addSet = (exIdx) => {
-            activeWorkout.exs[exIdx].sets.push({r:16, w:0, d:false}); // Add 16 by default
+            activeWorkout.exs[exIdx].sets.push({r:16, w:0, d:false}); 
             renderWorkout();
         };
 
@@ -1071,7 +1086,6 @@
             }
         };
 
-        // NEW FULL SCREEN COACH VIEW LOGIC
         async function openCoachView(uid,u) {
             selectedUserCoach=uid;
             
@@ -1166,7 +1180,6 @@
             if(confirm("¿Confirmar acceso a este atleta?")) {
                 await updateDoc(doc(db,"users",selectedUserCoach), {approved: true});
                 alert("Atleta Aprobado ✅");
-                // Refresh full view
                 openCoachView(selectedUserCoach, selectedUserObj);
             }
         };
@@ -1194,17 +1207,36 @@
             const prefix = pose === 'front' ? '' : '_back';
             const b = u[`photoBefore${prefix}`];
             const a = u[`photoAfter${prefix}`];
+            const dateB = u[`dateBefore${prefix}`] || '-';
+            const dateA = u[`dateAfter${prefix}`] || '-';
             
             const pCont = document.getElementById('coach-photos-container');
+            
+            // CLEANER SLIDER FOR COACH AS WELL
+            // Logic: Background is Before, Overlay is After.
+            // Slider at 0 (Left) -> Overlay Width 0 -> Show Background (Before)
+            
             pCont.innerHTML = `
-                <div class="coach-photo-box">${b ? `<img src="${b}"><div class="photo-date-label">ANTES</div>` : 'Sin Foto'}</div>
-                <div class="coach-photo-box">${a ? `<img src="${a}"><div class="photo-date-label">AHORA</div>` : 'Sin Foto'}</div>
+                <div class="compare-wrapper">
+                    <img src="${b || ''}" class="compare-img">
+                    <img src="${a || ''}" id="coach-overlay-img" class="compare-img img-overlay" style="clip-path:inset(0 100% 0 0)">
+                    <div class="slider-handle" id="coach-slider-handle" style="left:0%"><div class="slider-btn"></div></div>
+                </div>
+                <input type="range" min="0" max="100" value="0" style="width:100%; margin-top:15px;" oninput="moveCoachSlider(this.value)">
+                <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#888;">
+                    <span>ANTES (${dateB})</span><span>AHORA (${dateA})</span>
+                </div>
             `;
         }
+        
+        window.moveCoachSlider = (v) => {
+            document.getElementById('coach-overlay-img').style.clipPath = `inset(0 ${100-v}% 0 0)`;
+            document.getElementById('coach-slider-handle').style.left = `${v}%`;
+        };
 
         window.goToCreateRoutine = () => {
-            switchTab('routines-view'); // Go back to routines tab
-            openEditor(); // Open editor directly
+            switchTab('routines-view'); 
+            openEditor(); 
         };
 
         window.assignRoutine = async () => {
@@ -1212,13 +1244,13 @@
             const rRef=doc(db,"routines",rid); 
             await updateDoc(rRef,{assignedTo: arrayUnion(selectedUserCoach)}); 
             alert("Rutina Asignada");
-            openCoachView(selectedUserCoach, selectedUserObj); // Refresh view
+            openCoachView(selectedUserCoach, selectedUserObj); 
         };
 
         window.unassignRoutine = async (rid) => {
             if(confirm("¿Quitar esta rutina al atleta?")) {
                 await updateDoc(doc(db, "routines", rid), { assignedTo: arrayRemove(selectedUserCoach) });
-                openCoachView(selectedUserCoach, selectedUserObj); // Refresh view
+                openCoachView(selectedUserCoach, selectedUserObj); 
             }
         };
 
