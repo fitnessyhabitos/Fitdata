@@ -126,7 +126,7 @@
         /* LOGICA FOTOS INVERTIDA */
         /* Overlay empieza visible 100% (inset 0) */
         .img-overlay { clip-path: inset(0 0 0 0); border-right: 2px solid white; }
-        /* BARRA INVISIBLE */
+        /* Barra invisible */
         .slider-handle { position: absolute; top: 0; bottom: 0; left: 0%; width: 50px; margin-left: -25px; cursor: ew-resize; z-index: 10; background: transparent; }
         .slider-btn { display: none; }
         .slider-labels { position: absolute; top: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none; z-index: 20; }
@@ -167,7 +167,7 @@
     </div>
 
     <header id="main-header" class="hidden">
-        <div class="brand">FIT DATA <span>PRO v51</span></div>
+        <div class="brand">FIT DATA <span>PRO v50</span></div>
         <button id="coach-btn" class="hidden btn-neon-text">COACH</button>
     </header>
 
@@ -254,10 +254,7 @@
                     <div class="photo-tab active" id="tab-front" onclick="switchPose('front')">👤 FRONTAL</div>
                     <div class="photo-tab" id="tab-back" onclick="switchPose('back')">🛡️ ESPALDA</div>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.7rem; color:#888;">
-                    <span id="date-before">-</span>
-                    <span id="date-after">-</span>
-                </div>
+                
                 <div class="compare-wrapper">
                     <div class="slider-labels"><span class="label-tag">ANTES</span><span class="label-tag">AHORA</span></div>
                     <img src="" id="img-before" class="compare-img">
@@ -266,6 +263,11 @@
                 </div>
                 <input type="range" min="0" max="100" value="0" style="width:100%; margin-top:15px;" oninput="moveSlider(this.value)">
                 
+                <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.7rem; color:#888;">
+                    <span id="date-before">-</span>
+                    <span id="date-after">-</span>
+                </div>
+
                 <div class="photo-actions">
                     <button class="btn-outline" style="margin:0; padding:10px 5px;" onclick="document.getElementById('f-before').click()">1. ANTES</button>
                     <button class="btn-danger btn-small" style="margin:0;" onclick="deletePhoto('before')">🗑️</button>
@@ -367,24 +369,12 @@
                     <div class="photo-tab active" id="coach-tab-front" onclick="switchCoachPose('front')">FRONTAL</div>
                     <div class="photo-tab" id="coach-tab-back" onclick="switchCoachPose('back')">ESPALDA</div>
                 </div>
-                
-                <div class="compare-wrapper">
-                     <div class="slider-labels"><span class="label-tag">ANTES</span><span class="label-tag">AHORA</span></div>
-                    <img src="" id="coach-img-before" class="compare-img">
-                    <img src="" id="coach-img-overlay" class="compare-img img-overlay">
-                    <div class="slider-handle" id="coach-slider-handle"><div class="slider-btn"></div></div>
-                </div>
-                <input type="range" min="0" max="100" value="0" style="width:100%; margin-top:15px;" oninput="moveCoachSlider(this.value)">
-                
-                <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.7rem; color:#888;">
-                    <span id="coach-date-before">-</span>
-                    <span id="coach-date-after">-</span>
-                </div>
+                <div class="coach-photos-row" id="coach-photos-container"></div>
             </div>
 
             <div class="card">
                 <h3>GRÁFICA PESO</h3>
-                <div style="height:200px; width:100%; position:relative; margin-bottom: 20px;"><canvas id="coachWeightChart"></canvas></div>
+                <div style="height:200px; width:100%; position:relative;"><canvas id="coachWeightChart"></canvas></div>
             </div>
 
             <div class="card">
@@ -463,9 +453,7 @@
         const ADMIN = "toni@fitdatapro.es";
         const CODE = "fityhab";
 
-        // AUDIO SYSTEM (5 BEEPS)
         let audioCtx = null;
-
         function unlockAudio() {
             if(!audioCtx) {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -503,10 +491,8 @@
                 }
             }
         }
-
         window.testSound = () => { play5Beeps(); };
 
-        // BASE DE DATOS COMPLETA 82 EJERCICIOS
         const EXERCISES = [
             {n:"Sentadilla con Barra", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Sentadilla Jaca", img:"cuadriceps.png", m:"Cuádriceps"},
             {n:"Sentadilla Cinturón", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Prensa de Piernas", img:"cuadriceps.png", m:"Cuádriceps"},
@@ -553,8 +539,8 @@
 
         let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
         
-        // GLOBAL SELECTION STATE FOR EDITOR
         let currentRoutineSelections = [];
+        let creatingForAthleteId = null;
 
         function getExerciseData(name) {
             let match = EXERCISES.find(e => e.n === name);
@@ -731,12 +717,28 @@
             btn.innerText = "💾 GUARDANDO...";
             
             try {
-                // ADDING EMPTY ASSIGNEDTO TO PREVENT MISSING FIELD ERRORS
-                const data = { uid:currentUser.uid, name:n, exercises:s, createdAt:serverTimestamp(), assignedTo: [] };
+                let assignedArr = [];
+                if(creatingForAthleteId) assignedArr = [creatingForAthleteId];
+
+                const data = { 
+                    uid:currentUser.uid, 
+                    name:n, 
+                    exercises:s, 
+                    createdAt:serverTimestamp(), 
+                    assignedTo: assignedArr 
+                };
+
                 if(editingRoutineId) await updateDoc(doc(db,"routines",editingRoutineId), {name:n, exercises:s});
                 else await addDoc(collection(db,"routines"), data);
                 
-                switchTab('routines-view');
+                if(creatingForAthleteId) {
+                    const u = await getDoc(doc(db,"users",creatingForAthleteId));
+                    openCoachView(creatingForAthleteId, u.data());
+                    creatingForAthleteId = null; 
+                } else {
+                    switchTab('routines-view');
+                }
+
             } catch(e) {
                 alert("Error al guardar: " + e.message);
                 console.error(e);
@@ -762,18 +764,16 @@
             const dateB = u[`dateBefore${prefix}`] || '-';
             const dateA = u[`dateAfter${prefix}`] || '-';
 
-            // BACKGROUND = ACTUAL (AHORA)
-            const imgB = document.getElementById('img-before'); 
-            // OVERLAY = ANTERIOR (ANTES)
-            const imgA = document.getElementById('img-overlay'); 
+            const imgB = document.getElementById('img-before'); // FONDO = AHORA
+            const imgA = document.getElementById('img-overlay'); // CAPA = ANTES
             
-            if(after) imgB.src = after; else imgB.src = "";
-            if(before) imgA.src = before; else imgA.src = "";
+            if(after) imgB.src = after; else imgB.removeAttribute('src'); // Background: Current
+            if(before) imgA.src = before; else imgA.removeAttribute('src'); // Overlay: Past
 
             document.getElementById('date-before').innerText = `ANTES (${dateB})`;
             document.getElementById('date-after').innerText = `AHORA (${dateA})`;
             
-            // Slider Starts 0% (Left) -> Overlay Width = 100% -> Shows Full BEFORE
+            // Slider Starts 0% (Left) -> Full Overlay Visible (ANTES)
             document.getElementById('slider-handle').style.left = '0%';
             imgA.style.clipPath = 'inset(0 0 0 0)';
         }
@@ -829,12 +829,9 @@
         }
 
         // SLIDER LOGIC
-        // 0% (Left) -> Full Overlay (ANTES)
-        // 100% (Right) -> No Overlay (AHORA)
+        // 0% (Left) -> Clip 0 -> Full Overlay (ANTES)
+        // 100% (Right) -> Clip 100 -> No Overlay (AHORA)
         window.moveSlider = (v) => { 
-            // clip-path: inset(top right bottom left) -> inset(0 0 0 v%)
-            // v=0 -> clip left 0 -> show full
-            // v=100 -> clip left 100% -> hide all
             document.getElementById('img-overlay').style.clipPath = `inset(0 0 0 ${v}%)`; 
             document.getElementById('slider-handle').style.left = `${v}%`; 
         };
@@ -1072,12 +1069,13 @@
             switchTab('routines-view');
         };
 
-        // GLOBAL ADMIN LOADER
+        // GLOBAL ADMIN LOADER - ATTACHED TO WINDOW FOR BUTTON TO WORK
         window.loadAdminUsers = async () => {
             const l = document.getElementById('admin-list');
             l.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">↻ Cargando base de datos...</div>';
             
             try {
+                // FORCE FRESH FETCH FROM SERVER
                 const s = await getDocs(collection(db, "users"));
                 l.innerHTML = '';
                 
@@ -1092,6 +1090,7 @@
                     const div = document.createElement('div');
                     div.className = "admin-user-row";
                     
+                    // STATUS ICON
                     const statusIcon = u.approved ? '🟢' : '⏳';
                     const statusText = u.approved ? 'Activo' : 'Pendiente';
 
@@ -1114,15 +1113,17 @@
         async function openCoachView(uid,u) {
             selectedUserCoach=uid;
             
+            // FIX: Refresh user data to ensure realtime
             const freshSnap = await getDoc(doc(db, "users", uid));
             const freshU = freshSnap.data();
-            selectedUserObj = freshU; 
+            selectedUserObj = freshU; // Update local obj
 
             switchTab('coach-detail-view');
             
             document.getElementById('coach-user-name').innerText=freshU.name;
             document.getElementById('coach-user-email').innerText=freshU.email;
 
+            // SHOW APPROVE BUTTON IF PENDING
             const banner = document.getElementById('pending-approval-banner');
             if(!freshU.approved) {
                 banner.classList.remove('hidden');
@@ -1244,17 +1245,10 @@
             
             const pCont = document.getElementById('coach-photos-container');
             
-            // CLEANER SLIDER FOR COACH AS WELL
-            // Logic: Background is Current (After), Overlay is Past (Before)
-            // Slider at 0 (Left) -> Overlay Width full -> Show Background? No.
-            // Let's use same logic as profile:
-            // Background: Current (After)
-            // Overlay: Past (Before)
-            // Slider 0 (Left): Full overlay (Before)
-            // Slider 100 (Right): No overlay (After)
-            
+            // COACH: Fondo AHORA, Overlay ANTES. Inicio 0%.
             pCont.innerHTML = `
                 <div class="compare-wrapper">
+                    <div class="slider-labels"><span class="label-tag">ANTES</span><span class="label-tag">AHORA</span></div>
                     <img src="${a || ''}" class="compare-img">
                     <img src="${b || ''}" id="coach-overlay-img" class="compare-img img-overlay" style="clip-path:inset(0 0 0 0)">
                     <div class="slider-handle" id="coach-slider-handle" style="left:0%"><div class="slider-btn"></div></div>
@@ -1272,6 +1266,7 @@
         };
 
         window.goToCreateRoutine = () => {
+            creatingForAthleteId = selectedUserCoach; 
             switchTab('routines-view'); 
             openEditor(); 
         };
@@ -1309,17 +1304,7 @@
             if(document.getElementById('reg-code').value!==CODE)return alert("Código incorrecto");
             try{ const c=await createUserWithEmailAndPassword(auth,document.getElementById('reg-email').value,document.getElementById('reg-pass').value);
             // CRITICAL FIX: Ensure user object has ALL fields to prevent permission errors
-            await setDoc(doc(db,"users",c.user.uid),{
-                name:document.getElementById('reg-name').value,
-                email:document.getElementById('reg-email').value,
-                approved:document.getElementById('reg-email').value===ADMIN,
-                age:parseInt(document.getElementById('reg-age').value),
-                height:parseInt(document.getElementById('reg-height').value), 
-                weightHistory: [],
-                prs: {}, // Fixed: Initialize PRs object
-                stats: {workouts:0, totalKg:0, totalSets:0, totalReps:0},
-                muscleStats: {}
-            });
+            await setDoc(doc(db,"users",c.user.uid),{name:document.getElementById('reg-name').value,email:document.getElementById('reg-email').value,approved:document.getElementById('reg-email').value===ADMIN,age:parseInt(document.getElementById('reg-age').value),height:parseInt(document.getElementById('reg-height').value), weightHistory: [], prs: {}, stats: {workouts:0, totalKg:0, totalSets:0, totalReps:0}, muscleStats: {}});
             }catch(e){alert(e.message)}
         };
     </script>
