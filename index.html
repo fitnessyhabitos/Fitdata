@@ -1584,39 +1584,51 @@
         };
 
         document.getElementById('btn-register').onclick = async () => {
-            // 1. YA NO COMPROBAMOS EL CÓDIGO AQUÍ. LO ENVIAMOS A FIREBASE.
-            // Si el código está mal, Firebase dará error y saltará al 'catch'.
-            
-            try { 
-                const email = document.getElementById('reg-email').value;
-                const pass = document.getElementById('reg-pass').value;
-                const code = document.getElementById('reg-code').value; // Cogemos lo que ha escrito
+            // 1. Recogemos los datos del formulario
+            const email = document.getElementById('reg-email').value.toLowerCase().trim();
+            const pass = document.getElementById('reg-pass').value;
+            const name = document.getElementById('reg-name').value;
+            const code = document.getElementById('reg-code').value; // El código que escribe el usuario
+            const age = document.getElementById('reg-age').value;
+            const height = document.getElementById('reg-height').value;
 
-                // Primero creamos la cuenta de autenticación (Email/Pass)
+            // Validación básica visual
+            if (!code) return alert("Debes introducir el CÓDIGO SECRETO.");
+            if (!email || !pass || !name) return alert("Rellena todos los campos.");
+
+            try {
+                // 2. Primero creamos la cuenta de autenticación (Email/Pass)
                 const c = await createUserWithEmailAndPassword(auth, email, pass);
                 
-                // Ahora intentamos guardar los datos.
-                // Si el 'accessCode' no es "xxxxxxx", las Reglas de Firebase RECHAZARÁN esto
-                // y la cuenta de Auth se quedará creada pero sin datos (no pasa nada, no podrá entrar).
-                await setDoc(doc(db,"users",c.user.uid), {
-                    name: document.getElementById('reg-name').value,
+                // 3. Intentamos guardar la ficha. AQUÍ ESTÁ LA CLAVE DE SEGURIDAD.
+                // Enviamos 'accessCode' con lo que ha escrito el usuario.
+                // Si coincide con "fityhab" (según las Reglas), Firebase guardará. Si no, dará error.
+                await setDoc(doc(db, "users", c.user.uid), {
+                    name: name,
                     email: email,
-                    approved: false, // OBLIGATORIO FALSE
-                    accessCode: code, // <--- ENVIAMOS EL CÓDIGO PARA QUE FIREBASE LO REVISE
-                    age: parseInt(document.getElementById('reg-age').value),
-                    height: parseInt(document.getElementById('reg-height').value), 
+                    approved: false,        // OBLIGATORIO por reglas (nadie nace aprobado)
+                    accessCode: code,       // OBLIGATORIO enviar para que las reglas verifiquen
+                    role: 'user',           // Rol por defecto
+                    age: parseInt(age),
+                    height: parseInt(height), 
                     weightHistory: [],
                     prs: {},
                     stats: {workouts:0, totalKg:0, totalSets:0, totalReps:0},
-                    muscleStats: {}
+                    muscleStats: {},
+                    joined: serverTimestamp()
                 });
 
-                alert("Cuenta solicitada correctamente. Espera aprobación.");
-                
+                // Si llegamos aquí, es que el código era correcto
+                alert("✅ Cuenta creada correctamente. Espera a que el Coach te active.");
+                location.reload(); // Recargamos para que salga la pantalla de espera
+
             } catch(e) {
-                // Si el código estaba mal, Firebase devuelve error "Missing or insufficient permissions"
-                if(e.message.includes("permission")) {
-                    alert("❌ CÓDIGO DE REGISTRO INCORRECTO.");
+                console.error(e);
+                // Si las reglas rechazan la escritura (código mal o approved true), da este error:
+                if(e.message.includes("permission-denied") || e.code === "permission-denied") {
+                    alert("❌ CÓDIGO SECRETO INCORRECTO.\nTu usuario de acceso se ha creado, pero no la ficha de atleta.");
+                } else if (e.message.includes("email-already-in-use")) {
+                    alert("⚠️ Ese email ya está registrado.");
                 } else {
                     alert("Error: " + e.message);
                 }
