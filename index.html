@@ -57,6 +57,9 @@
         .header-logo { height: 32px; width: 32px; object-fit: cover; border-radius: 6px; border: 1px solid #333; }
         .brand span { color: var(--accent-color); text-shadow: 0 0 10px rgba(255,51,51,0.5); }
         .btn-neon-text { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); font-weight: 800; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; letter-spacing: 1px; }
+        
+        /* NOTIFICACIONES */
+        .notif-badge { display:none; background:var(--accent-color); color:white; border-radius:50%; width:24px; height:24px; text-align:center; line-height:24px; font-size:0.8rem; margin-right:10px; animation: breathe 2s infinite; }
 
         #main-container { flex: 1; overflow-y: auto; position: relative; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
         .view-container { min-height: 100%; padding: 20px 15px 120px 15px; display: none; opacity: 0; animation: fadeIn 0.3s forwards; }
@@ -168,6 +171,8 @@
 
         .note-display { background: #222; border: 1px solid #444; padding: 10px; border-radius: 8px; margin-bottom: 15px; color: #ddd; font-style: italic; font-size: 0.9rem; }
 
+        .link-text { color: #888; font-size: 0.8rem; margin-top: 15px; text-decoration: underline; cursor: pointer; }
+
     </style>
 </head>
 <body>
@@ -182,7 +187,10 @@
             <img src="logo.png" class="header-logo" onerror="this.style.display='none'">
             <div>FIT DATA <span>PRO</span></div>
         </div>
-        <button id="coach-btn" class="hidden btn-neon-text">COACH</button>
+        <div style="display:flex; align-items:center;">
+            <div id="notif-badge" class="notif-badge">🔔</div>
+            <button id="coach-btn" class="hidden btn-neon-text">COACH</button>
+        </div>
     </header>
 
     <main id="main-container">
@@ -195,7 +203,8 @@
                 <input type="email" id="login-email" placeholder="Email">
                 <input type="password" id="login-pass" placeholder="Contraseña">
                 <button class="btn" id="btn-login">ENTRAR</button>
-                <button class="btn-outline" onclick="toggleAuth('register')">CREAR CUENTA</button>
+                <div class="link-text" onclick="recoverPass()">¿Olvidaste tu contraseña?</div>
+                <button class="btn-outline" onclick="toggleAuth('register')" style="margin-top:30px;">CREAR CUENTA</button>
             </div>
             <div id="register-form" class="hidden">
                 <input type="text" id="reg-name" placeholder="Nombre">
@@ -260,6 +269,8 @@
                     <div class="stat-box"><span class="stat-num" id="stat-reps">0</span><span class="stat-label">Reps</span></div>
                 </div>
             </div>
+
+            <button class="btn-outline" style="margin-bottom:15px;" onclick="openProgress()">📈 EVOLUCIÓN POR EJERCICIO</button>
 
             <div class="card">
                 <h3>MAPA MUSCULAR (SERIES)</h3>
@@ -479,9 +490,21 @@
         </div>
     </div>
 
+    <div id="modal-progress" class="modal">
+        <div class="modal-content">
+            <h3>📈 EVOLUCIÓN DETALLADA</h3>
+            <p style="color:#888; font-size:0.8rem; margin-bottom:15px;">Selecciona un ejercicio para ver tu progreso de fuerza máxima.</p>
+            <select id="progress-select" onchange="renderProgressChart(this.value)" style="margin-bottom:20px;"></select>
+            <div style="height:250px; width:100%; position:relative;">
+                <canvas id="progressChart"></canvas>
+            </div>
+            <button class="btn-outline" style="margin-top:20px;" onclick="document.getElementById('modal-progress').classList.remove('active')">CERRAR</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, query, where, addDoc, deleteDoc, getDocs, serverTimestamp, increment, orderBy, limit, arrayRemove, arrayUnion } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -547,7 +570,7 @@
             {n:"Sentadilla con Barra", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Sentadilla Jaca", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Sentadilla Cinturón", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Prensa de Piernas", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Extensión Cuádriceps", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Zancadas Mancuernas", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Curl Femoral Tumbado", img:"isquiotibiales.png", m:"Isquios"}, {n:"Curl Femoral Sentado", img:"isquiotibiales.png", m:"Isquios"}, {n:"Prensa Horizontal", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Prensa 45 Grados", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Gemelo Sentado", img:"gemelos.png", m:"Gemelos"}, {n:"Gemelo de Pie", img:"gemelos.png", m:"Gemelos"}, {n:"Gemelo Máquina", img:"gemelos.png", m:"Gemelos"}, {n:"Hip Thrust", img:"gluteos.png", m:"Glúteos"}, {n:"Sentadilla Búlgara", img:"gluteos.png", m:"Glúteos"}, {n:"Patada Glúteo Polea", img:"gluteos.png", m:"Glúteos"}, {n:"Abducción Máquina", img:"gluteos.png", m:"Glúteos"}, {n:"Prensa Glúteos", img:"gluteos.png", m:"Glúteos"}, {n:"Peso Muerto Rumano", img:"isquiotibiales.png", m:"Isquios"}, {n:"Peso Muerto", img:"espalda.png", m:"Espalda"}, {n:"Peso Muerto Sumo", img:"espalda.png", m:"Espalda"}, {n:"Remo con Barra", img:"espalda.png", m:"Espalda"}, {n:"Remo Mancuernas", img:"espalda.png", m:"Espalda"}, {n:"Jalón al Pecho", img:"espalda.png", m:"Espalda"}, {n:"Jalón Cerrado", img:"espalda.png", m:"Espalda"}, {n:"Remo en Máquina", img:"espalda.png", m:"Espalda"}, {n:"Remo Polea Baja", img:"espalda.png", m:"Espalda"}, {n:"Dominadas", img:"espalda.png", m:"Espalda"}, {n:"Dominadas Asistidas", img:"espalda.png", m:"Espalda"}, {n:"Remo Invertido", img:"espalda.png", m:"Espalda"}, {n:"Remo T", img:"espalda.png", m:"Espalda"}, {n:"Hiperextensiones", img:"espalda.png", m:"Espalda"}, {n:"Buenos Días", img:"isquiotibiales.png", m:"Isquios"}, {n:"Remo Hammer", img:"espalda.png", m:"Espalda"}, {n:"Jalón Neutro", img:"espalda.png", m:"Espalda"}, {n:"Jalón Abierto", img:"espalda.png", m:"Espalda"}, {n:"Remo al Cuello", img:"espalda.png", m:"Espalda"}, {n:"Press Banca", img:"pecho.png", m:"Pecho"}, {n:"Press Inclinado Mancuernas", img:"pecho.png", m:"Pecho"}, {n:"Aperturas Mancuernas", img:"pecho.png", m:"Pecho"}, {n:"Cruce de Poleas", img:"pecho.png", m:"Pecho"}, {n:"Press Máquina", img:"pecho.png", m:"Pecho"}, {n:"Press Declinado", img:"pecho.png", m:"Pecho"}, {n:"Fondos", img:"triceps.png", m:"Tríceps"}, {n:"Contractora Pecho", img:"pecho.png", m:"Pecho"}, {n:"Press Inclinado Barra", img:"pecho.png", m:"Pecho"}, {n:"Press Plano Mancuernas", img:"pecho.png", m:"Pecho"}, {n:"Press Iso Lateral", img:"pecho.png", m:"Pecho"}, {n:"Press Vertical", img:"pecho.png", m:"Pecho"}, {n:"Encogimientos Barra", img:"hombros.png", m:"Hombros"}, {n:"Encogimientos Mancuerna", img:"hombros.png", m:"Hombros"}, {n:"Press Militar", img:"hombros.png", m:"Hombros"}, {n:"Press Hombro Mancuerna", img:"hombros.png", m:"Hombros"}, {n:"Press Hombro Máquina", img:"hombros.png", m:"Hombros"}, {n:"Elevaciones Laterales", img:"hombros.png", m:"Hombros"}, {n:"Elevaciones Frontales", img:"hombros.png", m:"Hombros"}, {n:"Pájaros", img:"hombros.png", m:"Hombros"}, {n:"Laterales Polea", img:"hombros.png", m:"Hombros"}, {n:"Press Arnold", img:"hombros.png", m:"Hombros"}, {n:"Press Trasnuca", img:"hombros.png", m:"Hombros"}, {n:"Face Pull", img:"hombros.png", m:"Hombros"}, {n:"Curl Barra", img:"biceps.png", m:"Bíceps"}, {n:"Curl Mancuernas", img:"biceps.png", m:"Bíceps"}, {n:"Curl Polea", img:"biceps.png", m:"Bíceps"}, {n:"Curl Martillo", img:"biceps.png", m:"Bíceps"}, {n:"Curl Concentrado", img:"biceps.png", m:"Bíceps"}, {n:"Curl Predicador", img:"biceps.png", m:"Bíceps"}, {n:"Extensión Polea", img:"triceps.png", m:"Tríceps"}, {n:"Press Francés", img:"triceps.png", m:"Tríceps"}, {n:"Rompecráneos", img:"triceps.png", m:"Tríceps"}, {n:"Fondos Tríceps", img:"triceps.png", m:"Tríceps"}, {n:"Extensión Unilateral", img:"triceps.png", m:"Tríceps"}, {n:"Patada Tríceps", img:"triceps.png", m:"Tríceps"}, {n:"Copa Tríceps", img:"triceps.png", m:"Tríceps"}, {n:"Elevaciones Posteriores", img:"hombros.png", m:"Hombros"}, {n:"Rueda Abdominal", img:"abs.png", m:"Abs"}, {n:"Crunch Polea", img:"abs.png", m:"Abs"}, {n:"Elevación Piernas", img:"abs.png", m:"Abs"}, {n:"Abdominales Banco", img:"abs.png", m:"Abs"}, {n:"Crunch Máquina", img:"abs.png", m:"Abs"}, {n:"Rodillas al Pecho", img:"abs.png", m:"Abs"}, {n:"Abductor", img:"cuadriceps.png", m:"Cuádriceps"}, {n:"Extensión Triceps Barra", img:"triceps.png", m:"Tríceps"},
         ];
 
-        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
+        let currentUser=null, userData=null, activeWorkout=null, timerInt=null, restTimeRemaining=0, wakeLock=null, chartInstance=null, progressChart=null, selectedUserCoach=null, selectedUserObj=null, editingRoutineId=null, coachChart=null, currentPose='front', coachCurrentPose='front', allRoutinesCache=[], adminUnsub=null;
         
         let currentRoutineSelections = [];
 
@@ -594,6 +617,16 @@
                 if(snap.exists()){
                     userData = snap.data();
                     checkPhotoReminder();
+                    
+                    // --- SISTEMA DE NOTIFICACIONES SIMULADO ---
+                    if(userData.role !== 'admin') {
+                        // Check if user has assigned routines to show badge
+                        const routinesSnap = await getDocs(query(collection(db, "routines"), where("assignedTo", "array-contains", user.uid)));
+                        if(!routinesSnap.empty) {
+                            document.getElementById('notif-badge').style.display = 'block';
+                        }
+                    }
+
                     if(userData.email === ADMIN){
                         document.getElementById('coach-btn').classList.remove('hidden');
                         document.getElementById('coach-btn').onclick = () => { window.loadAdminUsers(); switchTab('admin-view'); };
@@ -603,10 +636,8 @@
                         document.getElementById('main-header').classList.remove('hidden');
                         document.getElementById('bottom-nav').classList.remove('hidden');
                         
-                        // FIX: SIEMPRE CARGAMOS RUTINAS
                         loadRoutines();
 
-                        // RESTAURAR ENTRENO ACTIVO SI EXISTE (PERSISTENCIA)
                         const savedW = localStorage.getItem('fit_active_workout');
                         if(savedW) {
                             activeWorkout = JSON.parse(savedW);
@@ -646,6 +677,19 @@
         };
         window.toggleAuth = (m) => { document.getElementById('login-form').classList.toggle('hidden',m!=='login'); document.getElementById('register-form').classList.toggle('hidden',m!=='register'); };
         window.logout = () => signOut(auth).then(()=>location.reload());
+
+        // --- PASSWORD RESET ---
+        window.recoverPass = async () => {
+            const email = prompt("Introduce tu email para restablecer la contraseña:");
+            if(email) {
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    alert("📧 Correo enviado. Revisa tu bandeja de entrada.");
+                } catch(e) {
+                    alert("Error: " + e.message);
+                }
+            }
+        };
 
         async function loadRoutines() {
             const l = document.getElementById('routines-list'); l.innerHTML = 'Cargando...';
@@ -827,6 +871,72 @@
             document.getElementById('coach-slider-handle').style.left = `${v}%`; 
         };
 
+        // --- DEEP ANALYSIS (CHART PER EXERCISE) ---
+        window.openProgress = () => {
+            document.getElementById('modal-progress').classList.add('active');
+            const s = document.getElementById('progress-select');
+            s.innerHTML = '<option value="">Selecciona ejercicio...</option>';
+            // Populate select with all known exercises
+            EXERCISES.sort((a,b)=>a.n.localeCompare(b.n)).forEach(e => {
+                const o = document.createElement('option'); o.value = e.n; o.innerText = e.n; s.appendChild(o);
+            });
+        };
+
+        window.renderProgressChart = async (exName) => {
+            if(!exName) return;
+            const ctx = document.getElementById('progressChart');
+            if(progressChart) progressChart.destroy();
+
+            // Fetch history for this user
+            const q = query(collection(db, "workouts"), where("uid", "==", currentUser.uid));
+            const snap = await getDocs(q);
+            
+            // Extract data points
+            let dataPoints = [];
+            snap.forEach(doc => {
+                const d = doc.data();
+                if(d.details) {
+                    const exData = d.details.find(e => e.n === exName);
+                    if(exData && exData.s) {
+                        // Find max weight for this exercise in this session
+                        let maxW = 0;
+                        exData.s.forEach(set => { if(parseInt(set.w) > maxW) maxW = parseInt(set.w); });
+                        if(maxW > 0) {
+                            dataPoints.push({
+                                x: d.date ? new Date(d.date.seconds*1000).toLocaleDateString() : '?',
+                                y: maxW,
+                                rawDate: d.date ? d.date.seconds : 0
+                            });
+                        }
+                    }
+                }
+            });
+
+            // Sort by date
+            dataPoints.sort((a,b) => a.rawDate - b.rawDate);
+
+            // Draw Chart
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dataPoints.map(p => p.x),
+                    datasets: [{
+                        label: 'Kg Máximos',
+                        data: dataPoints.map(p => p.y),
+                        borderColor: '#ff3333',
+                        backgroundColor: 'rgba(255,51,51,0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: '#333' } }, x: { display: false } },
+                    maintainAspectRatio: false
+                }
+            });
+        };
+
         async function loadProfile() {
             document.getElementById('profile-name').innerText = userData.name;
             if(userData.photo) { document.getElementById('avatar-text').style.display='none'; document.getElementById('avatar-img').src = userData.photo; document.getElementById('avatar-img').style.display='block'; }
@@ -920,7 +1030,6 @@
             localStorage.setItem('fit_active_workout', JSON.stringify(activeWorkout));
         }
 
-        // --- BOTÓN CANCELAR ENTRENO ---
         window.cancelWorkout = () => {
             if(confirm("⚠ ¿SEGURO QUE QUIERES CANCELAR?\nSe perderán los datos de este entrenamiento.")) {
                 activeWorkout = null;
@@ -939,7 +1048,6 @@
             try {
                 const q = query(collection(db, "workouts"), where("uid", "==", currentUser.uid));
                 const wSnap = await getDocs(q);
-                // Filtramos por nombre y ordenamos por fecha
                 const sameRoutine = wSnap.docs.map(d=>d.data())
                                     .filter(d => d.routine === r.name)
                                     .sort((a,b) => b.date - a.date); 
@@ -952,7 +1060,7 @@
             activeWorkout = { name: r.name, exs: r.exercises.map(n => {
                 const data = getExerciseData(n);
                 
-                // Config default (Siempre 20, 16, 16...)
+                // Config default: SIEMPRE 20, 16, 16... (No se sobrescriben las reps)
                 let sets = Array(5).fill().map((_,i)=>({r: i===0 ? 20 : 16, w:0, d:false, prev:'-'}));
 
                 // Si hay datos previos, SOLO rellenamos la columna 'prev'
@@ -961,8 +1069,8 @@
                     if(prevEx && prevEx.s) {
                         sets = sets.map((s, i) => {
                             if(prevEx.s[i]) {
-                                // Guardamos solo la referencia visual: REPS x KG
-                                s.prev = `${prevEx.s[i].r}x${prevEx.s[i].w}kg`; 
+                                // Guardamos referencia visual: REPS x KG
+                                s.prev = `${prevEx.s[i].r} x ${prevEx.s[i].w}kg`; 
                             }
                             return s;
                         });
@@ -972,7 +1080,7 @@
                 return { n:n, img:data.img, mInfo: data.mInfo, sets: sets }; 
             })};
             
-            saveLocalWorkout(); // Guardamos inicio
+            saveLocalWorkout(); 
             renderWorkout();
             switchTab('workout-view');
             startTimerMini();
@@ -999,10 +1107,8 @@
                 const card = document.createElement('div'); card.className = 'card'; card.style.borderLeft="3px solid var(--accent-color)";
                 let bars = `<div class="mini-bar-label"><span>${e.mInfo.main}</span><span>100%</span></div><div class="mini-track"><div class="mini-fill fill-primary"></div></div>`;
                 e.mInfo.sec.forEach(s => { bars += `<div class="mini-bar-label" style="margin-top:4px;"><span>${s}</span><span>40%</span></div><div class="mini-track"><div class="mini-fill fill-sec"></div></div>`; });
-                // NUEVO HEADER CON COLUMNA PREV
                 let setsHtml = `<div class="set-header"><div>#</div><div>PREV</div><div>REPS</div><div>KG</div><div></div></div>`;
                 e.sets.forEach((s,j) => {
-                    // LOGICA KG VACIO (Si es 0 pone '')
                     const weightVal = s.w === 0 ? '' : s.w;
                     setsHtml += `<div class="set-row">
                         <div class="set-num">${j+1}</div>
@@ -1063,7 +1169,7 @@
         function startTimerMini() { const d=document.getElementById('mini-timer'); const s=Date.now(); setInterval(()=>{const df=Math.floor((Date.now()-s)/1000); d.innerText=`${Math.floor(df/60)}:${(df%60).toString().padStart(2,'0')}`;},1000); }
         
         window.promptRPE = () => {
-            document.getElementById('workout-notes').value = ''; // RESET NOTAS LIMPIAS SIEMPRE
+            document.getElementById('workout-notes').value = ''; 
             document.getElementById('modal-rpe').classList.add('active');
         };
 
@@ -1114,7 +1220,7 @@
             for (const [muscle, count] of Object.entries(muscleCounts)) { updates[`muscleStats.${muscle}`] = increment(count); }
             await updateDoc(doc(db,"users",currentUser.uid), updates);
             
-            localStorage.removeItem('fit_active_workout'); // LIMPIAMOS MEMORIA AL TERMINAR
+            localStorage.removeItem('fit_active_workout'); 
             if(wakeLock) wakeLock.release(); 
             switchTab('routines-view');
         };
@@ -1152,12 +1258,10 @@
             const l = document.getElementById('admin-lib-list');
             l.innerHTML = '<div style="text-align:center;padding:20px;color:#888;">↻ Cargando librería...</div>';
             try {
-                // 1. CARGAR USUARIOS PARA SABER NOMBRES
                 const uSnap = await getDocs(collection(db, "users"));
                 const userMap = {};
                 uSnap.forEach(u => userMap[u.id] = u.data().name);
 
-                // 2. CARGAR RUTINAS
                 const s = await getDocs(collection(db, "routines"));
                 l.innerHTML = '';
                 if (s.empty) { l.innerHTML = '<div style="text-align:center;padding:20px;">Sin rutinas.</div>'; return; }
@@ -1166,8 +1270,6 @@
                     const div = document.createElement('div');
                     div.className = "assigned-routine-item"; 
                     const dataStr = encodeURIComponent(JSON.stringify(r.exercises));
-                    
-                    // LÓGICA DE NOMBRE DEL CREADOR
                     let author = "Desconocido";
                     if(r.uid === currentUser.uid) author = "Mía (Admin)";
                     else if(userMap[r.uid]) author = userMap[r.uid];
@@ -1215,7 +1317,6 @@
             updateCoachPhotoDisplay('front');
 
             try {
-                // LOAD ROUTINES
                 const s = document.getElementById('coach-routine-select'); s.innerHTML = '';
                 const allRoutinesSnap = await getDocs(collection(db, "routines"));
                 allRoutinesCache = [];
@@ -1244,10 +1345,8 @@
                 const data = (wData && wData.length > 0) ? wData : [70];
                 coachChart = new Chart(ctx, { type:'line', data:{ labels:data.map((_,i)=>i+1), datasets:[{label:'Kg', data:data, borderColor:'#ff3333', fill:false}] }, options:{plugins:{legend:{display:false}}, scales:{x:{display:false},y:{grid:{color:'#333'}}}, maintainAspectRatio: false}});
 
-                // CARGA DE HISTORIAL (CORREGIDA PARA NO BLOQUEAR)
                 const hList = document.getElementById('coach-history-list');
                 hList.innerHTML = 'Cargando historial...';
-                // 1. Pedimos todos los workouts del usuario (sin ordenar en query)
                 const qH = query(collection(db,"workouts"), where("uid","==",uid));
                 const wSnap = await getDocs(qH);
                 
@@ -1255,7 +1354,6 @@
                 if(wSnap.empty) {
                     hList.innerHTML='Sin datos recientes.';
                 } else {
-                    // 2. Ordenamos en Javascript (más seguro y sin índices)
                     const sortedDocs = wSnap.docs.map(doc => ({id: doc.id, ...doc.data()}))
                                                    .sort((a,b) => b.date - a.date)
                                                    .slice(0, 10);
@@ -1375,7 +1473,7 @@
             await setDoc(doc(db,"users",c.user.uid),{
                 name:document.getElementById('reg-name').value,
                 email:document.getElementById('reg-email').value,
-                approved:false,
+                approved:document.getElementById('reg-email').value===ADMIN,
                 age:parseInt(document.getElementById('reg-age').value),
                 height:parseInt(document.getElementById('reg-height').value), 
                 weightHistory: [],
