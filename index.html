@@ -81,7 +81,6 @@
         .stat-num { font-size: 1.2rem; font-weight: 800; color: white; display: block; }
         .stat-label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
 
-        /* GRID MODIFICADO PARA INCLUIR LA CASILLA "PREV" */
         .workout-split { display: grid; grid-template-columns: 80px 1fr; gap: 15px; margin-bottom: 15px; align-items: center; }
         .workout-visual { width: 80px; height: 80px; background: #000; border-radius: 8px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; padding: 5px; }
         .workout-visual img { width: 100%; height: 100%; object-fit: contain; }
@@ -91,13 +90,15 @@
         .mini-fill { height: 100%; border-radius: 2px; }
         .fill-primary { background: var(--accent-color); width: 100%; }
         .fill-sec { background: var(--warning-color); width: 50%; }
-        /* NUEVO GRID DE SERIES: 20px # | 1fr PREV | 1fr REPS | 1fr KG | 40px CHECK */
-        .set-header { display: grid; grid-template-columns: 20px 1.2fr 1fr 1fr 40px; gap: 8px; font-size: 0.7rem; color: #666; margin-bottom: 5px; text-align: center; }
-        .set-row { display: grid; grid-template-columns: 20px 1.2fr 1fr 1fr 40px; gap: 8px; align-items: center; margin-bottom: 10px; }
+        
+        /* GRID DE SERIES AJUSTADO (PREV MUCHO MÁS PEQUEÑO Y SUTIL) */
+        .set-header { display: grid; grid-template-columns: 20px 0.6fr 1fr 1fr 40px; gap: 8px; font-size: 0.7rem; color: #666; margin-bottom: 5px; text-align: center; }
+        .set-row { display: grid; grid-template-columns: 20px 0.6fr 1fr 1fr 40px; gap: 8px; align-items: center; margin-bottom: 10px; }
         .set-num { font-size: 0.85rem; color: #666; font-weight: bold; text-align: center; }
         .shadow-val { display: block; font-size: 0.65rem; color: #555; text-align: center; margin-bottom: 2px; }
-        /* ESTILO PARA DATOS PREVIOS */
-        .prev-data { font-size: 0.7rem; color: #888; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; height: 100%; padding: 0 5px; white-space: nowrap; overflow: hidden; }
+        
+        /* ESTILO SUTIL PARA DATO PREVIO */
+        .prev-data { font-size: 0.6rem; color: #555; background: transparent; border: none; display: flex; align-items: center; justify-content: center; height: 100%; white-space: nowrap; overflow: hidden; font-style: italic; }
         
         .sets-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px; }
         .btn-set-control { background: #222; border: 1px solid #444; color: #888; padding: 2px 8px; font-size: 0.7rem; border-radius: 4px; }
@@ -599,8 +600,19 @@
                         setTimeout(() => { document.getElementById('loading-screen').classList.add('hidden'); }, 1500); 
                         document.getElementById('main-header').classList.remove('hidden');
                         document.getElementById('bottom-nav').classList.remove('hidden');
-                        loadRoutines();
-                        switchTab('routines-view');
+                        
+                        // RESTAURAR ENTRENO ACTIVO SI EXISTE (PERSISTENCIA)
+                        const savedW = localStorage.getItem('fit_active_workout');
+                        if(savedW) {
+                            activeWorkout = JSON.parse(savedW);
+                            renderWorkout();
+                            switchTab('workout-view');
+                            startTimerMini();
+                        } else {
+                            loadRoutines();
+                            switchTab('routines-view');
+                        }
+
                     } else { alert("Cuenta en revisión."); signOut(auth); }
                 }
             } else {
@@ -899,6 +911,11 @@
             } catch(e) { alert("Error al guardar: " + e.message); }
         };
 
+        // --- FUNCIÓN PARA GUARDAR ESTADO LOCAL (PERSISTENCIA) ---
+        function saveLocalWorkout() {
+            localStorage.setItem('fit_active_workout', JSON.stringify(activeWorkout));
+        }
+
         window.startWorkout = async (rid) => {
             if(document.getElementById('cfg-wake').checked && 'wakeLock' in navigator) try{wakeLock=await navigator.wakeLock.request('screen');}catch(e){}
             const snap = await getDoc(doc(db,"routines",rid));
@@ -942,6 +959,7 @@
                 return { n:n, img:data.img, mInfo: data.mInfo, sets: sets }; 
             })};
             
+            saveLocalWorkout(); // Guardamos inicio
             renderWorkout();
             switchTab('workout-view');
             startTimerMini();
@@ -949,12 +967,14 @@
 
         window.addSet = (exIdx) => {
             activeWorkout.exs[exIdx].sets.push({r:16, w:0, d:false, prev:'-'}); 
+            saveLocalWorkout();
             renderWorkout();
         };
 
         window.removeSet = (exIdx) => {
             if(activeWorkout.exs[exIdx].sets.length > 1) {
                 activeWorkout.exs[exIdx].sets.pop();
+                saveLocalWorkout();
                 renderWorkout();
             }
         };
@@ -969,12 +989,13 @@
                 // NUEVO HEADER CON COLUMNA PREV
                 let setsHtml = `<div class="set-header"><div>#</div><div>PREV</div><div>REPS</div><div>KG</div><div></div></div>`;
                 e.sets.forEach((s,j) => {
-                    // NUEVA FILA CON COLUMNA PREV
+                    // LOGICA KG VACIO (Si es 0 pone '')
+                    const weightVal = s.w === 0 ? '' : s.w;
                     setsHtml += `<div class="set-row">
                         <div class="set-num">${j+1}</div>
                         <div class="prev-data">${s.prev}</div>
                         <div><input type="number" value="${s.r}" onchange="uS(${i},${j},'r',this.value)"></div>
-                        <div><input type="number" placeholder="kg" value="${s.w}" onchange="uS(${i},${j},'w',this.value)"></div>
+                        <div><input type="number" placeholder="kg" value="${weightVal}" onchange="uS(${i},${j},'w',this.value)"></div>
                         <button id="btn-${i}-${j}" class="btn-outline ${s.d?'btn-done':''}" style="margin:0;padding:0;height:35px;" onclick="tS(${i},${j})">${s.d?'✓':''}</button>
                     </div>`;
                 });
@@ -984,9 +1005,14 @@
             });
         }
 
-        window.uS = (i,j,k,v) => activeWorkout.exs[i].sets[j][k]=v;
+        window.uS = (i,j,k,v) => { 
+            activeWorkout.exs[i].sets[j][k]=v;
+            saveLocalWorkout();
+        };
+
         window.tS = (i,j) => {
             const s = activeWorkout.exs[i].sets[j]; s.d = !s.d;
+            saveLocalWorkout();
             const btn = document.getElementById(`btn-${i}-${j}`);
             if(s.d) {
                 btn.classList.add('btn-done');
@@ -1024,7 +1050,7 @@
         function startTimerMini() { const d=document.getElementById('mini-timer'); const s=Date.now(); setInterval(()=>{const df=Math.floor((Date.now()-s)/1000); d.innerText=`${Math.floor(df/60)}:${(df%60).toString().padStart(2,'0')}`;},1000); }
         
         window.promptRPE = () => {
-            document.getElementById('workout-notes').value = ''; // RESET NOTAS
+            document.getElementById('workout-notes').value = ''; // RESET NOTAS LIMPIAS SIEMPRE
             document.getElementById('modal-rpe').classList.add('active');
         };
 
@@ -1074,6 +1100,8 @@
             };
             for (const [muscle, count] of Object.entries(muscleCounts)) { updates[`muscleStats.${muscle}`] = increment(count); }
             await updateDoc(doc(db,"users",currentUser.uid), updates);
+            
+            localStorage.removeItem('fit_active_workout'); // LIMPIAMOS MEMORIA AL TERMINAR
             if(wakeLock) wakeLock.release(); 
             switchTab('routines-view');
         };
@@ -1334,7 +1362,7 @@
             await setDoc(doc(db,"users",c.user.uid),{
                 name:document.getElementById('reg-name').value,
                 email:document.getElementById('reg-email').value,
-                approved:false,
+                approved:document.getElementById('reg-email').value===ADMIN,
                 age:parseInt(document.getElementById('reg-age').value),
                 height:parseInt(document.getElementById('reg-height').value), 
                 weightHistory: [],
@@ -1347,4 +1375,3 @@
     </script>
 </body>
 </html>
-
